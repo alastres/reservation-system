@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Reservation System (Next.js 14 Fullstack)
+
+A professional appointment scheduling platform similar to Calendly, built with Next.js 14, React, TailwindCSS, Prisma, and PostgreSQL.
+
+## Features
+
+- **Authentication**: Secure Login/Register with Email/Password (NextAuth v5).
+- **Dashboard**: Professional dashboard to manage services and availability.
+- **Service Management**: Create unlimited services with custom duration, price, and URL slugs.
+- **Availability Engine**: Set weekly recurring schedules (e.g., Mon-Fri, 9am-5pm).
+- **Public Booking Pages**:
+  - Profile Page: `/[username]`
+  - Booking Page: `/[username]/[service-slug]`
+- **Booking Logic**: Real-time slot generation preventing double bookings.
+- **Responsive UI**: Built with Shadcn/UI and TailwindCSS.
+
+## Tech Stack
+
+- **Framework**: Next.js 14 (App Router)
+- **Database**: PostgreSQL (Prisma ORM)
+- **Auth**: Auth.js (NextAuth v5)
+- **Styling**: TailwindCSS + Shadcn/UI
+- **Validation**: Zod
+- **Forms**: React Hook Form
 
 ## Getting Started
 
-First, run the development server:
+### 1. Environment Setup
+
+Copy `.env.example` to `.env` (or create `.env`) and add your database URL:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/mydb"
+AUTH_SECRET="your-secret-key" # Run `openssl rand -base64 32` to generate
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Database Setup
+
+Initialize the database schema:
+
+```bash
+# Generate Prisma Client
+npx prisma generate
+
+# Push schema to DB (Development)
+npx prisma db push
+```
+
+### 4. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000` to start.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Push to GitHub.
+2. Import project in Vercel.
+3. Add `DATABASE_URL` and `AUTH_SECRET` to Vercel Environment Variables.
+4. Deploy!
 
-## Learn More
+## API Routes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/api/auth/*`: Authentication endpoints.
+- Server Actions are used for data mutation (Services, Booking, etc.), located in `actions/`.

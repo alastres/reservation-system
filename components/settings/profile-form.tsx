@@ -1,0 +1,251 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useTransition, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { updateProfile } from "@/actions/user";
+import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { User } from "@prisma/client";
+import { useState } from "react";
+
+import { TimezoneSelect } from "@/components/ui/timezone-select";
+
+interface ProfileFormProps {
+    user: User;
+}
+
+export function ProfileForm({ user }: ProfileFormProps) {
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+    const [isUploading, setIsUploading] = useState(false);
+
+    const [formData, setFormData] = useState({
+        name: user.name || "",
+        username: user.username || "",
+        bio: user.bio || "",
+        timeZone: user.timeZone || "UTC",
+        language: (user as any).language || "es",
+        image: user.image || "",
+        notificationPreferences: {
+            email: (user.notificationPreferences as any)?.email ?? true,
+        }
+    });
+
+    // Sync state with props when user data updates (e.g. after save)
+    useEffect(() => {
+        setFormData({
+            name: user.name || "",
+            username: user.username || "",
+            bio: user.bio || "",
+            timeZone: user.timeZone || "UTC",
+            language: (user as any).language || "es",
+            image: user.image || "",
+            notificationPreferences: {
+                email: (user.notificationPreferences as any)?.email ?? true,
+            }
+        });
+    }, [user]);
+
+    const onImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        const data = new FormData();
+        data.append("file", file);
+
+        try {
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: data,
+            });
+            const json = await res.json();
+            if (json.url) {
+                setFormData(prev => ({ ...prev, image: json.url }));
+                toast.success("Image uploaded successfully!");
+            } else {
+                toast.error("Failed to upload image.");
+            }
+        } catch (error) {
+            toast.error("Something went wrong with upload.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const { update } = useSession();
+
+    const onSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        startTransition(() => {
+            console.log("Submitting form data:", formData);
+            updateProfile({
+                ...formData,
+                notificationPreferences: formData.notificationPreferences
+            })
+                .then(async (data) => {
+                    if (data.error) {
+                        toast.error(data.error);
+                    } else if (data.success) {
+                        await update(); // Force update session on client
+                        toast.success(data.success);
+                        router.refresh();
+                    }
+                })
+                .catch(() => toast.error("Something went wrong!"));
+        });
+    };
+
+    return (
+        <form onSubmit={onSubmit} className="space-y-6 max-w-2xl bg-card p-6 rounded-xl border shadow-sm">
+            <div className="space-y-4">
+                <Label>Profile Picture</Label>
+                <div className="flex items-center gap-6">
+                    <div className="relative group">
+                        {formData.image ? (
+                            <img
+                                src={formData.image}
+                                alt="Profile"
+                                className="w-24 h-24 rounded-full object-cover border-4 border-background shadow-md group-hover:opacity-90 transition-opacity"
+                            />
+                        ) : (
+                            <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-4 border-background shadow-md">
+                                <span className="text-2xl font-bold text-muted-foreground">
+                                    {formData.name?.charAt(0) || "U"}
+                                </span>
+                            </div>
+                        )}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Label
+                                htmlFor="image-upload"
+                                className="cursor-pointer bg-black/60 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm"
+                            >
+                                Change
+                            </Label>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 space-y-2">
+                        <Input
+                            id="image-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={onImageUpload}
+                            disabled={isUploading || isPending}
+                        />
+                        <div className="text-sm text-muted-foreground">
+                            <p>Recommended size: 500x500px</p>
+                            <p>JPG, PNG, GIF allowed.</p>
+                        </div>
+                        {isUploading && <p className="text-xs text-primary animate-pulse">Uploading...</p>}
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                        id="name"
+                        placeholder="John Doe"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        disabled={isPending}
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                        id="username"
+                        placeholder="username"
+                        value={formData.username}
+                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                        disabled={isPending}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                        scheduler.com/{formData.username || "username"}
+                    </p>
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                    id="bio"
+                    placeholder="Tell us about yourself..."
+                    className="resize-none min-h-[100px]"
+                    value={formData.bio}
+                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                    disabled={isPending}
+                />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <Label>Time Zone</Label>
+                    <TimezoneSelect
+                        value={formData.timeZone}
+                        onChange={(val) => setFormData({ ...formData, timeZone: val })}
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="language">Language</Label>
+                    <Select
+                        value={formData.language}
+                        onValueChange={(value) => setFormData({ ...formData, language: value })}
+                        disabled={isPending}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="es">Español</SelectItem>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="pt">Português</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border p-4 bg-muted/30">
+                <div className="space-y-0.5">
+                    <Label className="text-base font-medium">Email Notifications</Label>
+                    <p className="text-sm text-muted-foreground">
+                        Receive updates about your bookings.
+                    </p>
+                </div>
+                <Switch
+                    checked={formData.notificationPreferences.email}
+                    onCheckedChange={(checked) =>
+                        setFormData({
+                            ...formData,
+                            notificationPreferences: { ...formData.notificationPreferences, email: checked }
+                        })
+                    }
+                    disabled={isPending}
+                />
+            </div>
+
+            <div className="flex justify-end pt-4">
+                <Button type="submit" disabled={isPending || isUploading} className="min-w-[120px]">
+                    {isPending ? "Saving..." : "Save Changes"}
+                </Button>
+            </div>
+        </form>
+    );
+}
