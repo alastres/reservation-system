@@ -1,4 +1,4 @@
-import { addMinutes, format, parse, isBefore, isAfter, isEqual } from "date-fns";
+import { addMinutes, format, parse, isBefore, isAfter, isEqual, startOfDay } from "date-fns";
 
 type AvailabilityRule = {
     dayOfWeek: number;
@@ -11,24 +11,61 @@ type Booking = {
     endTime: Date;
 };
 
+type AvailabilityException = {
+    date: Date;
+    isAvailable: boolean;
+    startTime: string | null;
+    endTime: string | null;
+};
+
 export const getAvailableSlots = (
     date: Date,
     duration: number,
     rules: AvailabilityRule[],
     bookings: Booking[],
     timeZone: string,
-    bufferTime: number = 0
+    bufferTime: number = 0,
+    exceptions: AvailabilityException[] = [],
+    minNotice: number = 0
 ) => {
-    const dayOfWeek = date.getDay();
-    const rule = rules.find(r => r.dayOfWeek === dayOfWeek);
+    // 1. Min Notice Filter
+    const now = new Date();
+    const earliestSlotTime = addMinutes(now, minNotice);
 
-    if (!rule) return [];
+    // 2. Check for Exception first
+    const exception = exceptions.find(ex => isEqual(startOfDay(ex.date), startOfDay(date)));
+
+    let ruleStart = "09:00";
+    let ruleEnd = "17:00";
+    let isDayEnabled = false;
+
+    if (exception) {
+        // Exception rules
+        if (!exception.isAvailable) return []; // Blocked day
+
+        if (exception.startTime && exception.endTime) {
+            ruleStart = exception.startTime;
+            ruleEnd = exception.endTime;
+            isDayEnabled = true;
+        }
+    } else {
+        // Weekly rules
+        const dayOfWeek = date.getDay();
+        const rule = rules.find(r => r.dayOfWeek === dayOfWeek);
+        if (rule) {
+            ruleStart = rule.startTime;
+            ruleEnd = rule.endTime;
+            isDayEnabled = true; // Assuming existing enabled check is done upstream or implies enabled
+        }
+    }
+
+    if (!isDayEnabled) return [];
 
     const slots: string[] = [];
 
     // Parse rule start/end times
-    const dayStart = parse(rule.startTime, "HH:mm", date);
-    const dayEnd = parse(rule.endTime, "HH:mm", date);
+    const dayStart = parse(ruleStart, "HH:mm", date);
+    const dayEnd = parse(ruleEnd, "HH:mm", date);
 
     let currentSlot = dayStart;
 
@@ -37,6 +74,12 @@ export const getAvailableSlots = (
         const effectiveEnd = addMinutes(slotEnd, bufferTime);
 
         if (isAfter(effectiveEnd, dayEnd)) break;
+
+        // Min Notice Check
+        if (isBefore(currentSlot, earliestSlotTime)) {
+            currentSlot = addMinutes(currentSlot, duration);
+            continue;
+        }
 
         // Check conflicts
         const isConflict = bookings.some(booking => {
@@ -49,10 +92,6 @@ export const getAvailableSlots = (
         }
 
         // Increment logic
-        // We stick to 'duration' steps for consistency with typical slot generators
-        // But users might expect slots to align with buffer? 
-        // For now, simple duration steps (e.g., 9:00, 9:30, 10:00) 
-        // regardless of whether the *previous* theoretical slot had a buffer.
         currentSlot = addMinutes(currentSlot, duration);
     }
 
