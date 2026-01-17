@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { MotionDiv, staggerContainer, fadeIn, slideUp } from "@/components/ui/motion";
 
 import { RecentBookings } from "@/components/dashboard/recent-bookings";
+import { DashboardAutoRefresh } from "@/components/dashboard/auto-refresh";
 
 async function getDashboardStats(userId: string) {
     const totalBookings = await prisma.booking.count({
@@ -83,6 +84,7 @@ export default async function DashboardPage() {
             variants={staggerContainer}
             className="flex-1 space-y-4 p-8 pt-6"
         >
+            <DashboardAutoRefresh />
             <MotionDiv variants={slideUp} className="flex items-center justify-between space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
                     Dashboard

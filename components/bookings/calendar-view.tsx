@@ -1,0 +1,268 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+    format,
+    startOfMonth,
+    endOfMonth,
+    startOfWeek,
+    endOfWeek,
+    eachDayOfInterval,
+    isSameMonth,
+    isSameDay,
+    addMonths,
+    subMonths,
+    isToday
+} from "date-fns";
+import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from "lucide-react";
+import { CancelBookingButton } from "./booking-action";
+
+type Booking = {
+    id: string;
+    startTime: Date;
+    endTime: Date;
+    clientName: string;
+    clientEmail: string;
+    status: string;
+    service: {
+        id: string;
+        title: string;
+        color: string;
+    };
+};
+
+type Service = {
+    id: string;
+    title: string;
+    color: string;
+};
+
+interface CalendarViewProps {
+    bookings: Booking[];
+    services: Service[];
+}
+
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+
+export function CalendarView({ bookings, services }: CalendarViewProps) {
+    const router = useRouter();
+    const [currentDate, setCurrentDate] = useState(new Date());
+
+    // Polling for real-time updates
+    useEffect(() => {
+        const interval = setInterval(() => {
+            router.refresh();
+        }, 30000); // Refresh every 30 seconds
+
+        return () => clearInterval(interval);
+    }, [router]);
+
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [filterServiceId, setFilterServiceId] = useState<string>("all");
+
+    // Filter bookings
+    const filteredBookings = bookings.filter(b =>
+        filterServiceId === "all" || b.service.id === filterServiceId
+    );
+
+    // Get days for grid
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); // Monday start
+    const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+
+    const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
+
+    // Bookings for selected date
+    const selectedDayBookings = filteredBookings.filter(b =>
+        isSameDay(new Date(b.startTime), selectedDate)
+    ).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+
+    const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+    const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
+
+    const handleDayClick = (day: Date) => {
+        setSelectedDate(day);
+        setIsDialogOpen(true);
+    };
+
+    return (
+        <div className="flex flex-col gap-6">
+            {/* Main Calendar Area */}
+            <div className="flex-1 flex flex-col space-y-4">
+                <div className="flex items-center justify-between flex-shrink-0">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-2xl font-bold capitalize">
+                            {format(currentDate, "MMMM yyyy", { locale: es })}
+                        </h2>
+                        <div className="flex items-center rounded-md border border-input bg-transparent shadow-sm">
+                            <Button variant="ghost" size="icon" onClick={prevMonth} className="h-8 w-8 hover:bg-muted">
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => setCurrentDate(new Date())} className="h-8 px-2 text-xs font-normal hover:bg-muted">
+                                Hoy
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={nextMonth} className="h-8 w-8 hover:bg-muted">
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="w-[200px]">
+                        <Select value={filterServiceId} onValueChange={setFilterServiceId}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Filtrar por servicio" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Todos los servicios</SelectItem>
+                                {services.map(s => (
+                                    <SelectItem key={s.id} value={s.id}>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                                            {s.title}
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                <div className="flex-1">
+                    <div className="grid grid-cols-7 gap-px bg-muted rounded-lg overflow-hidden border border-border shadow-sm min-h-0">
+                        {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => (
+                            <div key={day} className="p-2 text-center text-sm font-medium bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 text-muted-foreground sticky top-0 z-20 border-b">
+                                {day}
+                            </div>
+                        ))}
+                        {calendarDays.map((day, idx) => {
+                            const dayBookings = filteredBookings.filter(b => isSameDay(new Date(b.startTime), day));
+                            return (
+                                <div
+                                    key={day.toString()}
+                                    onClick={() => handleDayClick(day)}
+                                    className={cn(
+                                        "min-h-[80px] md:min-h-[120px] p-1 md:p-2 bg-background hover:bg-accent/50 cursor-pointer transition-colors relative group border-t first:border-t-0",
+                                        !isSameMonth(day, currentDate) && "text-muted-foreground bg-muted/20",
+                                        isSameDay(day, selectedDate) && isDialogOpen && "bg-accent/50", // Highlight when dialog open
+                                        isToday(day) && "bg-primary/5 font-semibold"
+                                    )}
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <span className={cn(
+                                            "text-xs md:text-sm w-5 h-5 md:w-6 md:h-6 flex items-center justify-center rounded-full",
+                                            isToday(day) && "bg-primary text-primary-foreground"
+                                        )}>
+                                            {format(day, "d")}
+                                        </span>
+                                        {dayBookings.length > 0 && (
+                                            <Badge variant="secondary" className="hidden md:flex text-[10px] h-4 px-1">
+                                                {dayBookings.length}
+                                            </Badge>
+                                        )}
+                                    </div>
+
+                                    {/* Mobile: Dots View */}
+                                    <div className="flex md:hidden mt-1 gap-0.5 flex-wrap px-0.5">
+                                        {dayBookings.map(booking => (
+                                            <div
+                                                key={booking.id}
+                                                className="w-1.5 h-1.5 rounded-full"
+                                                style={{ backgroundColor: booking.service.color }}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Desktop: Bars View */}
+                                    <div className="hidden md:block mt-1 space-y-1">
+                                        {dayBookings.slice(0, 3).map(booking => (
+                                            <div
+                                                key={booking.id}
+                                                className="text-[10px] truncate px-1.5 py-0.5 rounded-sm bg-opacity-20 text-foreground"
+                                                style={{
+                                                    backgroundColor: `${booking.service.color}20`,
+                                                    borderLeft: `2px solid ${booking.service.color}`
+                                                }}
+                                            >
+                                                {format(booking.startTime, "HH:mm")}
+                                            </div>
+                                        ))}
+                                        {dayBookings.length > 3 && (
+                                            <div className="text-[10px] text-muted-foreground pl-1">
+                                                + {dayBookings.length - 3} más
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* Dialog for Day Details */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 capitalize">
+                            {format(selectedDate, "EEEE d", { locale: es })}
+                            <span className="text-muted-foreground font-normal">
+                                {format(selectedDate, "MMMM", { locale: es })}
+                            </span>
+                        </DialogTitle>
+                        <DialogDescription>
+                            {selectedDayBookings.length} cita{selectedDayBookings.length !== 1 && 's'} programada{selectedDayBookings.length !== 1 && 's'}.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="mt-4 space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                        {selectedDayBookings.length === 0 ? (
+                            <div className="text-center text-muted-foreground py-8 border rounded-lg border-dashed">
+                                No hay citas para este día.
+                            </div>
+                        ) : (
+                            selectedDayBookings.map(booking => (
+                                <div key={booking.id} className="relative pl-4 py-1 group">
+                                    <div
+                                        className="absolute left-0 top-2 bottom-2 w-1 rounded-full"
+                                        style={{ backgroundColor: booking.service.color }}
+                                    />
+                                    <div className="rounded-md border bg-card text-card-foreground shadow-sm p-3 hover:bg-accent transition-colors">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <Badge variant="outline" className="font-mono text-xs">
+                                                <Clock className="w-3 h-3 mr-1" />
+                                                {format(booking.startTime, "HH:mm")} - {format(booking.endTime, "HH:mm")}
+                                            </Badge>
+                                            <Badge variant={booking.status === "CONFIRMED" ? "default" : "secondary"} className="text-[10px] py-0 h-5">
+                                                {booking.status}
+                                            </Badge>
+                                        </div>
+                                        <h4 className="font-medium text-sm mb-1">{booking.clientName}</h4>
+                                        <p className="text-xs text-muted-foreground mb-2">{booking.service.title}</p>
+                                        <div className="flex justify-end">
+                                            <CancelBookingButton id={booking.id} />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+}
