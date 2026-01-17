@@ -14,7 +14,7 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
     // dateStr is iso date "YYYY-MM-DD"
     const service = await prisma.service.findUnique({
         where: { id: serviceId },
-        include: { user: { include: { availability: true, bookings: true } } }
+        include: { user: { include: { availability: true, bookings: true, exceptions: true } } }
     });
 
     if (!service) return { error: "Service not found" };
@@ -54,7 +54,9 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
         service.user.availability,
         allBusySlots,
         timeZone,
-        service.bufferTime
+        service.bufferTime,
+        service.user.exceptions,
+        service.minNotice
     );
 
     return { slots };
@@ -78,6 +80,12 @@ export const createBooking = async (
     const startTime = new Date(`${dateStr}T${time}:00`);
     const endTime = addMinutes(startTime, service.duration);
     const effectiveEndTime = addMinutes(endTime, service.bufferTime || 0);
+
+    // 2a. Min Notice Check
+    const minNoticeTime = addMinutes(new Date(), service.minNotice);
+    if (startTime < minNoticeTime) {
+        return { error: `Booking requires at least ${service.minNotice} minutes notice` };
+    }
 
     // 3. Double check availability (Race condition check omitted for MVP, but good to have)
     // ongoing booking [startTime, effectiveEndTime) must not overlap with any existing booking
