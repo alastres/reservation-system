@@ -176,29 +176,43 @@ export const createBooking = async (
 };
 
 export const cancelBooking = async (bookingId: string) => {
-    const session = await auth(); // Assuming auth() is available here or passed down. 
-    // Wait, auth() is in @/auth. Need to import it if not present. It is present.
+    console.log("[CancelBooking] Attempting to cancel booking:", bookingId);
+    const session = await auth();
 
-    if (!session?.user?.id) return { error: "Unauthorized" };
+    if (!session?.user?.id) {
+        console.log("[CancelBooking] Unauthorized: No session");
+        return { error: "Unauthorized" };
+    }
 
     const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
         include: { service: true }
     });
 
-    if (!booking) return { error: "Booking not found" };
+    if (!booking) {
+        console.log("[CancelBooking] Booking not found");
+        return { error: "Booking not found" };
+    }
 
     // Verify ownership
     if (booking.service.userId !== session.user.id) {
+        console.log("[CancelBooking] Unauthorized: User is not the owner", {
+            ownerId: booking.service.userId,
+            currentUserId: session.user.id
+        });
         return { error: "Unauthorized" };
     }
 
-    await prisma.booking.update({
-        where: { id: bookingId },
-        data: { status: "CANCELLED" }
-    });
-
-    // Ideally send cancellation email here
+    try {
+        await prisma.booking.update({
+            where: { id: bookingId },
+            data: { status: "CANCELLED" }
+        });
+        console.log("[CancelBooking] Status updated to CANCELLED");
+    } catch (e) {
+        console.error("[CancelBooking] DB Update Failed", e);
+        return { error: "Failed to update booking status" };
+    }
 
     revalidatePath("/dashboard/bookings");
     revalidatePath("/dashboard");
