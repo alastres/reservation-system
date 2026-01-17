@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 
 import { startOfDay, endOfDay, addMinutes, parse } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { sendBookingConfirmation, sendNewBookingNotification } from "@/lib/mail";
 import { getBusyTimes } from "@/lib/google-calendar";
 
@@ -19,14 +20,25 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
 
     if (!service) return { error: "Service not found" };
 
-    const date = new Date(dateStr); // Local midnight of that date (server time)
-    // Ideally we should parse based on user timezone.
+    // Valid TimeZone check
+    try {
+        Intl.DateTimeFormat(undefined, { timeZone });
+    } catch (e) {
+        return { error: "Invalid TimeZone" };
+    }
 
-    // Fetch bookings for that day (roughly)
-    // We fetch bookings that overlap with this day
-    const dayStart = startOfDay(date);
-    const dayEnd = endOfDay(date);
+    // 1. Determine "Day" in Target TimeZone
+    // dateStr is "2024-XX-XX". We want 00:00:00 in `timeZone`.
+    // fromZonedTime takes "YYYY-MM-DD HH:mm:ss" effectively if passed strings, 
+    // but easier to make a string and parse it as if it's in that zone.
+    const startOfDayInZone = fromZonedTime(`${dateStr} 00:00:00`, timeZone);
+    const endOfDayInZone = fromZonedTime(`${dateStr} 23:59:59.999`, timeZone);
 
+    // DB Queries should check against these UTC equivalents
+    const dayStart = startOfDayInZone;
+    const dayEnd = endOfDayInZone;
+
+    // Fetch bookings that overlap with this target day
     const bookings = await prisma.booking.findMany({
         where: {
             service: { userId: service.userId },
@@ -48,8 +60,9 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
         }))
     ];
 
+
     const slots = getAvailableSlots(
-        date,
+        startOfDayInZone, // Use the calculate start of day
         service.duration,
         service.user.availability,
         allBusySlots,
@@ -124,16 +137,39 @@ export const createBooking = async (
     );
 
     // Send Notification to Provider
-    const prefs = service.user.notificationPreferences as any;
-    if (prefs?.email !== false) {
-        await sendNewBookingNotification(
-            service.user.email,
-            service.user.id,
-            clientData.name,
-            service.title,
-            dateStr,
-            time
-        );
+    // Send Notification to Provider
+    try {
+        interface NotificationPreferences {
+            email?: boolean;
+            sms?: boolean;
+        }
+
+        const prefs = service.user.notificationPreferences as unknown as NotificationPreferences | null;
+
+        console.log(`[Booking] Checking prefs for user ${service.user.email}:`, prefs);
+
+        // Logic: Send email if preferences are null (default) OR if email is not explicitly set to false
+        const shouldSend = !prefs || prefs.email !== false;
+
+        if (shouldSend) {
+            console.log(`[Booking] Sending notification to provider: ${service.user.email}`);
+            await sendNewBookingNotification(
+                service.user.email,
+                service.user.id,
+                clientData.name,
+                service.title,
+                dateStr,
+                time
+            );
+            console.log("[Booking] Provider notification sent successfully");
+        } else {
+            console.log("[Booking] Provider notifications disabled by preference");
+        }
+    } catch (emailError: unknown) {
+        console.error("[Booking] Failed to send provider notification. Error details:", emailError);
+        console.error("[Booking] Attempted to send from:", process.env.EMAIL_FROM);
+        console.error("[Booking] Attempted to send to:", service.user.email);
+        // Don't fail the booking if email fails, but log it
     }
 
     return { success: "Booking confirmed!" };
