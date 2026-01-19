@@ -5,9 +5,9 @@ import { getAvailableSlots } from "@/lib/availability-engine";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 
-import { startOfDay, endOfDay, addMinutes, parse } from "date-fns";
+import { startOfDay, endOfDay, addMinutes, parse, format } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
-import { sendBookingConfirmation, sendNewBookingNotification } from "@/lib/mail";
+import { sendBookingConfirmation, sendNewBookingNotification, sendRescheduledBookingNotification, sendCancellationNotification } from "@/lib/mail";
 import { getBusyTimes } from "@/lib/google-calendar";
 
 
@@ -79,7 +79,7 @@ export const createBooking = async (
     serviceId: string,
     dateStr: string,
     time: string,
-    clientData: { name: string; email: string; notes?: string }
+    clientData: { name: string; email: string; notes?: string; answers?: Record<string, string>; recurrence?: string }
 ) => {
     // 1. Verify existence
     const service = await prisma.service.findUnique({
@@ -88,56 +88,94 @@ export const createBooking = async (
     });
     if (!service) return { error: "Service not found" };
 
-    // 2. Parse Start/End
-    // dateStr: YYYY-MM-DD, time: HH:mm
-    const startTime = new Date(`${dateStr}T${time}:00`);
-    const endTime = addMinutes(startTime, service.duration);
-    const effectiveEndTime = addMinutes(endTime, service.bufferTime || 0);
+    // 2. Determine Dates to Book
+    const initialDate = new Date(`${dateStr}T${time}:00`);
+    const datesToBook: Date[] = [initialDate];
+    let recurrenceId: string | undefined = undefined;
 
-    // 2a. Min Notice Check
+    if (clientData.recurrence && clientData.recurrence !== "none") {
+        recurrenceId = crypto.randomUUID();
+        // Generate future dates (MVP: Fixed count, e.g., 4 occurrences)
+        const count = 4;
+        for (let i = 1; i < count; i++) {
+            let nextDate = new Date(initialDate);
+            if (clientData.recurrence === "weekly") {
+                nextDate.setDate(initialDate.getDate() + (7 * i));
+            } else if (clientData.recurrence === "biweekly") {
+                nextDate.setDate(initialDate.getDate() + (14 * i));
+            } else if (clientData.recurrence === "monthly") {
+                nextDate.setMonth(initialDate.getMonth() + i);
+            }
+            datesToBook.push(nextDate);
+        }
+    }
+
+    // 2a. Min Notice Check (Only need to check the first/earliest one)
     const minNoticeTime = addMinutes(new Date(), service.minNotice);
-    if (startTime < minNoticeTime) {
+    if (datesToBook[0] < minNoticeTime) {
         return { error: `Booking requires at least ${service.minNotice} minutes notice` };
     }
 
-    // 3. Double check availability (Race condition check omitted for MVP, but good to have)
-    // ongoing booking [startTime, effectiveEndTime) must not overlap with any existing booking
-    const existing = await prisma.booking.findFirst({
-        where: {
-            serviceId: service.id,
-            startTime: { lt: effectiveEndTime },
-            endTime: { gt: startTime },
-            status: "CONFIRMED"
+    // 3. Availability Check for ALL dates
+    // This could be optimized to a custom query, but for MVP loop is fine or `findMany` with OR
+    for (const date of datesToBook) {
+        const checkStart = date;
+        const checkEnd = addMinutes(checkStart, service.duration);
+        const checkBuffEnd = addMinutes(checkEnd, service.bufferTime || 0);
+
+        const existing = await prisma.booking.findFirst({
+            where: {
+                serviceId: service.id,
+                startTime: { lt: checkBuffEnd },
+                endTime: { gt: checkStart },
+                status: "CONFIRMED"
+            }
+        });
+
+        if (existing) {
+            const conflictDate = format(checkStart, "yyyy-MM-dd");
+            return { error: `Slot on ${conflictDate} is already taken. Recurrence failed.` };
         }
-    });
+    }
 
-    if (existing) return { error: "Slot already taken" };
+    // 4. Create All Bookings
+    try {
+        await prisma.$transaction(
+            datesToBook.map(date => {
+                const startTime = date;
+                const endTime = addMinutes(startTime, service.duration);
 
-    // 4. Create
-    await prisma.booking.create({
-        data: {
-            serviceId,
-            startTime,
-            endTime,
-            clientName: clientData.name,
-            clientEmail: clientData.email,
-            notes: clientData.notes,
-            status: "CONFIRMED",
-            // professionalId: service.userId // If I added it to schema
-        }
-    });
+                return prisma.booking.create({
+                    data: {
+                        serviceId,
+                        startTime,
+                        endTime,
+                        clientName: clientData.name,
+                        clientEmail: clientData.email,
+                        notes: clientData.notes,
+                        answers: clientData.answers,
+                        recurrenceId,
+                        status: "CONFIRMED",
+                    }
+                });
+            })
+        );
+    } catch (e) {
+        console.error("Booking transaction failed", e);
+        return { error: "Failed to process booking" };
+    }
 
-    // Send Email to Client
+    // Send Email to Client (Summary)
     await sendBookingConfirmation(
         clientData.email,
         clientData.name,
         service.title,
         dateStr,
-        time
+        time // Todo: Mention recurrence in email
     );
 
-    // Send Notification to Provider
-    // Send Notification to Provider
+    // Send Notification to Provider (Summary)
+    // ... (logic remains similar, maybe mention recurrence)
     try {
         interface NotificationPreferences {
             email?: boolean;
@@ -145,34 +183,24 @@ export const createBooking = async (
         }
 
         const prefs = service.user.notificationPreferences as unknown as NotificationPreferences | null;
-
-        console.log(`[Booking] Checking prefs for user ${service.user.email}:`, prefs);
-
-        // Logic: Send email if preferences are null (default) OR if email is not explicitly set to false
         const shouldSend = !prefs || prefs.email !== false;
 
         if (shouldSend) {
-            console.log(`[Booking] Sending notification to provider: ${service.user.email}`);
             await sendNewBookingNotification(
                 service.user.email,
                 service.user.id,
                 clientData.name,
                 service.title,
                 dateStr,
-                time
+                time,
+                clientData.answers
             );
-            console.log("[Booking] Provider notification sent successfully");
-        } else {
-            console.log("[Booking] Provider notifications disabled by preference");
         }
     } catch (emailError: unknown) {
-        console.error("[Booking] Failed to send provider notification. Error details:", emailError);
-        console.error("[Booking] Attempted to send from:", process.env.EMAIL_FROM);
-        console.error("[Booking] Attempted to send to:", service.user.email);
-        // Don't fail the booking if email fails, but log it
+        console.error("[Booking] Failed to send provider notification.", emailError);
     }
 
-    return { success: "Booking confirmed!" };
+    return { success: recurrenceId ? "Recurring booking confirmed!" : "Booking confirmed!" };
 };
 
 export const cancelBooking = async (bookingId: string) => {
@@ -186,7 +214,7 @@ export const cancelBooking = async (bookingId: string) => {
 
     const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
-        include: { service: true }
+        include: { service: { include: { user: true } } }
     });
 
     if (!booking) {
@@ -214,7 +242,105 @@ export const cancelBooking = async (bookingId: string) => {
         return { error: "Failed to update booking status" };
     }
 
+    // Send Cancellation Email
+    await sendCancellationNotification(
+        booking.clientEmail,
+        booking.clientName,
+        booking.service.title,
+        format(booking.startTime, "yyyy-MM-dd"),
+        format(booking.startTime, "HH:mm")
+    );
+
     revalidatePath("/dashboard/bookings");
     revalidatePath("/dashboard");
+    if (booking.service.user?.username && booking.service.url) {
+        revalidatePath(`/${booking.service.user.username}/${booking.service.url}`);
+    }
     return { success: "Booking cancelled" };
+};
+
+export const rescheduleBooking = async (
+    bookingId: string,
+    newDateStr: string,
+    newTime: string
+) => {
+    const session = await auth();
+    if (!session?.user?.id) return { error: "Unauthorized" };
+
+    // 1. Fetch existing booking
+    const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: { service: true }
+    });
+
+    if (!booking) return { error: "Booking not found" };
+
+    // 2. Auth Check (Provider Only for now)
+    if (booking.service.userId !== session.user.id) {
+        return { error: "Unauthorized: You do not manage this booking" };
+    }
+
+    const service = booking.service;
+
+    // 3. Calculation & Validation
+    const newStartTime = new Date(`${newDateStr}T${newTime}:00`);
+    const newEndTime = addMinutes(newStartTime, service.duration);
+    const effectiveEndTime = addMinutes(newEndTime, service.bufferTime || 0);
+
+    // Min Notice Check
+    const minNoticeTime = addMinutes(new Date(), service.minNotice);
+    if (newStartTime < minNoticeTime) {
+        return { error: `Rescheduling requires at least ${service.minNotice} minutes notice` };
+    }
+
+    // 4. Availability Check (Availability Logic reuse?)
+    // Need to ensure we don't collide with OTHER bookings.
+    // We EXCLUDE the current booking ID from the check.
+    const conflict = await prisma.booking.findFirst({
+        where: {
+            serviceId: service.id,
+            startTime: { lt: effectiveEndTime },
+            endTime: { gt: newStartTime },
+            status: "CONFIRMED",
+            NOT: {
+                id: bookingId
+            }
+        }
+    });
+
+    if (conflict) {
+        return { error: "The selected slot is already taken" };
+    }
+
+    // Capture old details for email
+    const oldDateStr = format(booking.startTime, "yyyy-MM-dd");
+    const oldTimeStr = format(booking.startTime, "HH:mm");
+
+    // 5. Update Booking
+    try {
+        await prisma.booking.update({
+            where: { id: bookingId },
+            data: {
+                startTime: newStartTime,
+                endTime: newEndTime
+            }
+        });
+    } catch (e) {
+        console.error("Reschedule update failed", e);
+        return { error: "Failed to update booking" };
+    }
+
+    // 6. Notify Client
+    await sendRescheduledBookingNotification(
+        booking.clientEmail,
+        booking.clientName,
+        service.title,
+        newDateStr,
+        newTime,
+        oldDateStr,
+        oldTimeStr
+    );
+
+    revalidatePath("/dashboard/bookings");
+    return { success: "Booking rescheduled successfully" };
 };

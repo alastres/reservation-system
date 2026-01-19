@@ -15,6 +15,7 @@ model User {
   email         String          @unique
   emailVerified DateTime?
   image         String?
+  coverImage    String?
   password      String?
   
   accounts      Account[]
@@ -98,6 +99,9 @@ model Service {
   
   bookings    Booking[]
   
+  // Custom Form Fields
+  customInputs Json?   // [{ label: "Phone", type: "text", required: true }]
+
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -116,6 +120,8 @@ model Booking {
   clientName  String
   clientEmail String
   notes       String?
+  answers     Json?    // { "Phone": "123-456" }
+  recurrenceId String? // ID grouping recurring bookings
   
   // Integration
   googleEventId String? 

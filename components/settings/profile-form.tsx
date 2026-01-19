@@ -38,6 +38,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         timeZone: user.timeZone || "UTC",
         language: (user as any).language || "es",
         image: user.image || "",
+        coverImage: (user as any).coverImage || "",
         notificationPreferences: {
             email: (user.notificationPreferences as any)?.email ?? true,
         }
@@ -52,13 +53,14 @@ export function ProfileForm({ user }: ProfileFormProps) {
             timeZone: user.timeZone || "UTC",
             language: (user as any).language || "es",
             image: user.image || "",
+            coverImage: (user as any).coverImage || "",
             notificationPreferences: {
                 email: (user.notificationPreferences as any)?.email ?? true,
             }
         });
     }, [user]);
 
-    const onImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: "image" | "coverImage") => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -73,8 +75,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
             });
             const json = await res.json();
             if (json.url) {
-                setFormData(prev => ({ ...prev, image: json.url }));
-                toast.success("Image uploaded successfully!");
+                setFormData(prev => ({ ...prev, [field]: json.url }));
+                toast.success(`${field === "image" ? "Profile picture" : "Cover image"} uploaded successfully!`);
             } else {
                 toast.error("Failed to upload image.");
             }
@@ -93,6 +95,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             console.log("Submitting form data:", formData);
             updateProfile({
                 ...formData,
+                coverImage: formData.coverImage,
                 notificationPreferences: formData.notificationPreferences
             })
                 .then(async (data) => {
@@ -110,6 +113,42 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     return (
         <form onSubmit={onSubmit} className="space-y-6 max-w-2xl bg-card p-6 rounded-xl border shadow-sm">
+            {/* Cover Image Section */}
+            <div className="space-y-4">
+                <Label>Cover Image</Label>
+                <div className="relative group w-full h-48 bg-muted rounded-xl overflow-hidden border-2 border-dashed border-muted-foreground/25 flex items-center justify-center">
+                    {formData.coverImage ? (
+                        <img
+                            src={formData.coverImage}
+                            alt="Cover"
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <div className="text-center text-muted-foreground p-4">
+                            <p className="text-sm font-medium">No cover image</p>
+                            <p className="text-xs">Recommended 1200x400px</p>
+                        </div>
+                    )}
+
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Label
+                            htmlFor="cover-upload"
+                            className="cursor-pointer bg-white/90 text-black px-4 py-2 rounded-full text-sm font-medium shadow-lg hover:bg-white transition-colors"
+                        >
+                            Change Cover
+                        </Label>
+                        <Input
+                            id="cover-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleUpload(e, "coverImage")}
+                            disabled={isUploading || isPending}
+                        />
+                    </div>
+                </div>
+            </div>
+
             <div className="space-y-4">
                 <Label>Profile Picture</Label>
                 <div className="flex items-center gap-6">
@@ -143,7 +182,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            onChange={onImageUpload}
+                            onChange={(e) => handleUpload(e, "image")}
                             disabled={isUploading || isPending}
                         />
                         <div className="text-sm text-muted-foreground">
