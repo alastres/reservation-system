@@ -42,6 +42,8 @@ export default {
         async session({ session, token }) {
             if (token.sub && session.user) {
                 session.user.id = token.sub;
+                // Pass emailVerified from token to session (for middleware)
+                (session.user as any).emailVerified = token.emailVerified;
             }
             return session;
         },

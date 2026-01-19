@@ -34,6 +34,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         })
     ],
     callbacks: {
+        async jwt({ token, user, trigger, session }) {
+            // Initial sign in
+            if (user) {
+                token.sub = user.id;
+                token.email = user.email;
+                token.emailVerified = user.emailVerified;
+            }
+
+            // Refetch user on session update
+            if (trigger === "update") {
+                console.log("[AUTH] Trigger update received. Token sub:", token.sub);
+                const freshUser = await prisma.user.findUnique({
+                    where: { id: token.sub! }
+                });
+                console.log("[AUTH] Fresh user fetched:", freshUser?.email, "Verified:", freshUser?.emailVerified);
+
+                if (freshUser) {
+                    token.emailVerified = freshUser.emailVerified;
+                }
+            }
+
+            return token;
+        },
         async session({ session, token }) {
             if (token.sub && session.user) {
                 session.user.id = token.sub;
@@ -50,23 +73,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     (session.user as any).username = user.username;
                     (session.user as any).language = user.language;
                     (session.user as any).timeZone = user.timeZone;
+                    (session.user as any).emailVerified = user.emailVerified;
                 }
             }
             return session;
-        },
-        async jwt({ token, user, trigger, session }) {
-            // Initial sign in
-            if (user) {
-                token.sub = user.id;
-                token.email = user.email;
-            }
-
-            // Update token if session is updated
-            if (trigger === "update" && session) {
-                return { ...token, ...session.user };
-            }
-
-            return token;
+        }
+    },
+    events: {
+        async linkAccount({ user }) {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { emailVerified: new Date() }
+            })
         }
     }
 })

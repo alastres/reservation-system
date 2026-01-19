@@ -12,6 +12,10 @@ export const BackButton = ({
     href,
     label,
 }: BackButtonProps) => {
+    if (!label) {
+        return null; // Return null if no label is provided
+    }
+
     return (
         <Button
             variant="link"
