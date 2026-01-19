@@ -139,6 +139,7 @@ model Booking {
   clientName  String
   clientEmail String
   clientPhone String?  // Copied from form if LocationType == PHONE
+  clientTimeZone String? // Stores the client's browser timezone
   notes       String?
   answers     Json?    // { "Phone": "123-456" }
   recurrenceId String? // ID grouping recurring bookings
