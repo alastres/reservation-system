@@ -66,12 +66,19 @@ export const createGoogleEvent = async (
     try {
         const res = await calendar.events.insert({
             calendarId: "primary",
+            conferenceDataVersion: 1,
             requestBody: {
                 summary: event.summary,
                 description: event.description,
                 start: { dateTime: event.start.toISOString() },
                 end: { dateTime: event.end.toISOString() },
                 attendees: event.attendees?.map((email) => ({ email })),
+                conferenceData: {
+                    createRequest: {
+                        requestId: crypto.randomUUID(),
+                        conferenceSolutionKey: { type: "hangoutsMeet" },
+                    },
+                },
             },
         });
         console.log("[GoogleCalendar] Event created successfully:", res.data.id);
