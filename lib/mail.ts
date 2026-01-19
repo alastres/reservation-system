@@ -17,6 +17,7 @@ export const sendBookingConfirmation = async (
     serviceName: string,
     date: string,
     time: string,
+    providerId: string,
     locationDetails?: string
 ) => {
     const mailOptions = {
@@ -36,9 +37,10 @@ export const sendBookingConfirmation = async (
 
     try {
         await transporter.sendMail(mailOptions);
-        // We could try to log if email matches a user, but for now specific logging for providers is prioritized
+        await logNotification(providerId, "CLIENT_CONFIRMATION", "SENT", { email, name, serviceName, date, time });
     } catch (error) {
         console.error("Error sending email:", error);
+        await logNotification(providerId, "CLIENT_CONFIRMATION", "FAILED", { error: String(error) });
     }
 };
 
@@ -154,6 +156,7 @@ export const sendRescheduledBookingNotification = async (
     serviceName: string,
     date: string,
     time: string,
+    providerId: string,
     oldDate?: string,
     oldTime?: string
 ) => {
@@ -174,8 +177,10 @@ export const sendRescheduledBookingNotification = async (
 
     try {
         await transporter.sendMail(mailOptions);
+        await logNotification(providerId, "CLIENT_RESCHEDULE", "SENT", { email, name, serviceName, date, time, oldDate, oldTime });
     } catch (error) {
         console.error("Error sending reschedule email:", error);
+        await logNotification(providerId, "CLIENT_RESCHEDULE", "FAILED", { error: String(error) });
     }
 };
 
@@ -184,7 +189,8 @@ export const sendCancellationNotification = async (
     name: string,
     serviceName: string,
     date: string,
-    time: string
+    time: string,
+    providerId: string
 ) => {
     const mailOptions = {
         from: process.env.EMAIL_FROM,
@@ -200,7 +206,49 @@ export const sendCancellationNotification = async (
 
     try {
         await transporter.sendMail(mailOptions);
+        await logNotification(providerId, "CLIENT_CANCELLATION", "SENT", { email, name, serviceName, date, time });
     } catch (error) {
         console.error("Error sending cancellation email:", error);
+        await logNotification(providerId, "CLIENT_CANCELLATION", "FAILED", { error: String(error) });
+    }
+};
+
+export const sendBookingReminder = async (
+    email: string,
+    name: string,
+    serviceName: string,
+    date: string,
+    time: string,
+    providerId: string,
+    type: "24h" | "1h",
+    bookingId: string,
+    locationDetails?: string
+) => {
+    const subject = type === "24h"
+        ? `Reminder: Your booking is tomorrow - ${serviceName}`
+        : `Reminder: Your booking starts in 1 hour - ${serviceName}`;
+
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: email,
+        subject: subject,
+        html: `
+      <h1>Booking Reminder</h1>
+      <p>Hi ${name},</p>
+      <p>This is a reminder for your upcoming booking:</p>
+      <p><strong>Service:</strong> ${serviceName}</p>
+      <p><strong>Date:</strong> ${date}</p>
+      <p><strong>Time:</strong> ${time}</p>
+      ${locationDetails ? `<p><strong>Location:</strong> ${locationDetails}</p>` : ''}
+      <p>See you soon!</p>
+    `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        await logNotification(providerId, `REMINDER_${type.toUpperCase()}`, "SENT", { email, name, serviceName, date, time, bookingId });
+    } catch (error) {
+        console.error(`Error sending ${type} reminder email:`, error);
+        await logNotification(providerId, `REMINDER_${type.toUpperCase()}`, "FAILED", { error: String(error), bookingId });
     }
 };

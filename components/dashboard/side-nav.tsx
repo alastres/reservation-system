@@ -9,7 +9,8 @@ import {
     Settings,
     Video,
     Clock,
-    Briefcase
+    Briefcase,
+    Bug
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserButton } from "@/components/auth/user-button";
@@ -39,6 +40,12 @@ const routes = [
         label: "Bookings",
         icon: Calendar,
         href: "/dashboard/bookings",
+        color: "text-primary",
+    },
+    {
+        label: "Logs",
+        icon: Bug,
+        href: "/dashboard/logs",
         color: "text-primary",
     },
     {
