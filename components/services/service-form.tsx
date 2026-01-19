@@ -47,6 +47,8 @@ interface ServiceProps {
     minNotice: number;
     isActive: boolean;
     customInputs?: any[];
+    isRecurrenceEnabled: boolean;
+    maxRecurrenceCount: number;
 }
 
 interface ServiceFormProps {
@@ -125,6 +127,8 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
             bufferTime: service?.bufferTime || 0,
             minNotice: service?.minNotice || 60,
             customInputs: (service?.customInputs as any[]) || [],
+            isRecurrenceEnabled: service?.isRecurrenceEnabled ?? false,
+            maxRecurrenceCount: service?.maxRecurrenceCount || 4,
         },
     });
 
@@ -326,6 +330,54 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             </FormItem>
                         )}
                     />
+                </div>
+
+                {/* Recurrence Settings */}
+                <div className="space-y-4 border border-input/50 rounded-lg p-4 bg-muted/20">
+                    <div className="space-y-0.5">
+                        <FormLabel className="text-base">Recursive Bookings</FormLabel>
+                        <FormDescription>Allow customers to book recurring appointments (e.g., weekly).</FormDescription>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <FormField
+                            control={form.control}
+                            name="isRecurrenceEnabled"
+                            render={({ field }) => (
+                                <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-card">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-sm font-medium">Enable Recurrence</FormLabel>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={isPending}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="maxRecurrenceCount"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Max Occurrences</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            type="number"
+                                            min={1}
+                                            disabled={isPending || !form.watch("isRecurrenceEnabled")}
+                                            onChange={e => field.onChange(parseInt(e.target.value))}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>Limit how many times it can repeat.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 </div>
 
                 {/* Custom Fields Section */}

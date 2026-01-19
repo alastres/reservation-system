@@ -8,7 +8,7 @@ import { auth } from "@/lib/auth";
 import { startOfDay, endOfDay, addMinutes, parse, format } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { sendBookingConfirmation, sendNewBookingNotification, sendRescheduledBookingNotification, sendCancellationNotification } from "@/lib/mail";
-import { getBusyTimes } from "@/lib/google-calendar";
+import { getBusyTimes, createGoogleEvent } from "@/lib/google-calendar";
 
 
 export const getSlotsAction = async (dateStr: string, serviceId: string, timeZone: string) => {
@@ -95,8 +95,8 @@ export const createBooking = async (
 
     if (clientData.recurrence && clientData.recurrence !== "none") {
         recurrenceId = crypto.randomUUID();
-        // Generate future dates (MVP: Fixed count, e.g., 4 occurrences)
-        const count = 4;
+        // Generate future dates based on service config
+        const count = service.maxRecurrenceCount || 4;
         for (let i = 1; i < count; i++) {
             let nextDate = new Date(initialDate);
             if (clientData.recurrence === "weekly") {
@@ -163,6 +163,54 @@ export const createBooking = async (
     } catch (e) {
         console.error("Booking transaction failed", e);
         return { error: "Failed to process booking" };
+    }
+
+    // Sync with Google Calendar
+    // We execute this asynchronously/independently so it doesn't block the UI response if it's slow
+    // But we await it here to ensure it's done before returning (Vercel serverless might kill otherwise)
+    // In a real message queue system, this would be a job.
+    for (const date of datesToBook) {
+        const start = date;
+        const end = addMinutes(start, service.duration);
+
+        let description = `Client: ${clientData.name}\nEmail: ${clientData.email}\nNotes: ${clientData.notes || "None"}`;
+        if (clientData.answers) {
+            description += "\n\nAnswers:\n" + Object.entries(clientData.answers).map(([q, a]) => `- ${q}: ${a}`).join("\n");
+        }
+
+        const eventId = await createGoogleEvent(service.userId, {
+            summary: `Booking: ${service.title} with ${clientData.name}`,
+            description,
+            start,
+            end,
+            attendees: [clientData.email]
+        });
+
+        if (eventId) {
+            // Find the specific booking for this date interval
+            // Note: Since we have recurrence, we need to match the correct one.
+            // Using a precise finder or storing the IDs during creation would be better.
+            // For now, we update the one we just created in this request context.
+            // A safer approach: Return the created booking objects from transaction, verify which match the date.
+
+            // Re-fetch to find the booking ID matching this start time and service
+            // This is a bit inefficient but safe for this MVP loop
+            const createdBooking = await prisma.booking.findFirst({
+                where: {
+                    serviceId: service.id,
+                    startTime: start,
+                    status: "CONFIRMED",
+                    clientEmail: clientData.email
+                }
+            });
+
+            if (createdBooking) {
+                await prisma.booking.update({
+                    where: { id: createdBooking.id },
+                    data: { googleEventId: eventId }
+                });
+            }
+        }
     }
 
     // Send Email to Client (Summary)
