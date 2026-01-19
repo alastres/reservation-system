@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { CancelBookingButton } from "./booking-action";
+import { RescheduleDialog } from "./reschedule-dialog"; // Import new dialog
 
 type Booking = {
     id: string;
@@ -181,8 +182,11 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
                                         {dayBookings.map(booking => (
                                             <div
                                                 key={booking.id}
-                                                className="w-1.5 h-1.5 rounded-full"
-                                                style={{ backgroundColor: booking.service.color }}
+                                                className={cn(
+                                                    "w-1.5 h-1.5 rounded-full",
+                                                    booking.status === "CANCELLED" && "opacity-40"
+                                                )}
+                                                style={{ backgroundColor: booking.status === "CANCELLED" ? "#9ca3af" : booking.service.color }}
                                             />
                                         ))}
                                     </div>
@@ -192,10 +196,13 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
                                         {dayBookings.slice(0, 3).map(booking => (
                                             <div
                                                 key={booking.id}
-                                                className="text-[10px] truncate px-1.5 py-0.5 rounded-sm bg-opacity-20 text-foreground"
+                                                className={cn(
+                                                    "text-[10px] truncate px-1.5 py-0.5 rounded-sm bg-opacity-20 text-foreground",
+                                                    booking.status === "CANCELLED" && "opacity-50 line-through text-muted-foreground bg-gray-100"
+                                                )}
                                                 style={{
-                                                    backgroundColor: `${booking.service.color}20`,
-                                                    borderLeft: `2px solid ${booking.service.color}`
+                                                    backgroundColor: booking.status === "CANCELLED" ? undefined : `${booking.service.color}20`,
+                                                    borderLeft: booking.status === "CANCELLED" ? "2px solid #9ca3af" : `2px solid ${booking.service.color}`
                                                 }}
                                             >
                                                 {format(booking.startTime, "HH:mm")}
@@ -253,9 +260,12 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
                                         </div>
                                         <h4 className="font-medium text-sm mb-1">{booking.clientName}</h4>
                                         <p className="text-xs text-muted-foreground mb-2">{booking.service.title}</p>
-                                        <div className="flex justify-end">
-                                            <CancelBookingButton id={booking.id} />
-                                        </div>
+                                        {booking.status !== "CANCELLED" && (
+                                            <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+                                                <RescheduleDialog booking={booking as any} />
+                                                <CancelBookingButton id={booking.id} />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))

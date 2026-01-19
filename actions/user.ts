@@ -12,6 +12,7 @@ const profileSchema = z.object({
     timeZone: z.string().optional(),
     language: z.string().optional(),
     image: z.string().optional().or(z.literal("")),
+    coverImage: z.string().optional().or(z.literal("")),
     notificationPreferences: z.object({
         email: z.boolean().optional(),
         sms: z.boolean().optional(),
@@ -58,6 +59,7 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
                 timeZone: timeZone || "UTC",
                 language: validated.data.language || "es",
                 image,
+                coverImage: validated.data.coverImage,
                 notificationPreferences: notificationPreferences || undefined,
             },
         });

@@ -1,7 +1,7 @@
 "use client";
 
 import * as z from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ServiceSchema } from "@/schemas";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react"; // Import Trash2
 import {
     Form,
     FormControl,
@@ -45,6 +46,7 @@ interface ServiceProps {
     bufferTime: number;
     minNotice: number;
     isActive: boolean;
+    customInputs?: any[];
 }
 
 interface ServiceFormProps {
@@ -60,6 +62,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
     const [isPending, startTransition] = useTransition();
 
     const onSubmit = (values: z.infer<typeof ServiceSchema>) => {
+        // ... (onSubmit logic unchanged)
         setError("");
 
         startTransition(() => {
@@ -121,7 +124,13 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
             capacity: service?.capacity || 1,
             bufferTime: service?.bufferTime || 0,
             minNotice: service?.minNotice || 60,
+            customInputs: (service?.customInputs as any[]) || [],
         },
+    });
+
+    const fieldsReturn = useFieldArray({
+        control: form.control,
+        name: "customInputs",
     });
 
 
@@ -318,6 +327,83 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         )}
                     />
                 </div>
+
+                {/* Custom Fields Section */}
+                <div className="space-y-4 border border-input/50 rounded-lg p-4 bg-muted/20">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <FormLabel className="text-base">Custom Questions</FormLabel>
+                            <FormDescription>Ask your clients additional questions when they book.</FormDescription>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                const { append } = fieldsReturn;
+                                append({ id: crypto.randomUUID(), label: "", type: "text", required: false, options: [] });
+                            }}
+                        >
+                            + Add Question
+                        </Button>
+                    </div>
+
+                    <div className="space-y-4 mt-4">
+                        {fieldsReturn.fields.map((fieldItem, index) => (
+                            <div key={fieldItem.id} className="grid grid-cols-12 gap-3 items-end border p-3 rounded-md bg-card shadow-sm">
+                                <FormItem className="col-span-4">
+                                    <FormLabel>Label</FormLabel>
+                                    <FormControl>
+                                        <Input {...form.register(`customInputs.${index}.label`)} placeholder="e.g. Phone Number" disabled={isPending} />
+                                    </FormControl>
+                                </FormItem>
+
+                                <FormItem className="col-span-3">
+                                    <FormLabel>Type</FormLabel>
+                                    {/* Using Controller or Register for Select is tricky, simplified select */}
+                                    <FormControl>
+                                        <select
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            {...form.register(`customInputs.${index}.type`)}
+                                            disabled={isPending}
+                                        >
+                                            <option value="text">Short Text</option>
+                                            <option value="textarea">Long Text</option>
+                                            <option value="checkbox">Checkbox (Yes/No)</option>
+                                            {/* <option value="select">Dropdown</option> */}
+                                        </select>
+                                    </FormControl>
+                                </FormItem>
+
+                                <FormItem className="col-span-3 flex flex-row items-center space-x-2 space-y-0 h-10">
+                                    <FormControl>
+                                        <input
+                                            type="checkbox"
+                                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                            {...form.register(`customInputs.${index}.required`)}
+                                            disabled={isPending}
+                                        />
+                                    </FormControl>
+                                    <FormLabel className="font-normal cursor-pointer">Required</FormLabel>
+                                </FormItem>
+
+                                <div className="col-span-2 flex justify-end">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-destructive"
+                                        onClick={() => fieldsReturn.remove(index)}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                                <FormMessage>{form.formState.errors.customInputs?.[index]?.label?.message}</FormMessage>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 <FormError message={error} />
 
                 <Button type="submit" disabled={isPending}>
