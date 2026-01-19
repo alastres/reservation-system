@@ -39,6 +39,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
         language: (user as any).language || "es",
         image: user.image || "",
         coverImage: (user as any).coverImage || "",
+        address: (user as any).address || "",
+        phone: (user as any).phone || "",
         notificationPreferences: {
             email: (user.notificationPreferences as any)?.email ?? true,
         }
@@ -54,6 +56,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
             language: (user as any).language || "es",
             image: user.image || "",
             coverImage: (user as any).coverImage || "",
+            address: (user as any).address || "",
+            phone: (user as any).phone || "",
             notificationPreferences: {
                 email: (user.notificationPreferences as any)?.email ?? true,
             }
@@ -231,6 +235,31 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                     disabled={isPending}
                 />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <Label htmlFor="phone">Default Phone (Internal Use)</Label>
+                    <Input
+                        id="phone"
+                        placeholder="+1 234 567 890"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        disabled={isPending}
+                    />
+                    <p className="text-xs text-muted-foreground">Used if you select "Phone Call" location.</p>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="address">Default Address</Label>
+                    <Input
+                        id="address"
+                        placeholder="123 Main St, City"
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        disabled={isPending}
+                    />
+                    <p className="text-xs text-muted-foreground">Used if you select "In Person" location.</p>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

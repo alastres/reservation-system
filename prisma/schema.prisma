@@ -27,6 +27,10 @@ model User {
   timeZone      String          @default("UTC")
   language      String          @default("es") // "es" or "en"
   
+  // Professional Details
+  address       String?
+  phone         String?
+  
   services      Service[]
   bookings      Booking[]       @relation("UserBookings") // Bookings made BY this user (as a client)
   
@@ -104,11 +108,24 @@ model Service {
   isRecurrenceEnabled      Boolean     @default(false)
   maxRecurrenceCount       Int?        @default(4)
 
+  // Location Logic
+  locationType LocationType @default(GOOGLE_MEET)
+  locationUrl  String?      // For static links vs dynamic
+  address      String?      // For IN_PERSON
+
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@unique([userId, url])
+}
+
+enum LocationType {
+  GOOGLE_MEET
+  ZOOM
+  PHONE
+  IN_PERSON
+  CUSTOM
 }
 
 model Booking {
@@ -121,12 +138,14 @@ model Booking {
   
   clientName  String
   clientEmail String
+  clientPhone String?  // Copied from form if LocationType == PHONE
   notes       String?
   answers     Json?    // { "Phone": "123-456" }
   recurrenceId String? // ID grouping recurring bookings
   
   // Integration
   googleEventId String? 
+  joinUrl       String? // Google Meet / Zoom link
   
   status      BookingStatus @default(CONFIRMED)
   

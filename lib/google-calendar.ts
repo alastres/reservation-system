@@ -54,7 +54,9 @@ export const createGoogleEvent = async (
         start: Date;
         end: Date;
         attendees?: string[];
-    }
+        location?: string;
+    },
+    options?: { withMeet?: boolean }
 ) => {
     console.log("[GoogleCalendar] Creating event for user:", userId);
     const calendar = await getGoogleCalendar(userId);
@@ -64,25 +66,35 @@ export const createGoogleEvent = async (
     }
 
     try {
+        const body: any = {
+            summary: event.summary,
+            description: event.description,
+            start: { dateTime: event.start.toISOString() },
+            end: { dateTime: event.end.toISOString() },
+            attendees: event.attendees?.map((email) => ({ email })),
+            location: event.location,
+        };
+
+        if (options?.withMeet) {
+            body.conferenceData = {
+                createRequest: {
+                    requestId: crypto.randomUUID(),
+                    conferenceSolutionKey: { type: "hangoutsMeet" },
+                },
+            };
+        }
+
         const res = await calendar.events.insert({
             calendarId: "primary",
-            conferenceDataVersion: 1,
-            requestBody: {
-                summary: event.summary,
-                description: event.description,
-                start: { dateTime: event.start.toISOString() },
-                end: { dateTime: event.end.toISOString() },
-                attendees: event.attendees?.map((email) => ({ email })),
-                conferenceData: {
-                    createRequest: {
-                        requestId: crypto.randomUUID(),
-                        conferenceSolutionKey: { type: "hangoutsMeet" },
-                    },
-                },
-            },
+            conferenceDataVersion: options?.withMeet ? 1 : 0,
+            requestBody: body,
         });
         console.log("[GoogleCalendar] Event created successfully:", res.data.id);
-        return res.data.id || null;
+
+        return {
+            id: res.data.id || null,
+            meetLink: res.data.hangoutLink || null
+        };
     } catch (error) {
         console.error("[GoogleCalendar] Error creating event:", error);
         return null;

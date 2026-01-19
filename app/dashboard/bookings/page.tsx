@@ -19,7 +19,16 @@ export default async function BookingsPage() {
                 },
             },
             include: {
-                service: true,
+                service: {
+                    include: {
+                        user: {
+                            select: {
+                                address: true,
+                                phone: true
+                            }
+                        }
+                    }
+                },
             },
             orderBy: {
                 startTime: "desc",

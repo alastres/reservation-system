@@ -156,3 +156,15 @@
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* Fix for React Phone Number Input in Dark Mode */
+.dark .PhoneInputCountrySelect {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.dark .PhoneInputCountrySelect option {
+  background-color: var(--card);
+  /* or black/dark grey */
+  color: var(--foreground);
+}

@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Phone } from "lucide-react";
 import { CancelBookingButton } from "./booking-action";
 import { RescheduleDialog } from "./reschedule-dialog"; // Import new dialog
 
@@ -31,11 +31,18 @@ type Booking = {
     endTime: Date;
     clientName: string;
     clientEmail: string;
+    clientPhone?: string | null;
     status: string;
     service: {
         id: string;
         title: string;
         color: string;
+        locationType?: string;
+        address?: string | null;
+        user?: {
+            address?: string | null;
+            phone?: string | null;
+        }
     };
 };
 
@@ -259,7 +266,42 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
                                             </Badge>
                                         </div>
                                         <h4 className="font-medium text-sm mb-1">{booking.clientName}</h4>
-                                        <p className="text-xs text-muted-foreground mb-2">{booking.service.title}</p>
+                                        <p className="text-xs text-muted-foreground mb-1">{booking.clientEmail}</p>
+
+                                        {/* Show phone separately ONLY if it's NOT a phone booking (e.g. In Person but has phone) */}
+                                        {booking.clientPhone && booking.service.locationType !== "PHONE" && (
+                                            <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                                                <Phone className="w-3 h-3" />
+                                                {booking.clientPhone}
+                                            </p>
+                                        )}
+
+                                        <div className="pt-2 mt-2 border-t border-border/50">
+                                            <p className="text-xs font-medium mb-1">{booking.service.title}</p>
+
+                                            {/* Condensed Location/Contact Display */}
+                                            <p className="text-xs text-muted-foreground flex items-start gap-1">
+                                                {booking.service.locationType === "PHONE" ? (
+                                                    <>
+                                                        <Phone className="w-3 h-3 mt-0.5 shrink-0" />
+                                                        <span>{booking.clientPhone || "No phone provided"}</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span className="shrink-0">📍</span>
+                                                        <span>
+                                                            {booking.service.locationType === "IN_PERSON"
+                                                                ? (booking.service.address || booking.service.user?.address || "In Person")
+                                                                : booking.service.locationType === "GOOGLE_MEET"
+                                                                    ? "Google Meet"
+                                                                    : "Online"
+                                                            }
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </p>
+                                        </div>
+
                                         {booking.status !== "CANCELLED" && (
                                             <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
                                                 <RescheduleDialog booking={booking as any} />

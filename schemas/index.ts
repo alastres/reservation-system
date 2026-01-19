@@ -26,7 +26,10 @@ export const ServiceSchema = z.object({
     description: z.string().optional(),
     duration: z.number().min(1, "Duration must be at least 1 minute"),
     price: z.number().min(0),
-    location: z.string().optional(),
+    locationType: z.enum(["GOOGLE_MEET", "ZOOM", "PHONE", "IN_PERSON", "CUSTOM"]).default("GOOGLE_MEET"),
+    locationUrl: z.string().optional(),
+    address: z.string().optional(),
+    location: z.string().optional(), // Keeping for backward compatibility or display
     url: z.string().min(1, {
         message: "URL slug is required"
     }).regex(/^[a-z0-9-]+$/, {
