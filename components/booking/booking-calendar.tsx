@@ -48,7 +48,8 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
             try {
                 const dateStr = format(date, "yyyy-MM-dd");
-                const res = await getSlotsAction(dateStr, service.id, "UTC"); // User timezone handling needed
+                const timeZone = user.timeZone || "UTC";
+                const res = await getSlotsAction(dateStr, service.id, timeZone);
                 if (res.slots) {
                     setSlots(res.slots);
                 }
@@ -58,7 +59,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
         };
 
         fetchSlots();
-    }, [date, service.id]);
+    }, [date, service.id, user.timeZone]);
 
     const handleSlotClick = (slot: string) => {
         setSelectedSlot(slot);
@@ -105,9 +106,11 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
         setBookingError("");
         const dateStr = format(date, "yyyy-MM-dd");
+        const timeZone = user.timeZone || "UTC";
+        const clientTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
         startBooking(() => {
-            createBooking(service.id, dateStr, selectedSlot, { name, email, clientPhone: clientPhone || undefined, notes, answers, recurrence })
+            createBooking(service.id, dateStr, selectedSlot, { name, email, clientPhone: clientPhone || undefined, notes, answers, recurrence }, timeZone, clientTimeZone)
                 .then((data) => {
                     if (data.error) setBookingError(data.error);
                     if (data.success) setBookingStage("SUCCESS");
@@ -227,9 +230,32 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
                         {bookingStage === "FORM" && (
                             <div className="max-w-md space-y-4 animate-in fade-in slide-in-from-right-4">
-                                <div className="mb-4 p-3 bg-muted/50 border rounded text-sm">
-                                    <span className="font-semibold text-gray-700">Selected Time:</span> {date && format(date, "MMM dd")} @ {selectedSlot}
-                                    <Button variant="link" size="sm" onClick={() => setBookingStage("SLOT")} className="ml-2 text-sky-600 p-0 h-auto">Change</Button>
+                                <div className="mb-4 p-3 bg-muted/50 border rounded text-sm space-y-2">
+                                    <div>
+                                        <span className="font-semibold text-gray-700">Selected Time:</span> {date && format(date, "MMM dd")} @ {selectedSlot}
+                                        <Button variant="link" size="sm" onClick={() => setBookingStage("SLOT")} className="ml-2 text-sky-600 p-0 h-auto">Change</Button>
+                                    </div>
+
+                                    {/* Time Zone Warning */}
+                                    {(() => {
+                                        const clientTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                                        const ownerTimeZone = user.timeZone || "UTC";
+
+                                        if (clientTimeZone !== ownerTimeZone) {
+                                            try {
+                                                const slotDate = new Date(`${format(date, "yyyy-MM-dd")}T${selectedSlot}:00`);
+                                                return (
+                                                    <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
+                                                        <p className="font-semibold">⚠️ Time Zone Difference</p>
+                                                        <p>The time you selected ({selectedSlot}) is in <strong>{ownerTimeZone}</strong>.</p>
+                                                        <p>Your current time zone is <strong>{clientTimeZone}</strong>.</p>
+                                                        <p>Please double check the time difference.</p>
+                                                    </div>
+                                                );
+                                            } catch (e) { return null; }
+                                        }
+                                        return null;
+                                    })()}
                                 </div>
 
                                 {/* Custom Fields */}
