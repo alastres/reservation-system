@@ -129,7 +129,10 @@ export const duplicateService = async (serviceId: string) => {
                 bufferTime: existingService.bufferTime,
                 minNotice: existingService.minNotice,
                 isActive: false, // Default to draft
-                userId: session.user.id
+                userId: session.user.id,
+                customInputs: existingService.customInputs ?? [],
+                isRecurrenceEnabled: existingService.isRecurrenceEnabled,
+                maxRecurrenceCount: existingService.maxRecurrenceCount
             },
             include: { user: { select: { username: true } } }
         });

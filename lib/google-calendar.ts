@@ -45,3 +45,39 @@ export const getBusyTimes = async (userId: string, start: Date, end: Date) => {
         return [];
     }
 };
+
+export const createGoogleEvent = async (
+    userId: string,
+    event: {
+        summary: string;
+        description?: string;
+        start: Date;
+        end: Date;
+        attendees?: string[];
+    }
+) => {
+    console.log("[GoogleCalendar] Creating event for user:", userId);
+    const calendar = await getGoogleCalendar(userId);
+    if (!calendar) {
+        console.log("[GoogleCalendar] No calendar instance found (missing credentials?)");
+        return null;
+    }
+
+    try {
+        const res = await calendar.events.insert({
+            calendarId: "primary",
+            requestBody: {
+                summary: event.summary,
+                description: event.description,
+                start: { dateTime: event.start.toISOString() },
+                end: { dateTime: event.end.toISOString() },
+                attendees: event.attendees?.map((email) => ({ email })),
+            },
+        });
+        console.log("[GoogleCalendar] Event created successfully:", res.data.id);
+        return res.data.id || null;
+    } catch (error) {
+        console.error("[GoogleCalendar] Error creating event:", error);
+        return null;
+    }
+};

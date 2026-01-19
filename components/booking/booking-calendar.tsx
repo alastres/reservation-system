@@ -237,21 +237,25 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                     <Textarea placeholder="Any specific topics?" value={notes} onChange={e => setNotes(e.target.value)} disabled={isBooking} />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label>Repeat Booking</Label>
-                                    <select
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        value={recurrence}
-                                        onChange={(e) => setRecurrence(e.target.value)}
-                                        disabled={isBooking}
-                                    >
-                                        <option value="none">Does not repeat</option>
-                                        <option value="weekly">Weekly (4 weeks)</option>
-                                        <option value="biweekly">Bi-weekly (2 months)</option>
-                                        <option value="monthly">Monthly (3 months)</option>
-                                    </select>
-                                    <p className="text-xs text-muted-foreground">This will book the same time slot for future dates.</p>
-                                </div>
+                                {service.isRecurrenceEnabled && (
+                                    <div className="space-y-2">
+                                        <Label>Repeat Booking</Label>
+                                        <select
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            value={recurrence}
+                                            onChange={(e) => setRecurrence(e.target.value)}
+                                            disabled={isBooking}
+                                        >
+                                            <option value="none">Does not repeat</option>
+                                            <option value="weekly">Weekly ({service.maxRecurrenceCount} weeks)</option>
+                                            <option value="biweekly">Bi-weekly ({service.maxRecurrenceCount * 2} weeks)</option>
+                                            <option value="monthly">Monthly ({service.maxRecurrenceCount} months)</option>
+                                        </select>
+                                        <p className="text-xs text-muted-foreground">
+                                            This will book {service.maxRecurrenceCount} occurrences in total including today.
+                                        </p>
+                                    </div>
+                                )}
 
                                 <FormError message={bookingError} />
 
