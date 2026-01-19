@@ -250,7 +250,8 @@ export const createBooking = async (
         clientData.name,
         service.title,
         dateStr,
-        time, // Todo: Mention recurrence in email
+        time,
+        service.userId, // Pass providerId for logging
         locationDetails
     );
 
@@ -329,7 +330,8 @@ export const cancelBooking = async (bookingId: string) => {
         booking.clientName,
         booking.service.title,
         format(booking.startTime, "yyyy-MM-dd"),
-        format(booking.startTime, "HH:mm")
+        format(booking.startTime, "HH:mm"),
+        booking.service.userId // Pass providerId for logging
     );
 
     revalidatePath("/dashboard/bookings");
@@ -418,6 +420,7 @@ export const rescheduleBooking = async (
         service.title,
         newDateStr,
         newTime,
+        service.userId,
         oldDateStr,
         oldTimeStr
     );
