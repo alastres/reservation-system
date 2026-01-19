@@ -5,7 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { getSlotsAction, createBooking } from "@/actions/booking";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,8 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [notes, setNotes] = useState("");
+    const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [recurrence, setRecurrence] = useState("none");
     const [isBooking, startBooking] = useTransition();
     const [bookingError, setBookingError] = useState("");
 
@@ -67,11 +69,21 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
             return;
         }
 
+        // Validate required custom inputs
+        if (service.customInputs) {
+            for (const field of (service.customInputs as any[])) {
+                if (field.required && !answers[field.label]) {
+                    setBookingError(`${field.label} is required`);
+                    return;
+                }
+            }
+        }
+
         setBookingError("");
         const dateStr = format(date, "yyyy-MM-dd");
 
         startBooking(() => {
-            createBooking(service.id, dateStr, selectedSlot, { name, email, notes })
+            createBooking(service.id, dateStr, selectedSlot, { name, email, notes, answers, recurrence })
                 .then((data) => {
                     if (data.error) setBookingError(data.error);
                     if (data.success) setBookingStage("SUCCESS");
@@ -81,16 +93,48 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
     if (bookingStage === "SUCCESS") {
         return (
-            <div className="flex flex-col items-center justify-center h-full space-y-4">
-                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <div className="h-6 w-6 text-green-600">✓</div>
+            <div className="flex flex-col items-center justify-center h-full animate-in fade-in zoom-in-95 duration-500">
+                <div className="mb-6 relative">
+                    <div className="absolute inset-0 bg-green-500 blur-xl opacity-20 animate-pulse rounded-full"></div>
+                    <div className="h-20 w-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30 ring-4 ring-green-500/20 z-10 relative">
+                        <Check className="h-10 w-10 text-white animate-in zoom-in spin-in-12 duration-700" strokeWidth={3} />
+                    </div>
                 </div>
-                <h2 className="text-xl font-bold">Booking Confirmed!</h2>
-                <p className="text-gray-500 text-center">
-                    You have booked {service.title} with {user.name} on {date ? format(date, "PPPP") : ""} at {selectedSlot}.
+
+                <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 mb-2">
+                    Booking Confirmed!
+                </h2>
+
+                <p className="text-muted-foreground text-center max-w-sm mb-8 text-lg">
+                    You're all set! We've reserved your spot.
                 </p>
-                <p className="text-sm text-gray-400">A confirmation email has been sent to {email}.</p>
-                <Button variant="outline" onClick={() => window.location.reload()}>Book Another</Button>
+
+                <div className="bg-muted/30 backdrop-blur-sm border border-border p-6 rounded-2xl w-full max-w-sm space-y-4 mb-8">
+                    <div className="flex justify-between items-center border-b border-border/50 pb-3">
+                        <span className="text-muted-foreground text-sm font-medium">Service</span>
+                        <span className="font-semibold text-foreground">{service.title}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-border/50 pb-3">
+                        <span className="text-muted-foreground text-sm font-medium">Date</span>
+                        <span className="font-semibold text-foreground">{date ? format(date, "MMM do, yyyy") : ""}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground text-sm font-medium">Time</span>
+                        <span className="font-semibold text-foreground">{selectedSlot}</span>
+                    </div>
+                </div>
+
+                <p className="text-sm text-muted-foreground/70 mb-6 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    Confirmation sent to {email}
+                </p>
+
+                <Button
+                    onClick={() => window.location.reload()}
+                    className="bg-foreground text-background hover:bg-foreground/90 font-semibold px-8 rounded-full shadow-lg"
+                >
+                    Book Another Appointment
+                </Button>
             </div>
         );
     }
@@ -114,14 +158,14 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
                 {loadingSlots ? (
                     <div className="flex items-center justify-center h-40">
-                        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
                 ) : (
                     <>
                         {bookingStage === "SLOT" && (
                             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                                 {slots.length === 0 ? (
-                                    <p className="col-span-full text-gray-500 text-center py-10">No slots available for this day.</p>
+                                    <p className="col-span-full text-muted-foreground text-center py-10">No slots available for this day.</p>
                                 ) : (
                                     slots.map((slot) => (
                                         <Button
@@ -139,22 +183,74 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
                         {bookingStage === "FORM" && (
                             <div className="max-w-md space-y-4 animate-in fade-in slide-in-from-right-4">
-                                <div className="mb-4 p-3 bg-slate-50 border rounded text-sm">
+                                <div className="mb-4 p-3 bg-muted/50 border rounded text-sm">
                                     <span className="font-semibold text-gray-700">Selected Time:</span> {date && format(date, "MMM dd")} @ {selectedSlot}
                                     <Button variant="link" size="sm" onClick={() => setBookingStage("SLOT")} className="ml-2 text-sky-600 p-0 h-auto">Change</Button>
                                 </div>
 
+                                {/* Custom Fields */}
+                                {service.customInputs && (service.customInputs as any[]).map((field: any) => (
+                                    <div key={field.id} className="space-y-2">
+                                        <Label>
+                                            {field.label}
+                                            {field.required && <span className="text-red-500 ml-1">*</span>}
+                                        </Label>
+                                        {field.type === "textarea" ? (
+                                            <Textarea
+                                                placeholder={field.label}
+                                                disabled={isBooking}
+                                                onChange={(e) => setAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
+                                            />
+                                        ) : field.type === "checkbox" ? (
+                                            <div className="flex items-center space-x-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id={field.id}
+                                                    disabled={isBooking}
+                                                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                                    onChange={(e) => setAnswers(prev => ({ ...prev, [field.label]: e.target.checked ? "Yes" : "No" }))}
+                                                />
+                                                <label htmlFor={field.id} className="text-sm text-gray-700">Yes</label>
+                                            </div>
+                                        ) : (
+                                            <Input
+                                                type={field.type}
+                                                placeholder={field.label}
+                                                disabled={isBooking}
+                                                onChange={(e) => setAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
+                                            />
+                                        )}
+                                    </div>
+                                ))}
+
+                                {/* Standard Fields */}
                                 <div className="space-y-2">
-                                    <Label>Your Name</Label>
+                                    <Label>Your Name <span className="text-red-500">*</span></Label>
                                     <Input placeholder="John Doe" value={name} onChange={e => setName(e.target.value)} disabled={isBooking} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Email Address</Label>
+                                    <Label>Email Address <span className="text-red-500">*</span></Label>
                                     <Input type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={isBooking} />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Additional Notes</Label>
                                     <Textarea placeholder="Any specific topics?" value={notes} onChange={e => setNotes(e.target.value)} disabled={isBooking} />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Repeat Booking</Label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        value={recurrence}
+                                        onChange={(e) => setRecurrence(e.target.value)}
+                                        disabled={isBooking}
+                                    >
+                                        <option value="none">Does not repeat</option>
+                                        <option value="weekly">Weekly (4 weeks)</option>
+                                        <option value="biweekly">Bi-weekly (2 months)</option>
+                                        <option value="monthly">Monthly (3 months)</option>
+                                    </select>
+                                    <p className="text-xs text-muted-foreground">This will book the same time slot for future dates.</p>
                                 </div>
 
                                 <FormError message={bookingError} />
@@ -171,6 +267,6 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                     </>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

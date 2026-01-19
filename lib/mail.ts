@@ -46,7 +46,8 @@ export const sendNewBookingNotification = async (
     clientName: string,
     serviceName: string,
     date: string,
-    time: string
+    time: string,
+    answers?: Record<string, string>
 ) => {
     const mailOptions = {
         from: process.env.EMAIL_FROM,
@@ -58,6 +59,13 @@ export const sendNewBookingNotification = async (
       <p><strong>Service:</strong> ${serviceName}</p>
       <p><strong>Date:</strong> ${date}</p>
       <p><strong>Time:</strong> ${time}</p>
+      
+      ${answers && Object.keys(answers).length > 0 ? `
+        <h3>Additional Information:</h3>
+        <ul>
+          ${Object.entries(answers).map(([key, value]) => `<li><strong>${key}:</strong> ${value}</li>`).join('')}
+        </ul>
+      ` : ''}
     `,
     };
 
@@ -133,3 +141,60 @@ export const sendVerificationEmail = async (
         console.log(error);
     }
 }
+
+export const sendRescheduledBookingNotification = async (
+    email: string,
+    name: string,
+    serviceName: string,
+    date: string,
+    time: string,
+    oldDate?: string,
+    oldTime?: string
+) => {
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: email,
+        subject: `Booking Rescheduled: ${serviceName}`,
+        html: `
+      <h1>Booking Update</h1>
+      <p>Hi ${name},</p>
+      <p>Your booking for <strong>${serviceName}</strong> has been rescheduled.</p>
+      ${oldDate && oldTime ? `<p style="color: gray; text-decoration: line-through;">Previous: ${oldDate} at ${oldTime}</p>` : ''}
+      <p><strong>New Date:</strong> ${date}</p>
+      <p><strong>New Time:</strong> ${time}</p>
+      <p>If this new time doesn't work for you, please contact us.</p>
+    `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error("Error sending reschedule email:", error);
+    }
+};
+
+export const sendCancellationNotification = async (
+    email: string,
+    name: string,
+    serviceName: string,
+    date: string,
+    time: string
+) => {
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: email,
+        subject: `Booking Cancelled: ${serviceName}`,
+        html: `
+      <h1>Booking Cancelled</h1>
+      <p>Hi ${name},</p>
+      <p>Your booking for <strong>${serviceName}</strong> on <strong>${date}</strong> at <strong>${time}</strong> has been cancelled.</p>
+      <p>If you did not request this cancellation, please contact us immediately.</p>
+    `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error("Error sending cancellation email:", error);
+    }
+};

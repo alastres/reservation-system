@@ -37,4 +37,11 @@ export const ServiceSchema = z.object({
     bufferTime: z.number().int().min(0).default(0),
     minNotice: z.number().int().min(0).default(60),
     isActive: z.boolean().default(true).optional(),
+    customInputs: z.array(z.object({
+        id: z.string(),
+        label: z.string().min(1, "Label is required"),
+        type: z.enum(["text", "textarea", "checkbox", "select"]),
+        required: z.boolean().default(false),
+        options: z.array(z.string()).optional()
+    })).optional().default([]),
 });
