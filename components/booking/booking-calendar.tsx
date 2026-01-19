@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 interface BookingCalendarProps {
     service: any;
@@ -27,6 +29,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
     // Booking Form
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [clientPhone, setClientPhone] = useState<string | undefined>("");
     const [notes, setNotes] = useState("");
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [recurrence, setRecurrence] = useState("none");
@@ -62,11 +65,32 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
         setBookingStage("FORM");
     };
 
+    const validateEmail = (email: string) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
+
     const handleConfirmBooking = () => {
         if (!date || !selectedSlot) return;
         if (!name || !email) {
             setBookingError("Name and Email are required");
             return;
+        }
+
+        if (!validateEmail(email)) {
+            setBookingError("Invalid email address format");
+            return;
+        }
+
+        // Validate Phone if required
+        if (service.locationType === "PHONE") {
+            if (!clientPhone) {
+                setBookingError("Phone number is required for this service");
+                return;
+            }
+            if (!isValidPhoneNumber(clientPhone)) {
+                setBookingError("Please enter a valid phone number");
+                return;
+            }
         }
 
         // Validate required custom inputs
@@ -83,7 +107,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
         const dateStr = format(date, "yyyy-MM-dd");
 
         startBooking(() => {
-            createBooking(service.id, dateStr, selectedSlot, { name, email, notes, answers, recurrence })
+            createBooking(service.id, dateStr, selectedSlot, { name, email, clientPhone: clientPhone || undefined, notes, answers, recurrence })
                 .then((data) => {
                     if (data.error) setBookingError(data.error);
                     if (data.success) setBookingStage("SUCCESS");
@@ -118,10 +142,30 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                         <span className="text-muted-foreground text-sm font-medium">Date</span>
                         <span className="font-semibold text-foreground">{date ? format(date, "MMM do, yyyy") : ""}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground text-sm font-medium">Time</span>
-                        <span className="font-semibold text-foreground">{selectedSlot}</span>
+                    <div className="flex justify-between items-center max-w-full">
+                        <span className="text-muted-foreground text-sm font-medium w-1/3">Time</span>
+                        <span className="font-semibold text-foreground w-2/3 text-right truncate">{selectedSlot}</span>
                     </div>
+                    {service.locationType === "GOOGLE_MEET" && (
+                        <div className="flex justify-between items-center pt-2 border-t border-border/50">
+                            <span className="text-muted-foreground text-sm font-medium">Location</span>
+                            <span className="font-semibold text-foreground flex items-center gap-1">
+                                Google Meet
+                            </span>
+                        </div>
+                    )}
+                    {service.locationType === "PHONE" && clientPhone && (
+                        <div className="flex justify-between items-center pt-2 border-t border-border/50">
+                            <span className="text-muted-foreground text-sm font-medium">Phone</span>
+                            <span className="font-semibold text-foreground">{clientPhone}</span>
+                        </div>
+                    )}
+                    {service.locationType === "IN_PERSON" && (
+                        <div className="flex justify-between items-center pt-2 border-t border-border/50">
+                            <span className="text-muted-foreground text-sm font-medium">Location</span>
+                            <span className="font-semibold text-foreground text-right">{service.address || user?.address || "TBD"}</span>
+                        </div>
+                    )}
                 </div>
 
                 <p className="text-sm text-muted-foreground/70 mb-6 flex items-center gap-2">
@@ -232,6 +276,22 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                     <Label>Email Address <span className="text-red-500">*</span></Label>
                                     <Input type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={isBooking} />
                                 </div>
+
+                                {service.locationType === "PHONE" && (
+                                    <div className="space-y-2">
+                                        <Label>Phone Number <span className="text-red-500">*</span></Label>
+                                        <PhoneInput
+                                            placeholder="Enter phone number"
+                                            value={clientPhone}
+                                            onChange={setClientPhone}
+                                            disabled={isBooking}
+                                            defaultCountry="US"
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        />
+                                        <p className="text-xs text-muted-foreground">The provider will call you at this number.</p>
+                                    </div>
+                                )}
+
                                 <div className="space-y-2">
                                     <Label>Additional Notes</Label>
                                     <Textarea placeholder="Any specific topics?" value={notes} onChange={e => setNotes(e.target.value)} disabled={isBooking} />

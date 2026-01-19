@@ -74,6 +74,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     (session.user as any).language = user.language;
                     (session.user as any).timeZone = user.timeZone;
                     (session.user as any).emailVerified = user.emailVerified;
+                    (session.user as any).address = user.address;
+                    (session.user as any).phone = user.phone;
                 }
             }
             return session;

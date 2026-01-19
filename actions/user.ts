@@ -13,6 +13,8 @@ const profileSchema = z.object({
     language: z.string().optional(),
     image: z.string().optional().or(z.literal("")),
     coverImage: z.string().optional().or(z.literal("")),
+    address: z.string().optional().or(z.literal("")),
+    phone: z.string().optional().or(z.literal("")),
     notificationPreferences: z.object({
         email: z.boolean().optional(),
         sms: z.boolean().optional(),
@@ -32,7 +34,7 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
         return { error: "Invalid input fields" };
     }
 
-    const { name, username, bio, timeZone, image, notificationPreferences } = validated.data;
+    const { name, username, bio, timeZone, image, address, phone, notificationPreferences } = validated.data;
 
     // Check username uniqueness if changing
     if (username) {
@@ -60,6 +62,8 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
                 language: validated.data.language || "es",
                 image,
                 coverImage: validated.data.coverImage,
+                address,
+                phone,
                 notificationPreferences: notificationPreferences || undefined,
             },
         });

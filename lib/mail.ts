@@ -16,7 +16,8 @@ export const sendBookingConfirmation = async (
     name: string,
     serviceName: string,
     date: string,
-    time: string
+    time: string,
+    locationDetails?: string
 ) => {
     const mailOptions = {
         from: process.env.EMAIL_FROM,
@@ -28,6 +29,7 @@ export const sendBookingConfirmation = async (
       <p>Your booking for <strong>${serviceName}</strong> has been confirmed.</p>
       <p><strong>Date:</strong> ${date}</p>
       <p><strong>Time:</strong> ${time}</p>
+      ${locationDetails ? `<p><strong>Location:</strong> ${locationDetails}</p>` : ''}
       <p>See you there!</p>
     `,
     };
@@ -47,7 +49,9 @@ export const sendNewBookingNotification = async (
     serviceName: string,
     date: string,
     time: string,
-    answers?: Record<string, string>
+    answers?: Record<string, string>,
+    clientPhone?: string,
+    locationDetails?: string
 ) => {
     const mailOptions = {
         from: process.env.EMAIL_FROM,
@@ -59,6 +63,8 @@ export const sendNewBookingNotification = async (
       <p><strong>Service:</strong> ${serviceName}</p>
       <p><strong>Date:</strong> ${date}</p>
       <p><strong>Time:</strong> ${time}</p>
+      ${locationDetails ? `<p><strong>Location:</strong> ${locationDetails}</p>` : ''}
+      ${clientPhone ? `<p><strong>Phone:</strong> ${clientPhone}</p>` : ''}
       
       ${answers && Object.keys(answers).length > 0 ? `
         <h3>Additional Information:</h3>

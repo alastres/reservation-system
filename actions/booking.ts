@@ -79,7 +79,7 @@ export const createBooking = async (
     serviceId: string,
     dateStr: string,
     time: string,
-    clientData: { name: string; email: string; notes?: string; answers?: Record<string, string>; recurrence?: string }
+    clientData: { name: string; email: string; clientPhone?: string; notes?: string; answers?: Record<string, string>; recurrence?: string }
 ) => {
     // 1. Verify existence
     const service = await prisma.service.findUnique({
@@ -152,6 +152,7 @@ export const createBooking = async (
                         endTime,
                         clientName: clientData.name,
                         clientEmail: clientData.email,
+                        clientPhone: clientData.clientPhone,
                         notes: clientData.notes,
                         answers: clientData.answers,
                         recurrenceId,
@@ -174,27 +175,33 @@ export const createBooking = async (
         const end = addMinutes(start, service.duration);
 
         let description = `Client: ${clientData.name}\nEmail: ${clientData.email}\nNotes: ${clientData.notes || "None"}`;
+
+        if (clientData.clientPhone) {
+            description += `\nPhone: ${clientData.clientPhone}`;
+        }
+
         if (clientData.answers) {
             description += "\n\nAnswers:\n" + Object.entries(clientData.answers).map(([q, a]) => `- ${q}: ${a}`).join("\n");
         }
 
-        const eventId = await createGoogleEvent(service.userId, {
+        // Determine Final Address (Service specific OR Profile default)
+        const finalAddress = service.locationType === "IN_PERSON"
+            ? (service.address || service.user.address)
+            : undefined;
+
+        const eventResult = await createGoogleEvent(service.userId, {
             summary: `Booking: ${service.title} with ${clientData.name}`,
             description,
             start,
             end,
-            attendees: [clientData.email]
+            attendees: [clientData.email],
+            location: finalAddress || undefined
+        }, {
+            withMeet: service.locationType === "GOOGLE_MEET"
         });
 
-        if (eventId) {
+        if (eventResult && typeof eventResult === 'object') {
             // Find the specific booking for this date interval
-            // Note: Since we have recurrence, we need to match the correct one.
-            // Using a precise finder or storing the IDs during creation would be better.
-            // For now, we update the one we just created in this request context.
-            // A safer approach: Return the created booking objects from transaction, verify which match the date.
-
-            // Re-fetch to find the booking ID matching this start time and service
-            // This is a bit inefficient but safe for this MVP loop
             const createdBooking = await prisma.booking.findFirst({
                 where: {
                     serviceId: service.id,
@@ -207,10 +214,34 @@ export const createBooking = async (
             if (createdBooking) {
                 await prisma.booking.update({
                     where: { id: createdBooking.id },
-                    data: { googleEventId: eventId }
+                    data: {
+                        googleEventId: eventResult.id,
+                        joinUrl: eventResult.meetLink // Will be null if not generated
+                    }
                 });
             }
         }
+    }
+
+    // Determine Location Details for Email
+    let locationDetails = "";
+    const finalAddress = service.address || service.user.address; // Re-calculate or reuse if scope allows
+
+    switch (service.locationType) {
+        case "GOOGLE_MEET":
+            locationDetails = "Google Meet (Link in Calendar)";
+            break;
+        case "PHONE":
+            locationDetails = clientData.clientPhone
+                ? `Phone Call (Provider will call you at ${clientData.clientPhone})`
+                : "Phone Call";
+            break;
+        case "IN_PERSON":
+            locationDetails = finalAddress ? `In Person at ${finalAddress}` : "In Person";
+            break;
+        case "CUSTOM":
+            locationDetails = service.locationUrl ? `Link: ${service.locationUrl}` : "Online";
+            break;
     }
 
     // Send Email to Client (Summary)
@@ -219,11 +250,11 @@ export const createBooking = async (
         clientData.name,
         service.title,
         dateStr,
-        time // Todo: Mention recurrence in email
+        time, // Todo: Mention recurrence in email
+        locationDetails
     );
 
     // Send Notification to Provider (Summary)
-    // ... (logic remains similar, maybe mention recurrence)
     try {
         interface NotificationPreferences {
             email?: boolean;
@@ -241,7 +272,9 @@ export const createBooking = async (
                 service.title,
                 dateStr,
                 time,
-                clientData.answers
+                clientData.answers,
+                clientData.clientPhone, // Pass phone number
+                locationDetails // Pass location details
             );
         }
     } catch (emailError: unknown) {

@@ -119,7 +119,9 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
             description: service?.description || "",
             duration: service?.duration || 30,
             price: service?.price || 0,
-            location: service?.location || "",
+            locationType: (service as any)?.locationType || "GOOGLE_MEET",
+            address: (service as any)?.address || (user as any)?.address || "",
+            locationUrl: (service as any)?.locationUrl || "",
             url: service?.url || "",
             isActive: service?.isActive ?? true,
             color: service?.color || "#6366f1",
@@ -137,7 +139,19 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
         name: "customInputs",
     });
 
+    // Auto-fill address from profile if empty when switching to IN_PERSON
+    const locationType = form.watch("locationType");
+    const currentAddress = form.watch("address");
 
+    // We need useEffect to react to locationType changes
+    // But be careful not to overwrite if user typed something
+    // Only set if address is empty and we have a user address
+
+    // Actually, react-hook-form defaultValues logic is better for initial load.
+    // For runtime switching, we can use an effect.
+
+    // Note: user object might need casting if types aren't updated yet globally
+    const userAddress = (user as any)?.address;
 
     return (
         <Form {...form}>
@@ -289,7 +303,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                     />
                     <FormField
                         control={form.control}
-                        name="location"
+                        name="locationType"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Location</FormLabel>
@@ -300,17 +314,56 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="Google Meet">Google Meet</SelectItem>
-                                        <SelectItem value="Zoom">Zoom</SelectItem>
-                                        <SelectItem value="Phone Call">Phone Call</SelectItem>
-                                        <SelectItem value="In Person">In Person</SelectItem>
-                                        <SelectItem value="Custom Link">Custom Link</SelectItem>
+                                        <SelectItem value="GOOGLE_MEET">Google Meet</SelectItem>
+                                        <SelectItem value="PHONE">Phone Call</SelectItem>
+                                        <SelectItem value="IN_PERSON">In Person</SelectItem>
+                                        <SelectItem value="CUSTOM">Custom Link</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <FormDescription>
+                                    {field.value === "GOOGLE_MEET" && "A Meet link will be generated automatically."}
+                                    {field.value === "PHONE" && "Client will be required to provide their phone number."}
+                                    {field.value === "IN_PERSON" && "You must provide an address below."}
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
+
+                    {form.watch("locationType") === "IN_PERSON" && (
+                        <FormField
+                            control={form.control}
+                            name="address"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Address</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} disabled={isPending} placeholder="123 Main St, City" />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Leave empty to use your Default Profile Address.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
+
+                    {form.watch("locationType") === "CUSTOM" && (
+                        <FormField
+                            control={form.control}
+                            name="locationUrl"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Meeting URL</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} disabled={isPending} placeholder="https://..." />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
                     <FormField
                         control={form.control}
                         name="isActive"
