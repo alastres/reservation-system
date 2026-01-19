@@ -11,7 +11,9 @@ export default {
             allowDangerousEmailAccountLinking: true,
             authorization: {
                 params: {
-                    scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events"
+                    scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events",
+                    access_type: "offline",
+                    prompt: "consent",
                 }
             }
         }),

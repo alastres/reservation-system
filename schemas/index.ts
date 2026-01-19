@@ -44,4 +44,6 @@ export const ServiceSchema = z.object({
         required: z.boolean().default(false),
         options: z.array(z.string()).optional()
     })).optional().default([]),
+    isRecurrenceEnabled: z.boolean().default(false),
+    maxRecurrenceCount: z.number().int().min(1).default(4),
 });

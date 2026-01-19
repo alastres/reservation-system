@@ -101,6 +101,8 @@ model Service {
   
   // Custom Form Fields
   customInputs Json?   // [{ label: "Phone", type: "text", required: true }]
+  isRecurrenceEnabled      Boolean     @default(false)
+  maxRecurrenceCount       Int?        @default(4)
 
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
