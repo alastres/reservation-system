@@ -10,6 +10,7 @@ import {
     Video,
     Clock,
     Briefcase,
+    Users,
     Bug,
     ShieldCheck
 } from "lucide-react";
@@ -41,6 +42,12 @@ const routes = [
         label: "Bookings",
         icon: Calendar,
         href: "/dashboard/bookings",
+        color: "text-primary",
+    },
+    {
+        label: "Clients",
+        icon: Users,
+        href: "/dashboard/clients",
         color: "text-primary",
     },
     {
