@@ -3,6 +3,10 @@ import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { Plus_Jakarta_Sans } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const font = Plus_Jakarta_Sans({ weight: "600", subsets: ["latin"] });
 
 const DashboardLayout = async ({
     children
@@ -30,7 +34,14 @@ const DashboardLayout = async ({
             </div>
             <div className="md:hidden flex items-center p-4 border-b">
                 <MobileNav role={(user as any).role} />
-                <div className="ml-4 font-semibold">Scheduler</div>
+                <div className="flex items-center ml-4">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold mr-2 shadow-lg shadow-primary/25">
+                        S
+                    </div>
+                    <h1 className={cn("text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400", font.className)}>
+                        Scheduler
+                    </h1>
+                </div>
             </div>
             <main className="md:pl-72 h-full">
                 {children}
