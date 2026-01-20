@@ -294,3 +294,31 @@ export const sendBookingReminder = async (
         await logNotification(providerId, `REMINDER_${type.toUpperCase()}`, "FAILED", { error: String(error), bookingId });
     }
 };
+
+export const sendOtpEmail = async (
+    email: string,
+    token: string,
+) => {
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: email,
+        subject: "Your Confirmation Code",
+        html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+            <h1 style="color: #4f46e5;">Confirm your Booking</h1>
+            <p>Use the following code to verify your identity and confirm your booking:</p>
+            <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; display: inline-block; margin: 10px 0;">
+                <h2 style="margin: 0; letter-spacing: 5px; color: #111827; font-size: 24px;">${token}</h2>
+            </div>
+            <p style="color: #6b7280; font-size: 14px;">This code will expire in 15 minutes.</p>
+            <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">If you didn't request this code, you can safely ignore this email.</p>
+        </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.log("Error sending OTP:", error);
+    }
+}

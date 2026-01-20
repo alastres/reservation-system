@@ -149,6 +149,22 @@ export const createBooking = async (
         }
     }
 
+    // 3.5 Find User by Email to link booking
+    const existingUser = await prisma.user.findUnique({
+        where: { email: clientData.email }
+    });
+
+    // 3.6 Update User Name if it differs (and user is a Client/Owner who hasn't set a profile name explicitly? 
+    // Actually, for better UX, if I book as "John" but my registered name is "J", updating it seems nice.
+    // But we should probably only do this if the existing name is essentially empty or default.
+    // Or just always update it as requested by the user: "si el nombre que puso es diferente ... lo actualize"
+    if (existingUser && clientData.name && existingUser.name !== clientData.name) {
+        await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { name: clientData.name }
+        });
+    }
+
     // 4. Create All Bookings
     try {
         await prisma.$transaction(
@@ -169,6 +185,7 @@ export const createBooking = async (
                         recurrenceId,
                         clientTimeZone,
                         status: "CONFIRMED",
+                        userId: existingUser?.id, // Link to user if found
                     }
                 });
             })

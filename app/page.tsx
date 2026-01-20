@@ -3,9 +3,14 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Calendar, CheckCircle, Smartphone } from "lucide-react";
+import { ArrowRight, Calendar, CheckCircle, Smartphone, LogOut } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 export default function Home() {
+  const { data: session } = useSession();
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden selection:bg-primary/20">
 
@@ -27,12 +32,40 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" asChild>
-              <Link href="/auth/login">Log in</Link>
-            </Button>
-            <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/25" asChild>
-              <Link href="/auth/register">Get Started</Link>
-            </Button>
+            {session?.user ? (
+              <div className="flex items-center gap-4 animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-9 w-9 ring-2 ring-primary/20">
+                    <AvatarImage src={session.user.image || ""} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                      {session.user.name?.[0]?.toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden md:block">
+                    <p className="text-sm font-medium text-foreground leading-none">{session.user.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{session.user.email}</p>
+                  </div>
+                </div>
+                {/* Only show Dashboard link if NOT a client */}
+                {(session.user as any).role !== "CLIENT" && (
+                  <Button variant="outline" size="sm" asChild className="hidden sm:flex border-white/10">
+                    <Link href="/dashboard">Dashboard</Link>
+                  </Button>
+                )}
+                <LogoutButton variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400">
+                  <LogOut className="h-4 w-4" />
+                </LogoutButton>
+              </div>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href="/auth/login">Log in</Link>
+                </Button>
+                <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/25" asChild>
+                  <Link href="/auth/register">Get Started</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </nav>
