@@ -1,8 +1,6 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-
-
 }
 
 generator client {
@@ -10,38 +8,59 @@ generator client {
 }
 
 model User {
-  id            String          @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String          @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
   coverImage    String?
   password      String?
-  
-  accounts      Account[]
-  sessions      Session[]
-  
+
+  accounts Account[]
+  sessions Session[]
+
   // App specific
-  username      String?         @unique
-  bio           String?
-  timeZone      String          @default("UTC")
-  language      String          @default("es") // "es" or "en"
-  
+  username String? @unique
+  bio      String?
+  timeZone String  @default("UTC")
+  language String  @default("es") // "es" or "en"
+
   // Professional Details
-  address       String?
-  phone         String?
-  
-  services      Service[]
-  bookings      Booking[]       @relation("UserBookings") // Bookings made BY this user (as a client)
-  
-  availability  AvailabilityRule[]
-  exceptions    AvailabilityException[]
-  
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  
+  address String?
+  phone   String?
+
+  services Service[]
+  bookings Booking[] @relation("UserBookings") // Bookings made BY this user (as a client)
+
+  availability AvailabilityRule[]
+  exceptions   AvailabilityException[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   notificationPreferences Json? // { email: boolean, sms: boolean, etc }
-  notificationLogs NotificationLog[]
+  notificationLogs        NotificationLog[]
+
+  role      Role        @default(CLIENT)
+  SystemLog SystemLog[]
+}
+
+enum Role {
+  ADMIN
+  OWNER
+  CLIENT
+}
+
+model SystemLog {
+  id     String  @id @default(cuid())
+  userId String? // Optional, system actions might not have user
+  user   User?   @relation(fields: [userId], references: [id])
+
+  action  String // "VIEW_LOGS", "DELETE_USER", etc.
+  details Json?
+  ip      String?
+
+  createdAt DateTime @default(now())
 }
 
 model Account {
@@ -56,12 +75,12 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([provider, providerAccountId])
 }
 
@@ -70,7 +89,7 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -79,43 +98,43 @@ model VerificationToken {
   identifier String
   token      String
   expires    DateTime
- 
+
   @@id([identifier, token])
 }
 
 model Service {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
   description String?
-  duration    Int      // in minutes
-  price       Float    @default(0)
-  location    String?  // e.g. "Zoom", "Google Meet"
-  url         String   // slug for public url
-  
+  duration    Int // in minutes
+  price       Float   @default(0)
+  location    String? // e.g. "Zoom", "Google Meet"
+  url         String // slug for public url
+
   // Customization
-  color       String   @default("#6366f1") // Violet-500 default
-  capacity    Int      @default(1)    // 1 for 1-on-1, >1 for groups
-  bufferTime  Int      @default(0)    // Minutes after appointment
-  minNotice   Int      @default(60)   // Minutes before booking allowed
-  
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  bookings    Booking[]
-  
+  color      String @default("#6366f1") // Violet-500 default
+  capacity   Int    @default(1) // 1 for 1-on-1, >1 for groups
+  bufferTime Int    @default(0) // Minutes after appointment
+  minNotice  Int    @default(60) // Minutes before booking allowed
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bookings Booking[]
+
   // Custom Form Fields
-  customInputs Json?   // [{ label: "Phone", type: "text", required: true }]
-  isRecurrenceEnabled      Boolean     @default(false)
-  maxRecurrenceCount       Int?        @default(4)
+  customInputs        Json? // [{ label: "Phone", type: "text", required: true }]
+  isRecurrenceEnabled Boolean @default(false)
+  maxRecurrenceCount  Int?    @default(4)
 
   // Location Logic
   locationType LocationType @default(GOOGLE_MEET)
-  locationUrl  String?      // For static links vs dynamic
-  address      String?      // For IN_PERSON
+  locationUrl  String? // For static links vs dynamic
+  address      String? // For IN_PERSON
 
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, url])
 }
@@ -129,33 +148,33 @@ enum LocationType {
 }
 
 model Booking {
-  id          String   @id @default(cuid())
-  startTime   DateTime
-  endTime     DateTime
-  
-  serviceId   String
-  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  
-  clientName  String
-  clientEmail String
-  clientPhone String?  // Copied from form if LocationType == PHONE
+  id        String   @id @default(cuid())
+  startTime DateTime
+  endTime   DateTime
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+
+  clientName     String
+  clientEmail    String
+  clientPhone    String? // Copied from form if LocationType == PHONE
   clientTimeZone String? // Stores the client's browser timezone
-  notes       String?
-  answers     Json?    // { "Phone": "123-456" }
-  recurrenceId String? // ID grouping recurring bookings
-  
+  notes          String?
+  answers        Json? // { "Phone": "123-456" }
+  recurrenceId   String? // ID grouping recurring bookings
+
   // Integration
-  googleEventId String? 
+  googleEventId String?
   joinUrl       String? // Google Meet / Zoom link
-  
-  status      BookingStatus @default(CONFIRMED)
-  
+
+  status BookingStatus @default(CONFIRMED)
+
   // If the booker is a registered user
-  userId      String? 
-  user        User?    @relation("UserBookings", fields: [userId], references: [id])
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  userId String?
+  user   User?   @relation("UserBookings", fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum BookingStatus {
@@ -165,41 +184,41 @@ enum BookingStatus {
 }
 
 model AvailabilityRule {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  dayOfWeek Int      // 0 = Sunday, 1 = Monday...
-  startTime String   // "09:00"
-  endTime   String   // "17:00"
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  dayOfWeek Int // 0 = Sunday, 1 = Monday...
+  startTime String // "09:00"
+  endTime   String // "17:00"
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model AvailabilityException {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  date      DateTime @db.Date // Specific date
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date DateTime @db.Date // Specific date
+
   isAvailable Boolean @default(true) // If true, use start/endTime to OVERRIDE. If false, blocked.
-  startTime   String? 
-  endTime     String? 
-  
+  startTime   String?
+  endTime     String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model NotificationLog {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type      String   // "BOOKING_CONFIRMATION", "REMINDER_24H", etc
-  status    String   // "SENT", "FAILED"
-  metadata  Json?    // Any extra info
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type     String // "BOOKING_CONFIRMATION", "REMINDER_24H", etc
+  status   String // "SENT", "FAILED"
+  metadata Json? // Any extra info
+
   createdAt DateTime @default(now())
 }
