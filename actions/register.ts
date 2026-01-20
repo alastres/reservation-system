@@ -26,11 +26,17 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
 
     // Generate username from email + random suffix
     const username = email.split("@")[0] + "-" + Math.floor(Math.random() * 10000);
+
+    // Initial Admin Check: If no users exist, the first one becomes ADMIN
+    const userCount = await prisma.user.count();
+    const role = userCount === 0 ? "ADMIN" : "OWNER";
+
     await prisma.user.create({
         data: {
             name,
             email,
             password: hashedPassword,
+            role: role as any,
         },
     });
 

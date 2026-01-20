@@ -75,7 +75,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     (session.user as any).timeZone = user.timeZone;
                     (session.user as any).emailVerified = user.emailVerified;
                     (session.user as any).address = user.address;
+                    (session.user as any).address = user.address;
                     (session.user as any).phone = user.phone;
+                    (session.user as any).role = user.role;
                 }
             }
             return session;
@@ -87,6 +89,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 where: { id: user.id },
                 data: { emailVerified: new Date() }
             })
+        },
+        async createUser({ user }) {
+            const userCount = await prisma.user.count();
+            if (userCount === 1) {
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { role: "ADMIN" }
+                });
+            }
         }
     }
 })
