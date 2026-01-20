@@ -22,6 +22,9 @@ import { useState } from "react";
 
 import { TimezoneSelect } from "@/components/ui/timezone-select";
 
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
+
 interface ProfileFormProps {
     user: User;
 }
@@ -239,15 +242,16 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="phone">Default Phone (Internal Use)</Label>
-                    <Input
-                        id="phone"
-                        placeholder="+1 234 567 890"
+                    <Label htmlFor="phone">WhatsApp Number</Label>
+                    <PhoneInput
+                        placeholder="Enter phone number"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(val: string | undefined) => setFormData({ ...formData, phone: val || "" })}
                         disabled={isPending}
+                        defaultCountry="ES"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
-                    <p className="text-xs text-muted-foreground">Used if you select "Phone Call" location.</p>
+                    <p className="text-xs text-muted-foreground">Used for "Phone Call" location & public profile.</p>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="address">Default Address</Label>
