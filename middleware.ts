@@ -19,6 +19,7 @@ export default auth((req) => {
     const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
     const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
     const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+    const isDashboardRoute = nextUrl.pathname.startsWith("/dashboard");
 
     if (isApiAuthRoute) {
         return undefined;
@@ -31,7 +32,12 @@ export default auth((req) => {
         return undefined; // Allow access to auth pages if not logged in
     }
 
-    if (!isLoggedIn && !isPublicRoute) {
+    // Only protect dashboard routes
+    // This allows public access to:
+    // - Landing page (/)
+    // - Public profiles (/[username])
+    // - Service pages (/[username]/[service])
+    if (!isLoggedIn && isDashboardRoute) {
         let callbackUrl = nextUrl.pathname;
         if (nextUrl.search) {
             callbackUrl += nextUrl.search;
@@ -41,11 +47,6 @@ export default auth((req) => {
 
         return Response.redirect(new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
     }
-
-    // Protect routes requiring verification: MOVED TO SERVER SIDE (Layout)
-    // if (isLoggedIn && !isVerified && !isPublicRoute) {
-    //     return Response.redirect(new URL("/auth/new-verification", nextUrl));
-    // }
 
     return undefined; // Allow access
 })
