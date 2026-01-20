@@ -32,12 +32,12 @@ export default auth((req) => {
         return undefined; // Allow access to auth pages if not logged in
     }
 
-    // Only protect dashboard routes
+    // Only protect dashboard and admin routes
     // This allows public access to:
     // - Landing page (/)
     // - Public profiles (/[username])
     // - Service pages (/[username]/[service])
-    if (!isLoggedIn && isDashboardRoute) {
+    if (!isLoggedIn && (isDashboardRoute || nextUrl.pathname.startsWith("/admin"))) {
         let callbackUrl = nextUrl.pathname;
         if (nextUrl.search) {
             callbackUrl += nextUrl.search;

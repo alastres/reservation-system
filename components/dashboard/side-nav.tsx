@@ -10,7 +10,8 @@ import {
     Video,
     Clock,
     Briefcase,
-    Bug
+    Bug,
+    ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserButton } from "@/components/auth/user-button";
@@ -54,10 +55,27 @@ const routes = [
         href: "/dashboard/settings",
         color: "text-muted-foreground",
     },
+    {
+        label: "Admin Panel",
+        icon: ShieldCheck,
+        href: "/admin",
+        color: "text-rose-500",
+    },
 ];
 
-export const SideNav = () => {
+interface SideNavProps {
+    role?: string;
+}
+
+export const SideNav = ({ role }: SideNavProps) => {
     const pathname = usePathname();
+
+    const filteredRoutes = routes.filter(route => {
+        if (route.href === "/dashboard/logs" || route.href === "/admin") {
+            return role === "ADMIN";
+        }
+        return true;
+    });
 
     return (
         <div className="space-y-4 py-4 flex flex-col h-full bg-background/50 backdrop-blur-xl border-r border-white/5 text-card-foreground">
@@ -71,7 +89,7 @@ export const SideNav = () => {
                     </h1>
                 </Link>
                 <div className="space-y-1">
-                    {routes.map((route) => (
+                    {filteredRoutes.map((route) => (
                         <Link
                             key={route.href}
                             href={route.href}

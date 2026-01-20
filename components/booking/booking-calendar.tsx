@@ -12,7 +12,11 @@ import { Label } from "@/components/ui/label";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { useSession, signIn } from "next-auth/react";
+import { FcGoogle } from "react-icons/fc";
+import Link from "next/link";
 
 interface BookingCalendarProps {
     service: any;
@@ -24,7 +28,10 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
     const [slots, setSlots] = useState<string[]>([]);
     const [loadingSlots, setLoadingSlots] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-    const [bookingStage, setBookingStage] = useState<"SLOT" | "FORM" | "SUCCESS">("SLOT");
+    const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+    const [bookingStage, setBookingStage] = useState<"SLOT" | "AUTH" | "FORM" | "SUCCESS">("SLOT");
+
+    const { data: session } = useSession();
 
     // Booking Form
     const [name, setName] = useState("");
@@ -63,7 +70,11 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
     const handleSlotClick = (slot: string) => {
         setSelectedSlot(slot);
-        setBookingStage("FORM");
+        if (!session) {
+            setBookingStage("AUTH");
+        } else {
+            setBookingStage("FORM");
+        }
     };
 
     const validateEmail = (email: string) => {
@@ -117,6 +128,14 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                 });
         });
     };
+
+    // Auto-fill form if session exists
+    useEffect(() => {
+        if (session?.user) {
+            setName(session.user.name || "");
+            setEmail(session.user.email || "");
+        }
+    }, [session]);
 
     if (bookingStage === "SUCCESS") {
         return (
@@ -225,6 +244,51 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                         </Button>
                                     ))
                                 )}
+                            </div>
+                        )}
+
+
+
+                        {bookingStage === "AUTH" && (
+                            <div className="max-w-md space-y-6 animate-in fade-in slide-in-from-right-4 bg-slate-900/50 p-6 rounded-xl border border-white/10">
+                                <div className="text-center space-y-2">
+                                    <h3 className="text-xl font-semibold text-white">Sign in to book</h3>
+                                    <p className="text-sm text-slate-400">
+                                        Please sign in or create an account to secure your appointment.
+                                    </p>
+                                </div>
+
+                                <Button
+                                    size="lg"
+                                    className="w-full bg-white text-slate-900 hover:bg-slate-100 font-semibold"
+                                    onClick={() => signIn("google", { callbackUrl: window.location.href })}
+                                >
+                                    <FcGoogle className="h-5 w-5 mr-2" />
+                                    Continue with Google
+                                </Button>
+
+                                <div className="relative">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <span className="w-full border-t border-slate-700" />
+                                    </div>
+                                    <div className="relative flex justify-center text-xs uppercase">
+                                        <span className="bg-slate-900 px-2 text-slate-500">Or using email</span>
+                                    </div>
+                                </div>
+
+                                <Button
+                                    variant="outline"
+                                    className="w-full border-slate-700 hover:bg-slate-800 text-slate-300"
+                                    asChild
+                                >
+                                    <Link href={`/auth/login?callbackUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}>
+                                        Sign in with Password
+                                    </Link>
+                                </Button>
+
+                                <Button variant="ghost" onClick={() => setBookingStage("SLOT")} className="w-full text-slate-500">
+                                    Back to selection
+                                </Button>
                             </div>
                         )}
 

@@ -15,9 +15,18 @@ interface LogsPageProps {
     };
 }
 
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { LogsClientWrapper } from "@/components/logs/logs-client-wrapper";
 
 export default async function LogsPage(props: LogsPageProps) {
+    const session = await auth();
+
+    // Strict RBAC: Only ADMIN can access
+    if (session?.user?.role !== "ADMIN") {
+        redirect("/dashboard");
+    }
+
     const searchParams = await props.searchParams;
     const page = Number(searchParams?.page) || 1;
     const filter = (searchParams?.filter as LogFilter) || "ALL";

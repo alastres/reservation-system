@@ -6,7 +6,11 @@ import { Menu } from "lucide-react";
 import { SideNav } from "./side-nav";
 import { useState } from "react";
 
-export function MobileNav() {
+interface MobileNavProps {
+    role?: string;
+}
+
+export function MobileNav({ role }: MobileNavProps) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -20,7 +24,7 @@ export function MobileNav() {
                 <SheetHeader>
                     <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                 </SheetHeader>
-                <SideNav />
+                <SideNav role={role} />
             </SheetContent>
         </Sheet>
     );
