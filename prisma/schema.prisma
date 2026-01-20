@@ -41,7 +41,7 @@ model User {
   notificationPreferences Json? // { email: boolean, sms: boolean, etc }
   notificationLogs        NotificationLog[]
 
-  role      Role        @default(CLIENT)
+  role      Role        @default(OWNER)
   SystemLog SystemLog[]
 }
 
@@ -54,7 +54,7 @@ enum Role {
 model SystemLog {
   id     String  @id @default(cuid())
   userId String? // Optional, system actions might not have user
-  user   User?   @relation(fields: [userId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   action  String // "VIEW_LOGS", "DELETE_USER", etc.
   details Json?
@@ -141,7 +141,6 @@ model Service {
 
 enum LocationType {
   GOOGLE_MEET
-  ZOOM
   PHONE
   IN_PERSON
   CUSTOM
@@ -153,7 +152,7 @@ model Booking {
   endTime   DateTime
 
   serviceId String
-  service   Service @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   clientName     String
   clientEmail    String
@@ -171,7 +170,7 @@ model Booking {
 
   // If the booker is a registered user
   userId String?
-  user   User?   @relation("UserBookings", fields: [userId], references: [id])
+  user   User?   @relation("UserBookings", fields: [userId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

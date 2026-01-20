@@ -46,6 +46,7 @@ export default {
                 session.user.id = token.sub;
                 // Pass emailVerified from token to session (for middleware)
                 (session.user as any).emailVerified = token.emailVerified;
+                (session.user as any).role = token.role;
             }
             return session;
         },

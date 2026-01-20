@@ -12,11 +12,11 @@ import { Label } from "@/components/ui/label";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
-import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { useSession, signIn } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
+import { ClientAuthDialog } from "@/components/auth/client-auth-dialog";
 
 interface BookingCalendarProps {
     service: any;
@@ -28,7 +28,6 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
     const [slots, setSlots] = useState<string[]>([]);
     const [loadingSlots, setLoadingSlots] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-    const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
     const [bookingStage, setBookingStage] = useState<"SLOT" | "AUTH" | "FORM" | "SUCCESS">("SLOT");
 
     const { data: session } = useSession();
@@ -36,6 +35,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
     // Booking Form
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [isEmailVerified, setIsEmailVerified] = useState(false);
     const [clientPhone, setClientPhone] = useState<string | undefined>("");
     const [notes, setNotes] = useState("");
     const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -134,6 +134,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
         if (session?.user) {
             setName(session.user.name || "");
             setEmail(session.user.email || "");
+            setIsEmailVerified(true);
         }
     }, [session]);
 
@@ -250,45 +251,15 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
 
                         {bookingStage === "AUTH" && (
-                            <div className="max-w-md space-y-6 animate-in fade-in slide-in-from-right-4 bg-slate-900/50 p-6 rounded-xl border border-white/10">
-                                <div className="text-center space-y-2">
-                                    <h3 className="text-xl font-semibold text-white">Sign in to book</h3>
-                                    <p className="text-sm text-slate-400">
-                                        Please sign in or create an account to secure your appointment.
-                                    </p>
-                                </div>
-
-                                <Button
-                                    size="lg"
-                                    className="w-full bg-white text-slate-900 hover:bg-slate-100 font-semibold"
-                                    onClick={() => signIn("google", { callbackUrl: window.location.href })}
-                                >
-                                    <FcGoogle className="h-5 w-5 mr-2" />
-                                    Continue with Google
-                                </Button>
-
-                                <div className="relative">
-                                    <div className="absolute inset-0 flex items-center">
-                                        <span className="w-full border-t border-slate-700" />
-                                    </div>
-                                    <div className="relative flex justify-center text-xs uppercase">
-                                        <span className="bg-slate-900 px-2 text-slate-500">Or using email</span>
-                                    </div>
-                                </div>
-
-                                <Button
-                                    variant="outline"
-                                    className="w-full border-slate-700 hover:bg-slate-800 text-slate-300"
-                                    asChild
-                                >
-                                    <Link href={`/auth/login?callbackUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}>
-                                        Sign in with Password
-                                    </Link>
-                                </Button>
-
-                                <Button variant="ghost" onClick={() => setBookingStage("SLOT")} className="w-full text-slate-500">
-                                    Back to selection
-                                </Button>
+                            <div className="flex justify-center w-full">
+                                <ClientAuthDialog
+                                    onSuccess={(verifiedEmail) => {
+                                        setEmail(verifiedEmail);
+                                        setIsEmailVerified(true);
+                                        setBookingStage("FORM");
+                                    }}
+                                    onBack={() => setBookingStage("SLOT")}
+                                />
                             </div>
                         )}
 
@@ -306,6 +277,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                         const ownerTimeZone = user.timeZone || "UTC";
 
                                         if (clientTimeZone !== ownerTimeZone) {
+                                            if (!date) return null;
                                             try {
                                                 const slotDate = new Date(`${format(date, "yyyy-MM-dd")}T${selectedSlot}:00`);
                                                 return (
@@ -364,7 +336,14 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Email Address <span className="text-red-500">*</span></Label>
-                                    <Input type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={isBooking} />
+                                    <Input
+                                        type="email"
+                                        placeholder="john@example.com"
+                                        value={email}
+                                        onChange={e => setEmail(e.target.value)}
+                                        disabled={isBooking || isEmailVerified}
+                                        className={isEmailVerified ? "bg-muted text-muted-foreground opacity-100" : ""}
+                                    />
                                 </div>
 
                                 {service.locationType === "PHONE" && (
