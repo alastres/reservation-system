@@ -58,6 +58,7 @@ export const deleteUser = async (userId: string) => {
         revalidatePath("/admin/users");
         return { success: "User deleted successfully" };
     } catch (error) {
-        return { error: "Failed to delete user" };
+        console.error("Failed to delete user:", error);
+        return { error: `Failed to delete user: ${(error as any).message}` };
     }
 };

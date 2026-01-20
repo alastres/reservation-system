@@ -14,7 +14,8 @@ export default auth((req) => {
     const { nextUrl } = req;
     const isLoggedIn = !!req.auth;
     const isVerified = Boolean((req.auth?.user as any)?.emailVerified);
-    console.log("Middleware Check:", { path: nextUrl.pathname, isLoggedIn, isVerified, emailVerifiedVal: (req.auth?.user as any)?.emailVerified });
+    const userRole = (req.auth?.user as any)?.role;
+    console.log("Middleware Check:", { path: nextUrl.pathname, isLoggedIn, isVerified, emailVerifiedVal: (req.auth?.user as any)?.emailVerified, role: userRole });
 
     const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
     const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
@@ -27,6 +28,10 @@ export default auth((req) => {
 
     if (isAuthRoute) {
         if (isLoggedIn) {
+            // If Client, redirect to home instead of dashboard
+            if (userRole === "CLIENT") {
+                return Response.redirect(new URL("/", nextUrl));
+            }
             return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
         }
         return undefined; // Allow access to auth pages if not logged in
@@ -37,15 +42,22 @@ export default auth((req) => {
     // - Landing page (/)
     // - Public profiles (/[username])
     // - Service pages (/[username]/[service])
-    if (!isLoggedIn && (isDashboardRoute || nextUrl.pathname.startsWith("/admin"))) {
-        let callbackUrl = nextUrl.pathname;
-        if (nextUrl.search) {
-            callbackUrl += nextUrl.search;
+    if (isDashboardRoute || nextUrl.pathname.startsWith("/admin")) {
+        if (!isLoggedIn) {
+            let callbackUrl = nextUrl.pathname;
+            if (nextUrl.search) {
+                callbackUrl += nextUrl.search;
+            }
+
+            const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+
+            return Response.redirect(new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
         }
 
-        const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-
-        return Response.redirect(new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
+        // Restrict CLIENT users from accessing Dashboard/Admin
+        if (userRole === "CLIENT") {
+            return Response.redirect(new URL("/", nextUrl));
+        }
     }
 
     return undefined; // Allow access
