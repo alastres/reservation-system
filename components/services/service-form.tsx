@@ -131,6 +131,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
             customInputs: (service?.customInputs as any[]) || [],
             isRecurrenceEnabled: service?.isRecurrenceEnabled ?? false,
             maxRecurrenceCount: service?.maxRecurrenceCount || 4,
+            requiresPayment: (service as any)?.requiresPayment ?? false,
         },
     });
 
@@ -373,6 +374,25 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                 <div className="space-y-0.5">
                                     <FormLabel className="text-base">Active</FormLabel>
                                     <FormDescription>Turn off to hide from public profile</FormDescription>
+                                </div>
+                                <FormControl>
+                                    <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                        disabled={isPending}
+                                    />
+                                </FormControl>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="requiresPayment"
+                        render={({ field }) => (
+                            <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                    <FormLabel className="text-base">Require Payment</FormLabel>
+                                    <FormDescription>Clients must pay before booking is confirmed</FormDescription>
                                 </div>
                                 <FormControl>
                                     <Switch
