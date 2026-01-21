@@ -4,19 +4,21 @@ import { useState, useEffect, useTransition } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { getSlotsAction, createBooking } from "@/actions/booking";
-import { Loader2, Check } from "lucide-react";
+import { getSlotsAction, createBooking, confirmPaymentAndBooking } from "@/actions/booking";
+import { Loader2, Check, CreditCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FormError } from "@/components/form-error";
-import { FormSuccess } from "@/components/form-success";
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { useSession, signIn } from "next-auth/react";
-import { FcGoogle } from "react-icons/fc";
-import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { ClientAuthDialog } from "@/components/auth/client-auth-dialog";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import { CheckoutForm } from "./checkout-form";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface BookingCalendarProps {
     service: any;
@@ -28,11 +30,12 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
     const [slots, setSlots] = useState<string[]>([]);
     const [loadingSlots, setLoadingSlots] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-    const [bookingStage, setBookingStage] = useState<"SLOT" | "AUTH" | "FORM" | "SUCCESS">("SLOT");
+    const [bookingStage, setBookingStage] = useState<"SLOT" | "AUTH" | "FORM" | "PAYMENT" | "SUCCESS">("SLOT");
+    const [paymentData, setPaymentData] = useState<{ clientSecret: string; paymentIntentId: string } | null>(null);
 
     const { data: session } = useSession();
 
-    // Booking Form
+    // Booking Form State
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [isEmailVerified, setIsEmailVerified] = useState(false);
@@ -60,6 +63,8 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                 if (res.slots) {
                     setSlots(res.slots);
                 }
+            } catch (e) {
+                console.error("Error fetching slots", e);
             } finally {
                 setLoadingSlots(false);
             }
@@ -122,11 +127,30 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
         startBooking(() => {
             createBooking(service.id, dateStr, selectedSlot, { name, email, clientPhone: clientPhone || undefined, notes, answers, recurrence }, timeZone, clientTimeZone)
-                .then((data) => {
-                    if (data.error) setBookingError(data.error);
-                    if (data.success) setBookingStage("SUCCESS");
-                });
+                .then((data: any) => {
+                    if (data.error) {
+                        setBookingError(data.error);
+                    } else if (data.requiresPayment) {
+                        setPaymentData({
+                            clientSecret: data.clientSecret,
+                            paymentIntentId: data.paymentIntentId
+                        });
+                        setBookingStage("PAYMENT");
+                    } else if (data.success) {
+                        setBookingStage("SUCCESS");
+                    }
+                })
+                .catch(err => setBookingError("An unexpected error occurred."));
         });
+    };
+
+    const handlePaymentSuccess = async (paymentIntentId: string) => {
+        const res = await confirmPaymentAndBooking(paymentIntentId);
+        if (res.success) {
+            setBookingStage("SUCCESS");
+        } else {
+            setBookingError(res.error || "Failed to confirm booking after payment");
+        }
     };
 
     // Auto-fill form if session exists
@@ -169,32 +193,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                         <span className="text-muted-foreground text-sm font-medium w-1/3">Time</span>
                         <span className="font-semibold text-foreground w-2/3 text-right truncate">{selectedSlot}</span>
                     </div>
-                    {service.locationType === "GOOGLE_MEET" && (
-                        <div className="flex justify-between items-center pt-2 border-t border-border/50">
-                            <span className="text-muted-foreground text-sm font-medium">Location</span>
-                            <span className="font-semibold text-foreground flex items-center gap-1">
-                                Google Meet
-                            </span>
-                        </div>
-                    )}
-                    {service.locationType === "PHONE" && clientPhone && (
-                        <div className="flex justify-between items-center pt-2 border-t border-border/50">
-                            <span className="text-muted-foreground text-sm font-medium">Phone</span>
-                            <span className="font-semibold text-foreground">{clientPhone}</span>
-                        </div>
-                    )}
-                    {service.locationType === "IN_PERSON" && (
-                        <div className="flex justify-between items-center pt-2 border-t border-border/50">
-                            <span className="text-muted-foreground text-sm font-medium">Location</span>
-                            <span className="font-semibold text-foreground text-right">{service.address || user?.address || "TBD"}</span>
-                        </div>
-                    )}
                 </div>
-
-                <p className="text-sm text-muted-foreground/70 mb-6 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    Confirmation sent to {email}
-                </p>
 
                 <Button
                     onClick={() => window.location.reload()}
@@ -248,8 +247,6 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                             </div>
                         )}
 
-
-
                         {bookingStage === "AUTH" && (
                             <div className="flex justify-center w-full">
                                 <ClientAuthDialog
@@ -270,121 +267,45 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                         <span className="font-semibold text-gray-700">Selected Time:</span> {date && format(date, "MMM dd")} @ {selectedSlot}
                                         <Button variant="link" size="sm" onClick={() => setBookingStage("SLOT")} className="ml-2 text-sky-600 p-0 h-auto">Change</Button>
                                     </div>
-
-                                    {/* Time Zone Warning */}
-                                    {(() => {
-                                        const clientTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                                        const ownerTimeZone = user.timeZone || "UTC";
-
-                                        if (clientTimeZone !== ownerTimeZone) {
-                                            if (!date) return null;
-                                            try {
-                                                const slotDate = new Date(`${format(date, "yyyy-MM-dd")}T${selectedSlot}:00`);
-                                                return (
-                                                    <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
-                                                        <p className="font-semibold">⚠️ Time Zone Difference</p>
-                                                        <p>The time you selected ({selectedSlot}) is in <strong>{ownerTimeZone}</strong>.</p>
-                                                        <p>Your current time zone is <strong>{clientTimeZone}</strong>.</p>
-                                                        <p>Please double check the time difference.</p>
-                                                    </div>
-                                                );
-                                            } catch (e) { return null; }
-                                        }
-                                        return null;
-                                    })()}
                                 </div>
 
-                                {/* Custom Fields */}
-                                {service.customInputs && (service.customInputs as any[]).map((field: any) => (
-                                    <div key={field.id} className="space-y-2">
-                                        <Label>
-                                            {field.label}
-                                            {field.required && <span className="text-red-500 ml-1">*</span>}
-                                        </Label>
-                                        {field.type === "textarea" ? (
-                                            <Textarea
-                                                placeholder={field.label}
-                                                disabled={isBooking}
-                                                onChange={(e) => setAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
-                                            />
-                                        ) : field.type === "checkbox" ? (
-                                            <div className="flex items-center space-x-2">
-                                                <input
-                                                    type="checkbox"
-                                                    id={field.id}
-                                                    disabled={isBooking}
-                                                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                                                    onChange={(e) => setAnswers(prev => ({ ...prev, [field.label]: e.target.checked ? "Yes" : "No" }))}
-                                                />
-                                                <label htmlFor={field.id} className="text-sm text-gray-700">Yes</label>
-                                            </div>
-                                        ) : (
-                                            <Input
-                                                type={field.type}
-                                                placeholder={field.label}
-                                                disabled={isBooking}
-                                                onChange={(e) => setAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
-                                            />
-                                        )}
-                                    </div>
-                                ))}
-
-                                {/* Standard Fields */}
-                                <div className="space-y-2">
-                                    <Label>Your Name <span className="text-red-500">*</span></Label>
-                                    <Input placeholder="John Doe" value={name} onChange={e => setName(e.target.value)} disabled={isBooking} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Email Address <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        type="email"
-                                        placeholder="john@example.com"
-                                        value={email}
-                                        onChange={e => setEmail(e.target.value)}
-                                        disabled={isBooking || isEmailVerified}
-                                        className={isEmailVerified ? "bg-muted text-muted-foreground opacity-100" : ""}
-                                    />
-                                </div>
-
-                                {service.locationType === "PHONE" && (
+                                {/* Custom / Standard Fields */}
+                                <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label>Phone Number <span className="text-red-500">*</span></Label>
-                                        <PhoneInput
-                                            placeholder="Enter phone number"
-                                            value={clientPhone}
-                                            onChange={setClientPhone}
-                                            disabled={isBooking}
-                                            defaultCountry="US"
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        <Label>Your Name <span className="text-red-500">*</span></Label>
+                                        <Input placeholder="John Doe" value={name} onChange={e => setName(e.target.value)} disabled={isBooking} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Email Address <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            type="email"
+                                            placeholder="john@example.com"
+                                            value={email}
+                                            onChange={e => setEmail(e.target.value)}
+                                            disabled={isBooking || isEmailVerified}
+                                            className={isEmailVerified ? "bg-muted text-muted-foreground opacity-100" : ""}
                                         />
-                                        <p className="text-xs text-muted-foreground">The provider will call you at this number.</p>
                                     </div>
-                                )}
 
-                                <div className="space-y-2">
-                                    <Label>Additional Notes</Label>
-                                    <Textarea placeholder="Any specific topics?" value={notes} onChange={e => setNotes(e.target.value)} disabled={isBooking} />
-                                </div>
+                                    {service.locationType === "PHONE" && (
+                                        <div className="space-y-2">
+                                            <Label>Phone Number <span className="text-red-500">*</span></Label>
+                                            <PhoneInput
+                                                placeholder="Enter phone number"
+                                                value={clientPhone}
+                                                onChange={setClientPhone}
+                                                disabled={isBooking}
+                                                defaultCountry="US"
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            />
+                                        </div>
+                                    )}
 
-                                {service.isRecurrenceEnabled && (
                                     <div className="space-y-2">
-                                        <Label>Repeat Booking</Label>
-                                        <select
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                            value={recurrence}
-                                            onChange={(e) => setRecurrence(e.target.value)}
-                                            disabled={isBooking}
-                                        >
-                                            <option value="none">Does not repeat</option>
-                                            <option value="weekly">Weekly ({service.maxRecurrenceCount} weeks)</option>
-                                            <option value="biweekly">Bi-weekly ({service.maxRecurrenceCount * 2} weeks)</option>
-                                            <option value="monthly">Monthly ({service.maxRecurrenceCount} months)</option>
-                                        </select>
-                                        <p className="text-xs text-muted-foreground">
-                                            This will book {service.maxRecurrenceCount} occurrences in total including today.
-                                        </p>
+                                        <Label>Additional Notes</Label>
+                                        <Textarea placeholder="Any specific topics?" value={notes} onChange={e => setNotes(e.target.value)} disabled={isBooking} />
                                     </div>
-                                )}
+                                </div>
 
                                 <FormError message={bookingError} />
 
@@ -392,9 +313,37 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                     <Button variant="ghost" onClick={() => setBookingStage("SLOT")} disabled={isBooking}>Back</Button>
                                     <Button className="flex-1" onClick={handleConfirmBooking} disabled={isBooking}>
                                         {isBooking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Confirm Booking
+                                        {service.requiresPayment ? `Pay $${service.price} & Confirm` : "Confirm Booking"}
                                     </Button>
                                 </div>
+                            </div>
+                        )}
+
+                        {bookingStage === "PAYMENT" && paymentData && (
+                            <div className="max-w-md space-y-6 animate-in fade-in slide-in-from-right-4">
+                                <div className="p-4 bg-muted/50 border rounded-xl flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                        <CreditCard className="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-lg text-foreground">Secure Payment</p>
+                                        <p className="text-sm text-muted-foreground">Confirm your booking for <strong>${service.price}</strong></p>
+                                    </div>
+                                </div>
+
+                                <Elements
+                                    stripe={stripePromise}
+                                    options={{
+                                        clientSecret: paymentData.clientSecret,
+                                        appearance: { theme: 'stripe' }
+                                    }}
+                                >
+                                    <CheckoutForm
+                                        clientSecret={paymentData.clientSecret}
+                                        onSuccess={handlePaymentSuccess}
+                                        onCancel={() => setBookingStage("FORM")}
+                                    />
+                                </Elements>
                             </div>
                         )}
                     </>
