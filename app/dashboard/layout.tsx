@@ -20,11 +20,28 @@ const DashboardLayout = async ({
     }
 
     const user = await prisma.user.findUnique({
-        where: { id: session.user.id }
+        where: { id: session.user.id },
+        select: {
+            emailVerified: true,
+            role: true,
+            subscriptionStatus: true,
+            id: true,
+        },
     });
 
     if (!user || !user.emailVerified) {
         redirect("/auth/new-verification");
+    }
+
+    // Check if user is first admin (count all users)
+    const isFirstUser = await prisma.user.count() === 1;
+
+    // Subscription check: Allow access if ADMIN, first user, or has ACTIVE subscription
+    const hasActiveSubscription = user.subscriptionStatus === "ACTIVE";
+    const isAdmin = user.role === "ADMIN";
+
+    if (!isAdmin && !isFirstUser && !hasActiveSubscription) {
+        redirect("/subscription/select");
     }
 
     return (
