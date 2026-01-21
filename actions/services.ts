@@ -135,8 +135,7 @@ export const duplicateService = async (serviceId: string) => {
                 userId: session.user.id,
                 customInputs: existingService.customInputs ?? [],
                 isRecurrenceEnabled: existingService.isRecurrenceEnabled,
-                maxRecurrenceCount: existingService.maxRecurrenceCount,
-                currency: (existingService as any).currency || "usd"
+                maxRecurrenceCount: existingService.maxRecurrenceCount
             },
             include: { user: { select: { username: true } } }
         });

@@ -147,7 +147,6 @@ model Service {
 
   // Payment
   requiresPayment Boolean @default(false)
-  currency        String  @default("usd")
 
   @@unique([userId, url])
 }

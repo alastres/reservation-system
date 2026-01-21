@@ -29,7 +29,7 @@ export const saveAvailability = async (rules: z.infer<typeof AvailabilitySchema>
             if (rules.length > 0) {
                 await tx.availabilityRule.createMany({
                     data: rules.map(rule => ({
-                        userId: userId!, // Explicitly non-null as checked above
+                        userId,
                         ...rule
                     }))
                 });

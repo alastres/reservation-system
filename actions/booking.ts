@@ -178,7 +178,7 @@ export const createBooking = async (
 
         const paymentResult = await createPaymentIntent(
             service.price,
-            (service as any).currency || "usd",
+            service.currency || "usd",
             {
                 serviceId: service.id,
                 serviceName: service.title,
@@ -201,12 +201,14 @@ export const createBooking = async (
 >>>>>>> parent of 225f375 (payment implementado de servicios)
         );
 
-        if (paymentResult.error || !paymentResult.paymentIntent) {
-            return { error: paymentResult.error || "Failed to initiate payment" };
+        if (paymentResult.error) {
+            return { error: paymentResult.error };
         }
 
 <<<<<<< HEAD
         // Return the client secret so the frontend can show the payment form
+        // We do NOT create the booking in the DB yet to avoid cluttering with unpaid sessions
+        // unless we use a "PENDING_PAYMENT" status and a cleanup job.
         return {
             requiresPayment: true,
             clientSecret: paymentResult.paymentIntent.client_secret,
