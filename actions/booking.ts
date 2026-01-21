@@ -184,7 +184,6 @@ export const createBooking = async (
                 serviceName: service.title,
                 clientEmail: clientData.email,
                 clientName: clientData.name,
-<<<<<<< HEAD
                 dateStr,
                 time,
                 timeZone,
@@ -196,27 +195,13 @@ export const createBooking = async (
             },
             connectedAccountId || undefined,
             applicationFeeAmount
-=======
-            }
->>>>>>> parent of 225f375 (payment implementado de servicios)
         );
 
         if (paymentResult.error) {
             return { error: paymentResult.error };
         }
 
-<<<<<<< HEAD
-        // Return the client secret so the frontend can show the payment form
-        // We do NOT create the booking in the DB yet to avoid cluttering with unpaid sessions
-        // unless we use a "PENDING_PAYMENT" status and a cleanup job.
-        return {
-            requiresPayment: true,
-            clientSecret: paymentResult.paymentIntent.client_secret,
-            paymentIntentId: paymentResult.paymentIntent.id
-        };
-=======
         paymentIntent = paymentResult.paymentIntent;
->>>>>>> parent of 225f375 (payment implementado de servicios)
     }
 
     // 4. Create All Bookings
