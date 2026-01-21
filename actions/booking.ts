@@ -168,6 +168,7 @@ export const createBooking = async (
     }
 
     // 3.7 Handle Payment if Required
+    let paymentIntent: any = null;
     if (service.requiresPayment && service.price > 0) {
         const { createPaymentIntent } = await import("@/lib/stripe");
 
@@ -183,6 +184,7 @@ export const createBooking = async (
                 serviceName: service.title,
                 clientEmail: clientData.email,
                 clientName: clientData.name,
+<<<<<<< HEAD
                 dateStr,
                 time,
                 timeZone,
@@ -194,21 +196,28 @@ export const createBooking = async (
             },
             connectedAccountId || undefined,
             applicationFeeAmount
+=======
+            }
+>>>>>>> parent of 225f375 (payment implementado de servicios)
         );
 
         if (paymentResult.error || !paymentResult.paymentIntent) {
             return { error: paymentResult.error || "Failed to initiate payment" };
         }
 
+<<<<<<< HEAD
         // Return the client secret so the frontend can show the payment form
         return {
             requiresPayment: true,
             clientSecret: paymentResult.paymentIntent.client_secret,
             paymentIntentId: paymentResult.paymentIntent.id
         };
+=======
+        paymentIntent = paymentResult.paymentIntent;
+>>>>>>> parent of 225f375 (payment implementado de servicios)
     }
 
-    // 4. Create All Bookings (Only if no payment required or payment already handled)
+    // 4. Create All Bookings
     try {
         await prisma.$transaction(
             datesToBook.map(date => {
@@ -227,10 +236,11 @@ export const createBooking = async (
                         answers: clientData.answers,
                         recurrenceId,
                         clientTimeZone,
-                        status: "CONFIRMED",
-                        userId: existingUser?.id,
-                        paymentStatus: "PENDING",
-                        amountPaid: service.price,
+                        status: paymentIntent ? "PENDING" : "CONFIRMED",
+                        userId: existingUser?.id, // Link to user if found
+                        paymentIntentId: paymentIntent?.id,
+                        paymentStatus: paymentIntent ? "PROCESSING" : "PENDING",
+                        amountPaid: paymentIntent ? service.price : undefined,
                         currency: "usd",
                     }
                 });
@@ -241,16 +251,142 @@ export const createBooking = async (
         return { error: "Failed to process booking" };
     }
 
-    // Handle Calendar Sync and Emails using the helper
-    await handleBookingFulfillment(
-        service,
-        datesToBook,
-        clientData,
-        clientTimeZone,
-        initialDate,
+    // Sync with Google Calendar
+    // We execute this asynchronously/independently so it doesn't block the UI response if it's slow
+    // But we await it here to ensure it's done before returning (Vercel serverless might kill otherwise)
+    // In a real message queue system, this would be a job.
+    for (const date of datesToBook) {
+        const start = date;
+        const end = addMinutes(start, service.duration);
+
+        let description = `Client: ${clientData.name}\nEmail: ${clientData.email}\nNotes: ${clientData.notes || "None"}`;
+
+        if (clientData.clientPhone) {
+            description += `\nPhone: ${clientData.clientPhone}`;
+        }
+
+        if (clientData.answers) {
+            description += "\n\nAnswers:\n" + Object.entries(clientData.answers).map(([q, a]) => `- ${q}: ${a}`).join("\n");
+        }
+
+        // Determine Final Address (Service specific OR Profile default)
+        const finalAddress = service.locationType === "IN_PERSON"
+            ? (service.address || service.user.address)
+            : undefined;
+
+        const eventResult = await createGoogleEvent(service.userId, {
+            summary: `Booking: ${service.title} with ${clientData.name}`,
+            description,
+            start,
+            end,
+            attendees: [clientData.email],
+            location: finalAddress || undefined
+        }, {
+            withMeet: service.locationType === "GOOGLE_MEET"
+        });
+
+        if (eventResult && typeof eventResult === 'object') {
+            // Find the specific booking for this date interval
+            const createdBooking = await prisma.booking.findFirst({
+                where: {
+                    serviceId: service.id,
+                    startTime: start,
+                    status: "CONFIRMED",
+                    clientEmail: clientData.email
+                }
+            });
+
+            if (createdBooking) {
+                await prisma.booking.update({
+                    where: { id: createdBooking.id },
+                    data: {
+                        googleEventId: eventResult.id,
+                        joinUrl: eventResult.meetLink // Will be null if not generated
+                    }
+                });
+            }
+        }
+    }
+
+    // Determine Location Details for Email
+    let locationDetails = "";
+    const finalAddress = service.address || service.user.address; // Re-calculate or reuse if scope allows
+
+    switch (service.locationType) {
+        case "GOOGLE_MEET":
+            locationDetails = "Google Meet (Link in Calendar)";
+            break;
+        case "PHONE":
+            locationDetails = clientData.clientPhone
+                ? `Phone Call (Provider will call you at ${clientData.clientPhone})`
+                : "Phone Call";
+            break;
+        case "IN_PERSON":
+            locationDetails = finalAddress ? `In Person at ${finalAddress}` : "In Person";
+            break;
+        case "CUSTOM":
+            locationDetails = service.locationUrl ? `Link: ${service.locationUrl}` : "Online";
+            break;
+    }
+
+    // Determine Client Time Display
+    let clientTimeDisplay: string | undefined = undefined;
+    if (clientTimeZone) {
+        try {
+            // initialDate is the start time in UTC (Date object)
+            // We want to format it in the Client's Time Zone
+            const clientZonedDate = toZonedTime(initialDate, clientTimeZone);
+            const clientDateStr = format(clientZonedDate, "yyyy-MM-dd");
+            const clientTimeStr = format(clientZonedDate, "HH:mm");
+            clientTimeDisplay = `${clientTimeStr} (${clientTimeZone})`;
+
+            // If the date is different, we should probably mention it
+            if (clientDateStr !== dateStr) {
+                clientTimeDisplay += ` on ${clientDateStr}`;
+            }
+        } catch (e) {
+            console.error("Error formatting client time", e);
+        }
+    }
+
+    // Send Email to Client (Summary)
+    await sendBookingConfirmation(
+        clientData.email,
+        clientData.name,
+        service.title,
         dateStr,
-        time
+        time,
+        service.userId, // Pass providerId for logging
+        locationDetails,
+        clientTimeDisplay
     );
+
+    // Send Notification to Provider (Summary)
+    try {
+        interface NotificationPreferences {
+            email?: boolean;
+            sms?: boolean;
+        }
+
+        const prefs = service.user.notificationPreferences as unknown as NotificationPreferences | null;
+        const shouldSend = !prefs || prefs.email !== false;
+
+        if (shouldSend) {
+            await sendNewBookingNotification(
+                service.user.email,
+                service.user.id,
+                clientData.name,
+                service.title,
+                dateStr,
+                time,
+                clientData.answers,
+                clientData.clientPhone, // Pass phone number
+                locationDetails // Pass location details
+            );
+        }
+    } catch (emailError: unknown) {
+        console.error("[Booking] Failed to send provider notification.", emailError);
+    }
 
     return { success: recurrenceId ? "Recurring booking confirmed!" : "Booking confirmed!" };
 };
@@ -398,241 +534,3 @@ export const rescheduleBooking = async (
     revalidatePath("/dashboard/bookings");
     return { success: "Booking rescheduled successfully" };
 };
-
-// Helper to handle calendar sync and email notifications after booking creation
-async function handleBookingFulfillment(
-    service: any,
-    datesToBook: Date[],
-    clientData: { name: string; email: string; clientPhone?: string; notes?: string; answers?: any },
-    clientTimeZone?: string,
-    initialDate?: Date, // The very first date in UTC
-    dateStr?: string,   // "YYYY-MM-DD"
-    time?: string      // "HH:MM"
-) {
-    // 1. Sync with Google Calendar
-    for (const date of datesToBook) {
-        const start = date;
-        const end = addMinutes(start, service.duration);
-
-        let description = `Client: ${clientData.name}\nEmail: ${clientData.email}\nNotes: ${clientData.notes || "None"}`;
-
-        if (clientData.clientPhone) {
-            description += `\nPhone: ${clientData.clientPhone}`;
-        }
-
-        if (clientData.answers) {
-            const answers = typeof clientData.answers === 'string' ? JSON.parse(clientData.answers) : clientData.answers;
-            description += "\n\nAnswers:\n" + Object.entries(answers).map(([q, a]) => `- ${q}: ${a}`).join("\n");
-        }
-
-        // Determine Final Address
-        const finalAddress = service.locationType === "IN_PERSON"
-            ? (service.address || service.user.address)
-            : undefined;
-
-        const eventResult = await createGoogleEvent(service.userId, {
-            summary: `Booking: ${service.title} with ${clientData.name}`,
-            description,
-            start,
-            end,
-            attendees: [clientData.email],
-            location: finalAddress || undefined
-        }, {
-            withMeet: service.locationType === "GOOGLE_MEET"
-        });
-
-        if (eventResult && typeof eventResult === 'object') {
-            const createdBooking = await prisma.booking.findFirst({
-                where: {
-                    serviceId: service.id,
-                    startTime: start,
-                    status: "CONFIRMED",
-                    clientEmail: clientData.email
-                }
-            });
-
-            if (createdBooking) {
-                await prisma.booking.update({
-                    where: { id: createdBooking.id },
-                    data: {
-                        googleEventId: eventResult.id,
-                        joinUrl: eventResult.meetLink
-                    }
-                });
-            }
-        }
-    }
-
-    // 2. Determine Location Details for Email
-    let locationDetails = "";
-    const finalAddress = service.address || service.user.address;
-
-    switch (service.locationType) {
-        case "GOOGLE_MEET":
-            locationDetails = "Google Meet (Link in Calendar)";
-            break;
-        case "PHONE":
-            locationDetails = clientData.clientPhone
-                ? `Phone Call (Provider will call you at ${clientData.clientPhone})`
-                : "Phone Call";
-            break;
-        case "IN_PERSON":
-            locationDetails = finalAddress ? `In Person at ${finalAddress}` : "In Person";
-            break;
-        case "CUSTOM":
-            locationDetails = service.locationUrl ? `Link: ${service.locationUrl}` : "Online";
-            break;
-    }
-
-    // 3. Determine Client Time Display
-    let clientTimeDisplay: string | undefined = undefined;
-    if (clientTimeZone && initialDate && dateStr && time) {
-        try {
-            const clientZonedDate = toZonedTime(initialDate, clientTimeZone);
-            const clientDateStr = format(clientZonedDate, "yyyy-MM-dd");
-            const clientTimeStr = format(clientZonedDate, "HH:mm");
-            clientTimeDisplay = `${clientTimeStr} (${clientTimeZone})`;
-
-            if (clientDateStr !== dateStr) {
-                clientTimeDisplay += ` on ${clientDateStr}`;
-            }
-        } catch (e) {
-            console.error("Error formatting client time", e);
-        }
-    }
-
-    // 4. Send Email to Client
-    await sendBookingConfirmation(
-        clientData.email,
-        clientData.name,
-        service.title,
-        dateStr || "",
-        time || "",
-        service.userId,
-        locationDetails,
-        clientTimeDisplay
-    );
-
-    // 5. Send Notification to Provider
-    try {
-        const prefs = service.user.notificationPreferences as any;
-        const shouldSend = !prefs || prefs.email !== false;
-
-        if (shouldSend) {
-            await sendNewBookingNotification(
-                service.user.email,
-                service.user.id,
-                clientData.name,
-                service.title,
-                dateStr || "",
-                time || "",
-                clientData.answers,
-                clientData.clientPhone,
-                locationDetails
-            );
-        }
-    } catch (emailError: unknown) {
-        console.error("[Booking] Failed to send provider notification.", emailError);
-    }
-}
-
-export const confirmPaymentAndBooking = async (paymentIntentId: string) => {
-    try {
-        const { getPaymentIntent } = await import("@/lib/stripe");
-        const res = await getPaymentIntent(paymentIntentId);
-
-        if (res.error || !res.paymentIntent) {
-            return { error: res.error || "Payment not found" };
-        }
-
-        const pi = res.paymentIntent;
-
-        if (pi.status !== "succeeded") {
-            return { error: `Payment status is ${pi.status}. Please complete the payment.` };
-        }
-
-        // Check if booking already exists (avoid duplicates)
-        const existing = await prisma.booking.findFirst({
-            where: { paymentIntentId }
-        });
-
-        if (existing) {
-            return { success: "Booking already confirmed" };
-        }
-
-        // Extract data from metadata
-        const { serviceId, dateStr, time, timeZone, clientEmail, clientName, notes, answers, recurrence, clientPhone, clientTimeZone } = pi.metadata;
-
-        const service = await prisma.service.findUnique({
-            where: { id: serviceId },
-            include: { user: true }
-        });
-
-        if (!service) return { error: "Service not found" };
-
-        const initialDate = fromZonedTime(`${dateStr} ${time}:00`, timeZone);
-        const datesToBook: Date[] = [initialDate];
-        let recurrenceId: string | undefined = undefined;
-
-        if (recurrence && recurrence !== "none") {
-            recurrenceId = crypto.randomUUID();
-            const count = service.maxRecurrenceCount || 4;
-            for (let i = 1; i < count; i++) {
-                let nextDate = new Date(initialDate);
-                if (recurrence === "weekly") nextDate.setDate(initialDate.getDate() + (7 * i));
-                else if (recurrence === "biweekly") nextDate.setDate(initialDate.getDate() + (14 * i));
-                else if (recurrence === "monthly") nextDate.setMonth(initialDate.getMonth() + i);
-                datesToBook.push(nextDate);
-            }
-        }
-
-        const existingUser = await prisma.user.findUnique({
-            where: { email: clientEmail }
-        });
-
-        // Create Bookings
-        await prisma.$transaction(
-            datesToBook.map(date => {
-                const startTime = date;
-                const endTime = addMinutes(startTime, service.duration);
-
-                return prisma.booking.create({
-                    data: {
-                        serviceId: service.id,
-                        startTime,
-                        endTime,
-                        clientName,
-                        clientEmail,
-                        clientPhone: clientPhone || undefined,
-                        notes: notes || undefined,
-                        answers: JSON.parse(answers || "{}"),
-                        recurrenceId,
-                        clientTimeZone,
-                        status: "CONFIRMED",
-                        userId: existingUser?.id,
-                        paymentIntentId,
-                        paymentStatus: "PAID",
-                        amountPaid: pi.amount / 100,
-                        currency: pi.currency,
-                    }
-                });
-            })
-        );
-
-        // SYNC Calendar and Emails
-        await handleBookingFulfillment(
-            service,
-            datesToBook,
-            { name: clientName, email: clientEmail, clientPhone, notes, answers },
-            clientTimeZone,
-            initialDate,
-            dateStr,
-            time
-        );
-
-        return { success: "Payment confirmed and booking created!" };
-    } catch (error: any) {
-        console.error("Confirm payment error:", error);
-        return { error: error.message };
-    }
-}
