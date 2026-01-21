@@ -170,15 +170,19 @@ export const createBooking = async (
     // 3.7 Handle Payment if Required
     if (service.requiresPayment && service.price > 0) {
         const { createPaymentIntent } = await import("@/lib/stripe");
+
+        // Determine if we should route payment to a connected account
+        const connectedAccountId = service.user.stripeConnectedAccountId;
+        const applicationFeeAmount = connectedAccountId ? Math.round(service.price * 0.1) : undefined; // Optional 10% platform fee, in cents
+
         const paymentResult = await createPaymentIntent(
             service.price,
-            "usd",
+            service.currency || "usd",
             {
                 serviceId: service.id,
                 serviceName: service.title,
                 clientEmail: clientData.email,
                 clientName: clientData.name,
-                // Add more metadata as needed
                 dateStr,
                 time,
                 timeZone,
@@ -187,7 +191,9 @@ export const createBooking = async (
                 notes: clientData.notes || "",
                 answers: JSON.stringify(clientData.answers || {}),
                 recurrence: clientData.recurrence || "none"
-            }
+            },
+            connectedAccountId || undefined,
+            applicationFeeAmount
         );
 
         if (paymentResult.error) {

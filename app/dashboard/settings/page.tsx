@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 import { CreditCard, Calendar, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { StripeConnectCallback } from "@/components/settings/stripe-connect-callback";
 
 export const dynamic = "force-dynamic";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ searchParams }: { searchParams: { status?: string } }) {
     const session = await auth();
 
     if (!session?.user?.id) {
@@ -34,6 +35,8 @@ export default async function SettingsPage() {
             subscriptionStatus: true,
             subscriptionPlan: true,
             subscriptionEndsAt: true,
+            stripeConnectedAccountId: true,
+            stripeConnectedAccountStatus: true,
         },
     });
 
@@ -74,6 +77,7 @@ export default async function SettingsPage() {
 
     return (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+            <StripeConnectCallback status={searchParams.status} />
             <Card className="col-span-1 md:col-span-2">
                 <CardHeader>
                     <CardTitle>Profile Information</CardTitle>
@@ -176,6 +180,57 @@ export default async function SettingsPage() {
                                 Como administrador, tienes acceso completo sin necesidad de suscripción
                             </p>
                         </div>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Stripe Connect Section - For receiving payments */}
+            {!isAdmin && (
+                <Card className="col-span-1 md:col-span-2">
+                    <CardHeader>
+                        <CardTitle>Pagos y Cobros</CardTitle>
+                        <CardDescription>
+                            Conecta tu cuenta de Stripe para recibir pagos directamente de tus clientes
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {user.stripeConnectedAccountId ? (
+                            <>
+                                <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400">
+                                        {user.stripeConnectedAccountStatus === "active" ? "Conectado" : "Pendiente"}
+                                    </Badge>
+                                    <p className="text-sm text-muted-foreground">
+                                        {user.stripeConnectedAccountStatus === "active"
+                                            ? "Tu cuenta de Stripe está conectada y lista para recibir pagos"
+                                            : "Completa la configuración de tu cuenta de Stripe para empezar a recibir pagos"
+                                        }
+                                    </p>
+                                </div>
+                                {user.stripeConnectedAccountStatus !== "active" && (
+                                    <form action="/api/stripe/connect/onboard" method="POST">
+                                        <Button type="submit" variant="default" className="w-full">
+                                            Completar Configuración
+                                        </Button>
+                                    </form>
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-center py-8">
+                                <p className="text-muted-foreground mb-4">
+                                    Conecta tu cuenta de Stripe para recibir pagos por tus servicios
+                                </p>
+                                <form action="/api/stripe/connect/onboard" method="POST">
+                                    <Button type="submit" variant="default">
+                                        <CreditCard className="h-4 w-4 mr-2" />
+                                        Conectar con Stripe
+                                    </Button>
+                                </form>
+                                <p className="text-xs text-muted-foreground mt-4">
+                                    Los pagos se transferirán directamente a tu cuenta de Stripe
+                                </p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             )}
