@@ -13,6 +13,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
+  password      String? // For credential-based auth (bcrypt hashed)
 
   accounts Account[]
   sessions Session[]
@@ -117,6 +118,7 @@ model Service {
   description String?
   duration    Int // in minutes
   price       Float   @default(0)
+  currency    String  @default("usd") // ISO currency code for Stripe
   location    String? // e.g. "Zoom", "Google Meet"
   url         String // slug for public url
 
@@ -156,6 +158,7 @@ enum LocationType {
   PHONE
   IN_PERSON
   CUSTOM
+  ZOOM
 }
 
 model Booking {

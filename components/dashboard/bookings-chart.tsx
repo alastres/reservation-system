@@ -41,7 +41,7 @@ export function BookingsChart({ data }: BookingsChartProps) {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "8px",
                     }}
-                    formatter={(value: number) => [value, "Bookings"]}
+                    formatter={(value: any) => [value, "Bookings"]}
                 />
                 <Bar
                     dataKey="bookings"

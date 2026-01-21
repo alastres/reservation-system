@@ -18,13 +18,7 @@ async function main() {
                     duration: 30,
                     url: `test-service-${Date.now()}`,
                     minNotice: 0, // Disable min notice to avoid confusion
-                    availability: {
-                        create: {
-                            dayOfWeek: new Date().getDay(), // Enable today
-                            startTime: "00:00",
-                            endTime: "23:59"
-                        }
-                    }
+
                 }
             }
         },

@@ -42,7 +42,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "8px",
                     }}
-                    formatter={(value: number) => [`$${value.toFixed(2)}`, "Revenue"]}
+                    formatter={(value: any) => [`$${Number(value).toFixed(2)}`, "Revenue"]}
                 />
                 <Line
                     type="monotone"

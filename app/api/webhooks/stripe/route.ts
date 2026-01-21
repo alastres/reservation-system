@@ -108,7 +108,7 @@ export async function POST(req: Request) {
                         subscriptionPlan: plan,
                         stripeCustomerId: subscription.customer as string,
                         stripeSubscriptionId: subscription.id,
-                        subscriptionEndsAt: new Date(subscription.current_period_end * 1000),
+                        subscriptionEndsAt: new Date((subscription as any).current_period_end * 1000),
                     },
                 });
 
@@ -134,16 +134,16 @@ export async function POST(req: Request) {
                 const invoice = event.data.object as Stripe.Invoice;
 
                 // Update subscription end date when payment succeeds
-                if (invoice.subscription) {
+                if ((invoice as any).subscription) {
                     const subscription = await stripe.subscriptions.retrieve(
-                        invoice.subscription as string
+                        (invoice as any).subscription as string
                     );
 
                     await prisma.user.updateMany({
                         where: { stripeSubscriptionId: subscription.id },
                         data: {
                             subscriptionStatus: "ACTIVE",
-                            subscriptionEndsAt: new Date(subscription.current_period_end * 1000),
+                            subscriptionEndsAt: new Date((subscription as any).current_period_end * 1000),
                         },
                     });
 
@@ -155,9 +155,9 @@ export async function POST(req: Request) {
             case "invoice.payment_failed": {
                 const invoice = event.data.object as Stripe.Invoice;
 
-                if (invoice.subscription) {
+                if ((invoice as any).subscription) {
                     await prisma.user.updateMany({
-                        where: { stripeSubscriptionId: invoice.subscription as string },
+                        where: { stripeSubscriptionId: (invoice as any).subscription as string },
                         data: {
                             subscriptionStatus: "PAST_DUE",
                         },
@@ -193,7 +193,7 @@ export async function POST(req: Request) {
                                 subscriptionPlan: plan,
                                 stripeCustomerId: session.customer as string,
                                 stripeSubscriptionId: subscriptionId,
-                                subscriptionEndsAt: new Date(subscription.current_period_end * 1000),
+                                subscriptionEndsAt: new Date((subscription as any).current_period_end * 1000),
                             },
                         });
 
