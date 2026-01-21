@@ -136,6 +136,9 @@ model Service {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Payment
+  requiresPayment Boolean @default(false)
+
   @@unique([userId, url])
 }
 
@@ -172,6 +175,13 @@ model Booking {
   userId String?
   user   User?   @relation("UserBookings", fields: [userId], references: [id], onDelete: SetNull)
 
+  // Payment
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentIntentId String?       @unique
+  amountPaid      Float?
+  currency        String        @default("usd")
+  refundId        String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -180,6 +190,14 @@ enum BookingStatus {
   CONFIRMED
   CANCELLED
   PENDING
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  REFUNDED
 }
 
 model AvailabilityRule {

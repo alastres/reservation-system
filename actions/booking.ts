@@ -128,13 +128,14 @@ export const createBooking = async (
     }
 
     // 3. Availability Check for ALL dates
-    // This could be optimized to a custom query, but for MVP loop is fine or `findMany` with OR
+    // For group bookings: check if capacity is reached
     for (const date of datesToBook) {
         const checkStart = date;
         const checkEnd = addMinutes(checkStart, service.duration);
         const checkBuffEnd = addMinutes(checkEnd, service.bufferTime || 0);
 
-        const existing = await prisma.booking.findFirst({
+        // Count existing bookings for this time slot
+        const existingCount = await prisma.booking.count({
             where: {
                 serviceId: service.id,
                 startTime: { lt: checkBuffEnd },
@@ -143,9 +144,10 @@ export const createBooking = async (
             }
         });
 
-        if (existing) {
+        // Check if slot has reached capacity
+        if (existingCount >= service.capacity) {
             const conflictDate = format(checkStart, "yyyy-MM-dd");
-            return { error: `Slot on ${conflictDate} is already taken. Recurrence failed.` };
+            return { error: `Slot on ${conflictDate} is fully booked (${service.capacity}/${service.capacity} spots taken).` };
         }
     }
 
@@ -163,6 +165,28 @@ export const createBooking = async (
             where: { id: existingUser.id },
             data: { name: clientData.name }
         });
+    }
+
+    // 3.7 Handle Payment if Required
+    let paymentIntent: any = null;
+    if (service.requiresPayment && service.price > 0) {
+        const { createPaymentIntent } = await import("@/lib/stripe");
+        const paymentResult = await createPaymentIntent(
+            service.price,
+            "usd",
+            {
+                serviceId: service.id,
+                serviceName: service.title,
+                clientEmail: clientData.email,
+                clientName: clientData.name,
+            }
+        );
+
+        if (paymentResult.error) {
+            return { error: paymentResult.error };
+        }
+
+        paymentIntent = paymentResult.paymentIntent;
     }
 
     // 4. Create All Bookings
@@ -184,8 +208,12 @@ export const createBooking = async (
                         answers: clientData.answers,
                         recurrenceId,
                         clientTimeZone,
-                        status: "CONFIRMED",
+                        status: paymentIntent ? "PENDING" : "CONFIRMED",
                         userId: existingUser?.id, // Link to user if found
+                        paymentIntentId: paymentIntent?.id,
+                        paymentStatus: paymentIntent ? "PROCESSING" : "PENDING",
+                        amountPaid: paymentIntent ? service.price : undefined,
+                        currency: "usd",
                     }
                 });
             })

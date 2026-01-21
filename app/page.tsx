@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -54,12 +55,14 @@ export default function Home() {
                       <Link href="/dashboard">Dashboard</Link>
                     </Button>
                   )}
+                  <ThemeToggle />
                   <LogoutButton variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400">
                     <LogOut className="h-4 w-4" />
                   </LogoutButton>
                 </div>
               ) : (
                 <>
+                  <ThemeToggle />
                   <Button variant="ghost" asChild>
                     <Link href="/auth/login">Log in</Link>
                   </Button>

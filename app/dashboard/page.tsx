@@ -7,6 +7,8 @@ import { MotionDiv, staggerContainer, fadeIn, slideUp } from "@/components/ui/mo
 
 import { RecentBookings } from "@/components/dashboard/recent-bookings";
 import { DashboardAutoRefresh } from "@/components/dashboard/auto-refresh";
+import { RevenueChart } from "@/components/dashboard/revenue-chart";
+import { BookingsChart } from "@/components/dashboard/bookings-chart";
 
 async function getDashboardStats(userId: string) {
     const totalBookings = await prisma.booking.count({
@@ -56,15 +58,60 @@ async function getDashboardStats(userId: string) {
         include: {
             service: true,
         },
+        orderBy: {
+            startTime: 'asc'
+        }
     });
 
     const revenue = bookings.reduce((acc: number, booking: any) => acc + booking.service.price, 0);
+
+    // Chart Data: Revenue over last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentBookingsForChart = bookings.filter(
+        (booking: any) => new Date(booking.startTime) >= thirtyDaysAgo
+    );
+
+    // Aggregate revenue by date
+    const revenueByDate = recentBookingsForChart.reduce((acc: any, booking: any) => {
+        const date = new Date(booking.startTime).toISOString().split('T')[0];
+        if (!acc[date]) {
+            acc[date] = 0;
+        }
+        acc[date] += booking.service.price;
+        return acc;
+    }, {});
+
+    const revenueChartData = Object.entries(revenueByDate).map(([date, revenue]) => ({
+        date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        revenue: revenue as number,
+    }));
+
+    // Chart Data: Bookings by service
+    const bookingsByService = bookings.reduce((acc: any, booking: any) => {
+        const serviceName = booking.service.title;
+        if (!acc[serviceName]) {
+            acc[serviceName] = 0;
+        }
+        acc[serviceName]++;
+        return acc;
+    }, {});
+
+    const bookingsChartData = Object.entries(bookingsByService)
+        .map(([service, count]) => ({
+            service: service.length > 15 ? service.substring(0, 15) + '...' : service,
+            bookings: count as number,
+        }))
+        .slice(0, 5); // Top 5 services
 
     return {
         totalBookings,
         upcomingBookings,
         revenue,
-        recentBookings
+        recentBookings,
+        revenueChartData,
+        bookingsChartData,
     };
 }
 
@@ -156,20 +203,27 @@ export default async function DashboardPage() {
                     </Card>
                 </MotionDiv>
             </div>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
-                <MotionDiv variants={fadeIn} className="col-span-4">
-                    <Card className="col-span-4">
+            <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+                <MotionDiv variants={fadeIn} className="lg:col-span-4">
+                    <Card>
                         <CardHeader>
-                            <CardTitle>Overview</CardTitle>
+                            <CardTitle>Revenue Overview</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                                Last 30 days revenue trend
+                            </p>
                         </CardHeader>
                         <CardContent className="pl-2">
-                            <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                                Graph Placeholder
-                            </div>
+                            {sections.revenueChartData.length > 0 ? (
+                                <RevenueChart data={sections.revenueChartData} />
+                            ) : (
+                                <div className="h-[350px] flex items-center justify-center text-muted-foreground">
+                                    No revenue data available
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </MotionDiv>
-                <MotionDiv variants={fadeIn} className="col-span-3">
+                <MotionDiv variants={fadeIn} className="lg:col-span-3">
                     <Card className="col-span-3">
                         <CardHeader>
                             <CardTitle>Recent Bookings</CardTitle>
@@ -179,6 +233,27 @@ export default async function DashboardPage() {
                         </CardHeader>
                         <CardContent>
                             <RecentBookings bookings={sections.recentBookings} />
+                        </CardContent>
+                    </Card>
+                </MotionDiv>
+            </div>
+            <div className="grid gap-4 grid-cols-1">
+                <MotionDiv variants={fadeIn}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Bookings by Service</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                                Top 5 services by booking count
+                            </p>
+                        </CardHeader>
+                        <CardContent className="pl-2">
+                            {sections.bookingsChartData.length > 0 ? (
+                                <BookingsChart data={sections.bookingsChartData} />
+                            ) : (
+                                <div className="h-[350px] flex items-center justify-center text-muted-foreground">
+                                    No booking data available
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </MotionDiv>
