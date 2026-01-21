@@ -13,32 +13,35 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  coverImage    String?
-  password      String?
 
   accounts Account[]
   sessions Session[]
 
   // App specific
   username String? @unique
-  bio      String?
   timeZone String  @default("UTC")
   language String  @default("es") // "es" or "en"
 
-  // Professional Details
-  address String?
-  phone   String?
+  // Profile
+  address       String?
+  phone         String?
+  profilePicUrl String?
 
-  services Service[]
-  bookings Booking[] @relation("UserBookings") // Bookings made BY this user (as a client)
-
-  availability AvailabilityRule[]
-  exceptions   AvailabilityException[]
+  // Platform Subscription (for owners to use the platform)
+  subscriptionStatus    SubscriptionStatus @default(INACTIVE)
+  subscriptionPlan      SubscriptionPlan?
+  stripeCustomerId      String?            @unique
+  stripeSubscriptionId  String?            @unique
+  subscriptionEndsAt    DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  notificationPreferences Json? // { email: boolean, sms: boolean, etc }
+  services           Service[]
+  bookings           Booking[]           @relation("UserBookings")
+  availabilityRules  AvailabilityRule[]
+  availabilityExceptions AvailabilityException[]
+  notificationPreferences Json?
   notificationLogs        NotificationLog[]
 
   role      Role        @default(OWNER)
@@ -198,6 +201,20 @@ enum PaymentStatus {
   PAID
   FAILED
   REFUNDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  PAST_DUE
+  TRIALING
+}
+
+enum SubscriptionPlan {
+  MONTHLY
+  QUARTERLY
+  ANNUAL
 }
 
 model AvailabilityRule {
