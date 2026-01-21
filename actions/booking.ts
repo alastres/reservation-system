@@ -15,7 +15,7 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
     // dateStr is iso date "YYYY-MM-DD"
     const service = await prisma.service.findUnique({
         where: { id: serviceId },
-        include: { user: { include: { availability: true, bookings: true, exceptions: true } } }
+        include: { user: { include: { availabilityRules: true, bookings: true, availabilityExceptions: true } } }
     });
 
     if (!service) return { error: "Service not found" };
@@ -64,11 +64,11 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
     const slots = getAvailableSlots(
         startOfDayInZone, // Use the calculate start of day
         service.duration,
-        service.user.availability,
+        service.user.availabilityRules,
         allBusySlots,
         timeZone,
         service.bufferTime,
-        service.user.exceptions,
+        service.user.availabilityExceptions,
         service.minNotice
     );
 

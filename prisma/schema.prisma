@@ -23,6 +23,8 @@ model User {
   language String  @default("es") // "es" or "en"
 
   // Profile
+  bio           String?
+  coverImage    String?
   address       String?
   phone         String?
   profilePicUrl String?
