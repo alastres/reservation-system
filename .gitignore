@@ -25,6 +25,9 @@
 *.pem
 
 # debug
+test_*.txt
+tsc_*.txt
+ts_*.txt
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
