@@ -242,6 +242,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                             onChange={e => field.onChange(e.target.value === "" ? 1 : parseInt(e.target.value))}
                                         />
                                     </FormControl>
+                                    <FormDescription>Max people per slot (1 = individual, &gt;1 = group)</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}

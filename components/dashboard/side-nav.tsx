@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserButton } from "@/components/auth/user-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const font = Plus_Jakarta_Sans({ weight: "600", subsets: ["latin"] });
 
@@ -116,8 +117,9 @@ export const SideNav = ({ role }: SideNavProps) => {
                 </div>
             </div>
             <div className="px-3 py-2">
-                <div className="flex items-center pl-3 mb-4 w-full justify-between">
+                <div className="flex items-center pl-3 mb-4 w-full justify-between gap-2">
                     <UserButton />
+                    <ThemeToggle />
                 </div>
             </div>
         </div >
