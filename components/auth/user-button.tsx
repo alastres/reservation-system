@@ -17,7 +17,7 @@ export const UserButton = () => {
         <div className="flex items-center w-full justify-between gap-x-2">
             <div className="flex items-center gap-x-2">
                 <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.image || ""} className="object-cover" />
+                    <AvatarImage src={user?.image || undefined} className="object-cover" />
                     <AvatarFallback className="bg-primary/10 text-primary">
                         {user?.name?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>

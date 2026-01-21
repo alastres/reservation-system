@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 // Price IDs from environment
@@ -100,17 +100,27 @@ export async function createPortalSession() {
         });
 
         if (!user?.stripeCustomerId) {
-            return { error: "No subscription found" };
+            return { error: "No se encontró una suscripción activa. Por favor suscríbete primero." };
         }
+
+        console.log("Creating portal session for customer:", user.stripeCustomerId);
+        console.log("Return URL:", `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings`);
 
         const portalSession = await stripe.billingPortal.sessions.create({
             customer: user.stripeCustomerId,
-            return_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription/manage`,
+            return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings`,
         });
 
+        console.log("Portal session created successfully:", portalSession.id);
         return { success: true, url: portalSession.url };
     } catch (error: any) {
         console.error("Error creating portal session:", error);
+        console.error("Error details:", {
+            message: error.message,
+            type: error.type,
+            code: error.code,
+            statusCode: error.statusCode,
+        });
         return { error: error.message || "Failed to create portal session" };
     }
 }

@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,10 +12,10 @@ async function getSubscriptionInfo(userId: string) {
     const user = await prisma.user.findUnique({
         where: { id: userId },
         select: {
-            subscriptionStatus,
-            subscriptionPlan,
-            subscriptionEndsAt,
-            stripeCustomerId,
+            subscriptionStatus: true,
+            subscriptionPlan: true,
+            subscriptionEndsAt: true,
+            stripeCustomerId: true,
         },
     });
 
