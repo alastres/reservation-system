@@ -50,4 +50,5 @@ export const ServiceSchema = z.object({
     isRecurrenceEnabled: z.boolean().default(false),
     maxRecurrenceCount: z.number().int().min(1).default(4),
     requiresPayment: z.boolean().default(false),
+    currency: z.string().min(1).default("usd"),
 });

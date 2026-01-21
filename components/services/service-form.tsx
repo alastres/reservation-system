@@ -40,6 +40,9 @@ interface ServiceProps {
     duration: number;
     price: number;
     location: string | null;
+    locationType: "GOOGLE_MEET" | "ZOOM" | "PHONE" | "IN_PERSON" | "CUSTOM";
+    locationUrl: string | null;
+    address: string | null;
     url: string;
     color: string;
     capacity: number;
@@ -49,6 +52,7 @@ interface ServiceProps {
     customInputs?: any[];
     isRecurrenceEnabled: boolean;
     maxRecurrenceCount: number;
+    requiresPayment: boolean;
 }
 
 interface ServiceFormProps {
