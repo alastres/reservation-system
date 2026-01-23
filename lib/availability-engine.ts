@@ -26,7 +26,8 @@ export const getAvailableSlots = (
     timeZone: string,
     bufferTime: number = 0,
     exceptions: AvailabilityException[] = [],
-    minNotice: number = 0
+    minNotice: number = 0,
+    capacity: number = 1
 ) => {
     // 1. Min Notice Filter
     const now = new Date();
@@ -81,13 +82,13 @@ export const getAvailableSlots = (
             continue;
         }
 
-        // Check conflicts
-        const isConflict = bookings.some(booking => {
+        // Check conflicts (Capacity Logic)
+        const overlappingBookingsCount = bookings.filter(booking => {
             // Check overlap with effective range [currentSlot, effectiveEnd)
             return isBefore(currentSlot, booking.endTime) && isAfter(effectiveEnd, booking.startTime);
-        });
+        }).length;
 
-        if (!isConflict) {
+        if (overlappingBookingsCount < capacity) {
             slots.push(format(currentSlot, "HH:mm"));
         }
 
