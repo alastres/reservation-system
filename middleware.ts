@@ -15,7 +15,6 @@ export default auth((req) => {
     const isLoggedIn = !!req.auth;
     const isVerified = Boolean((req.auth?.user as any)?.emailVerified);
     const userRole = (req.auth?.user as any)?.role;
-    console.log("Middleware Check:", { path: nextUrl.pathname, isLoggedIn, isVerified, emailVerifiedVal: (req.auth?.user as any)?.emailVerified, role: userRole });
 
     const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
     const isPublicRoute = publicRoutes.includes(nextUrl.pathname);

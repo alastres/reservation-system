@@ -15,17 +15,26 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export async function createPaymentIntent(
     amount: number,
     currency: string = "usd",
-    metadata: Record<string, string>
+    metadata: Record<string, string>,
+    connectedAccountId?: string
 ) {
     try {
-        const paymentIntent = await stripe.paymentIntents.create({
+        const params: Stripe.PaymentIntentCreateParams = {
             amount: Math.round(amount * 100), // Convert to cents
             currency,
             metadata,
             automatic_payment_methods: {
                 enabled: true,
             },
-        });
+        };
+
+        if (connectedAccountId) {
+            params.transfer_data = {
+                destination: connectedAccountId,
+            };
+        }
+
+        const paymentIntent = await stripe.paymentIntents.create(params);
 
         return { success: true, paymentIntent };
     } catch (error: any) {
