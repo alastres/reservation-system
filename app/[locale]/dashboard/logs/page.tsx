@@ -18,9 +18,11 @@ interface LogsPageProps {
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { LogsClientWrapper } from "@/components/logs/logs-client-wrapper";
+import { getTranslations } from "next-intl/server";
 
 export default async function LogsPage(props: LogsPageProps) {
     const session = await auth();
+    const t = await getTranslations("Logs");
 
     // Strict RBAC: Only ADMIN can access
     if (session?.user?.role !== "ADMIN") {
@@ -36,7 +38,7 @@ export default async function LogsPage(props: LogsPageProps) {
     if (error) {
         return (
             <div className="p-8">
-                <h1 className="text-2xl font-bold text-destructive">Error</h1>
+                <h1 className="text-2xl font-bold text-destructive">{t('error')}</h1>
                 <p>{error}</p>
             </div>
         );
@@ -45,11 +47,11 @@ export default async function LogsPage(props: LogsPageProps) {
     return (
         <div className="flex-1 space-y-4 p-8 pt-6">
             <div className="flex items-center justify-between space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">Notification Logs</h2>
+                <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
             </div>
             <Separator />
 
-            <Suspense fallback={<div>Loading logs...</div>}>
+            <Suspense fallback={<div>{t('loading')}</div>}>
                 <LogsClientWrapper
                     initialLogs={logs || []}
                     pagination={pagination || { total: 0, pages: 1, current: 1, limit: 20 }}

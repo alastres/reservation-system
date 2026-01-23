@@ -21,12 +21,14 @@ import { DeleteServiceButton, DuplicateServiceButton, ServiceStatusToggle } from
 import { useState } from "react";
 import { ServiceModal } from "@/components/services/service-modal";
 import { AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 interface ServicesClientProps {
     services: any[]; // Using any for now to match strictness level
 }
 
 export const ServicesClient = ({ services }: ServicesClientProps) => {
+    const t = useTranslations('Services');
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedService, setSelectedService] = useState<any>(null);
@@ -34,22 +36,9 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
     const [searchQuery, setSearchQuery] = useState("");
 
     // Sync specific service changes when props update (to handle deletion or external updates)
-    // But primarily we want to be optimistic.
-    // Actually, simply resetting logic is safer for consistency with router.refresh()
-    // but the user wants instant feedback.
-    // Sync specific service changes when props update
     useEffect(() => {
         setLocalServices(services);
     }, [services]);
-
-    // We can't just use useEffect because it might not run fast enough or race.
-    // But we need to update state when new props come in from router.refresh().
-    // AND we want to manually append when we create one.
-
-    // Better pattern: use effect to sync with server, but optimistic updates override temporarily?
-    // No, standard is: local state initializes from props.
-    // When props change (router.refresh), local state updates.
-    // AND we allow manual modification.
 
     const handleCreate = () => {
         setSelectedService(undefined);
@@ -117,17 +106,17 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                 <MotionDiv variants={slideUp} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
                         <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                            Services
+                            {t('title')}
                         </h2>
                         <p className="text-muted-foreground">
-                            Manage your service offerings and pricing.
+                            {t('subtitle')}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="relative w-full md:w-64 hidden md:block">
                             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search..."
+                                placeholder={t('searchPlaceholder')}
                                 className="pl-8 h-9"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -138,7 +127,7 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                             className="bg-gradient-to-r from-primary to-purple-600 shadow-lg shadow-primary/25 border-0"
                         >
                             <Plus className="" />
-                            Create Service
+                            {t('createService')}
                         </Button>
                     </div>
                 </MotionDiv>
@@ -146,7 +135,7 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                 <MotionDiv variants={fadeIn} className="relative w-full md:hidden mb-4">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search services..."
+                        placeholder={t('searchPlaceholder')}
                         className="pl-8 h-9"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -170,13 +159,13 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                                             <Plus className="w-8 h-8" />
                                         </div>
                                         <div className="space-y-1">
-                                            <h3 className="font-semibold text-lg">No services created</h3>
+                                            <h3 className="font-semibold text-lg">{t('noServicesTitle')}</h3>
                                             <p className="text-muted-foreground max-w-sm">
-                                                Get started by creating your first service offering.
+                                                {t('noServicesDesc')}
                                             </p>
                                         </div>
                                         <Button onClick={handleCreate} className="bg-primary">
-                                            Create Service
+                                            {t('createService')}
                                         </Button>
                                     </div>
                                 </Card>
@@ -195,9 +184,9 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                                         <Search className="w-8 h-8" />
                                     </div>
                                     <div className="space-y-1">
-                                        <h3 className="font-semibold text-lg">No results found</h3>
+                                        <h3 className="font-semibold text-lg">{t('noResultsTitle')}</h3>
                                         <p className="text-muted-foreground">
-                                            No services found matching "{searchQuery}"
+                                            {t('noResultsDesc', { query: searchQuery })}
                                         </p>
                                     </div>
                                     <Button
@@ -205,7 +194,7 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                                         onClick={() => setSearchQuery("")}
                                         className="border-white/10 hover:bg-white/5"
                                     >
-                                        Clear Search
+                                        {t('clearSearch')}
                                     </Button>
                                 </div>
                             </MotionDiv>
@@ -224,8 +213,6 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                                             if (service.user?.username) {
                                                 window.open(`/${service.user.username}/${service.url}`, '_blank');
                                             } else {
-                                                // Avoid error spam, maybe just log or do nothing. 
-                                                // It's possible the optimistic update hasn't populated user yet.
                                                 console.warn("Service owner has no username set", service);
                                             }
                                         }}
@@ -243,12 +230,12 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                                             <CardDescription className="flex items-center gap-2">
                                                 <span className="font-medium text-foreground">${service.price}</span>
                                                 <span>•</span>
-                                                <span>{service.duration} mins</span>
+                                                <span>{service.duration} {t('minutes')}</span>
                                             </CardDescription>
                                         </CardHeader>
                                         <CardContent>
                                             <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
-                                                {service.description || "No description provided."}
+                                                {service.description || t('noDescription')}
                                             </p>
                                             <div className="mt-4 flex items-center text-xs text-muted-foreground bg-black/20 p-2 rounded-md font-mono border border-white/5">
                                                 /{service.url}
@@ -266,7 +253,7 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                                                 className="h-8 hover:bg-white/10 hover:text-primary"
                                             >
                                                 <Edit2 className="w-4 h-4 mr-2" />
-                                                Edit
+                                                {t('edit')}
                                             </Button>
                                             <DeleteServiceButton id={service.id} onDelete={handleDelete} />
                                         </CardFooter>

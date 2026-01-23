@@ -3,9 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { MotionDiv, staggerContainer, slideUp } from "@/components/ui/motion";
 import { CalendarView } from "@/components/bookings/calendar-view";
+import { getTranslations } from "next-intl/server";
 
 export default async function BookingsPage() {
     const session = await auth();
+    const t = await getTranslations("Bookings");
 
     if (!session?.user?.id) {
         redirect("/auth/login");
@@ -55,7 +57,7 @@ export default async function BookingsPage() {
         >
             <MotionDiv variants={slideUp} className="flex items-center justify-between space-y-2 flex-shrink-0">
                 <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                    Calendario
+                    {t('title')}
                 </h2>
             </MotionDiv>
 

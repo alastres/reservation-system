@@ -30,12 +30,18 @@ interface DataTableProps<TData, TValue> {
     data: TData[];
 }
 
+import { useTranslations } from "next-intl";
+
+// ... (props definition)
+
 export function DataTable<TData, TValue>({
     columns,
     data,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+
+    const t = useTranslations('Clients.table');
 
     const table = useReactTable({
         data,
@@ -58,7 +64,7 @@ export function DataTable<TData, TValue>({
                 <div className="relative max-w-sm w-full">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Filter by name..."
+                        placeholder={t('filterPlaceholder')}
                         value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                         onChange={(event) =>
                             table.getColumn("name")?.setFilterValue(event.target.value)
@@ -112,7 +118,7 @@ export function DataTable<TData, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No results.
+                                    {t('noResults')}
                                 </TableCell>
                             </TableRow>
                         )}
@@ -122,7 +128,7 @@ export function DataTable<TData, TValue>({
 
             <div className="flex items-center justify-between py-4">
                 <div className="text-sm text-muted-foreground">
-                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                    {t('pagination.page')} {table.getState().pagination.pageIndex + 1} {t('pagination.of')} {table.getPageCount()}
                 </div>
                 <div className="flex items-center space-x-2">
                     <Button
@@ -132,7 +138,7 @@ export function DataTable<TData, TValue>({
                         disabled={!table.getCanPreviousPage()}
                     >
                         <ChevronLeft className="h-4 w-4 mr-2" />
-                        Previous
+                        {t('pagination.previous')}
                     </Button>
                     <Button
                         variant="outline"
@@ -140,7 +146,7 @@ export function DataTable<TData, TValue>({
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
                     >
-                        Next
+                        {t('pagination.next')}
                         <ChevronRight className="h-4 w-4 ml-2" />
                     </Button>
                 </div>

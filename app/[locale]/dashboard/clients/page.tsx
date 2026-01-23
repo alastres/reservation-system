@@ -5,9 +5,11 @@ import { MotionDiv, staggerContainer, slideUp } from "@/components/ui/motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { columns, Client } from "./columns";
 import { DataTable } from "./data-table";
+import { getTranslations } from "next-intl/server";
 
 export default async function ClientsPage() {
     const session = await auth();
+    const t = await getTranslations("Clients");
 
     if (!session?.user?.id) {
         redirect("/auth/login");
@@ -64,17 +66,17 @@ export default async function ClientsPage() {
         >
             <MotionDiv variants={slideUp} className="flex items-center justify-between space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                    Clients
+                    {t('title')}
                 </h2>
                 <p className="text-muted-foreground">
-                    You have {clients.length} unique clients.
+                    {t('subtitle', { count: clients.length })}
                 </p>
             </MotionDiv>
 
             <MotionDiv variants={slideUp}>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Client List</CardTitle>
+                        <CardTitle>{t('clientList')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <DataTable columns={columns} data={clients} />

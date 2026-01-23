@@ -1,0 +1,350 @@
+{
+    "Landing": {
+        "heroTitle": "Booking Management Simplified",
+        "heroSubtitle": "The complete solution to manage your appointments, clients, and payments in one place.",
+        "getStarted": "Get Started",
+        "signIn": "Sign In",
+        "features": "Features",
+        "pricing": "Pricing"
+    },
+    "Common": {
+        "dashboard": "Dashboard",
+        "settings": "Settings",
+        "logout": "Log Out"
+    },
+    "Auth": {
+        "welcomeBack": "Welcome back",
+        "dontHaveAccount": "Don't have an account?",
+        "createAccount": "Create an account",
+        "alreadyHaveAccount": "Already have an account?",
+        "email": "Email",
+        "password": "Password",
+        "name": "Name",
+        "forgotPassword": "Forgot password?",
+        "login": "Login",
+        "register": "Create an account",
+        "loginSuccess": "Login successful!",
+        "somethingWentWrong": "Something went wrong"
+    },
+    "Dashboard": {
+        "dashboard": "Dashboard",
+        "services": "Services",
+        "availability": "Availability",
+        "bookings": "Bookings",
+        "clients": "Clients",
+        "logs": "Logs",
+        "settings": "Settings",
+        "adminPanel": "Admin Panel"
+    },
+    "DashboardOverview": {
+        "title": "Dashboard",
+        "totalRevenue": "Total Revenue",
+        "lifetime": "Lifetime",
+        "totalBookings": "Total Bookings",
+        "allTime": "All time",
+        "upcomingBookings": "Upcoming Bookings",
+        "scheduled": "Scheduled",
+        "services": "Services",
+        "active": "Active",
+        "revenueOverview": "Revenue Overview",
+        "last30Days": "Last 30 days revenue trend",
+        "noRevenueData": "No revenue data available",
+        "recentBookings": "Recent Bookings",
+        "latestBookingActivity": "Latest booking activity",
+        "bookingsByService": "Bookings by Service",
+        "top5Services": "Top 5 services by booking count",
+        "noBookingData": "No booking data available",
+        "confirmed": "Confirmed",
+        "noRecentBookings": "No recent bookings",
+        "revenue": "Revenue",
+        "bookings": "Bookings"
+    },
+    "Services": {
+        "title": "Services",
+        "subtitle": "Manage your service offerings and pricing.",
+        "searchPlaceholder": "Search...",
+        "createService": "Create Service",
+        "updateService": "Update Service",
+        "noServicesTitle": "No services created",
+        "noServicesDesc": "Get started by creating your first service offering.",
+        "noResultsTitle": "No results found",
+        "noResultsDesc": "No services found matching \"{query}\"",
+        "clearSearch": "Clear Search",
+        "edit": "Edit",
+        "delete": "Delete",
+        "duplicate": "Duplicate Service",
+        "cancel": "Cancel",
+        "deleteService": "Delete Service",
+        "deleteConfirmation": "Are you sure you want to delete this service? This action cannot be undone.",
+        "deleting": "Deleting...",
+        "editService": "Edit Service",
+        "editServiceDesc": "Make changes to your service details below.",
+        "createServiceDesc": "Add a new service to your offerings.",
+        "form": {
+            "title": "Title",
+            "titlePlaceholder": "e.g. 30 Min Meeting",
+            "urlSlug": "URL Slug",
+            "urlSlugDesc": "Public link: domain.com/[username]/{slug}",
+            "duration": "Duration (min)",
+            "price": "Price ($)",
+            "colorTheme": "Color Theme",
+            "description": "Description",
+            "location": "Location",
+            "selectLocation": "Select location type",
+            "googleMeet": "Google Meet",
+            "phoneCall": "Phone Call",
+            "inPerson": "In Person",
+            "customLink": "Custom Link",
+            "googleMeetDesc": "A Meet link will be generated automatically.",
+            "phoneCallDesc": "Client will be required to provide their phone number.",
+            "inPersonDesc": "You must provide an address below.",
+            "address": "Address",
+            "addressDesc": "Leave empty to use your Default Profile Address.",
+            "meetingUrl": "Meeting URL",
+            "active": "Active",
+            "activeDesc": "Turn off to hide from public profile",
+            "requirePayment": "Require Payment",
+            "requirePaymentDesc": "Clients must pay before booking is confirmed",
+            "concurrency": "Service Concurrency",
+            "concurrencyDesc": "Define if this service has its own dedicated capacity or shares your global availability.",
+            "useCustomCapacity": "Use Custom Capacity",
+            "useCustomCapacityDesc": "If enabled, this service creates its own capacity pool.",
+            "maxConcurrentClients": "Max Concurrent Clients",
+            "maxConcurrentClientsDesc": "How many clients can be booked at the same time for THIS service.",
+            "recursiveBookings": "Recursive Bookings",
+            "recursiveBookingsDesc": "Allow customers to book recurring appointments.",
+            "enableRecurrence": "Enable Recurrence",
+            "maxOccurrences": "Max Occurrences",
+            "limitRepeats": "Limit how many times it can repeat.",
+            "customQuestions": "Custom Questions",
+            "customQuestionsDesc": "Ask your clients additional questions when they book.",
+            "addQuestion": "Add Question",
+            "label": "Label",
+            "type": "Type",
+            "required": "Required",
+            "types": {
+                "text": "Short Text",
+                "textarea": "Long Text",
+                "checkbox": "Checkbox (Yes/No)"
+            }
+        },
+        "status": {
+            "created": "Service created!",
+            "updated": "Service updated!",
+            "deleted": "Service deleted!",
+            "duplicated": "Service duplicated!",
+            "toggled": "Service status updated!"
+        },
+        "noDescription": "No description provided.",
+        "minutes": "mins"
+    },
+    "Availability": {
+        "title": "Availability Settings",
+        "form": {
+            "title": "Weekly Schedule",
+            "save": "Save Changes",
+            "saving": "Saving...",
+            "days": {
+                "sunday": "Sunday",
+                "monday": "Monday",
+                "tuesday": "Tuesday",
+                "wednesday": "Wednesday",
+                "thursday": "Thursday",
+                "friday": "Friday",
+                "saturday": "Saturday"
+            },
+            "unavailable": "Unavailable"
+        },
+        "override": {
+            "title": "Date-Specific Overrides",
+            "selectDate": "Select Date",
+            "pickDate": "Pick a date",
+            "available": "Available?",
+            "startTime": "Start Time",
+            "endTime": "End Time",
+            "add": "Add Override",
+            "active": "Active Overrides",
+            "empty": "No overrides set.",
+            "unavailable": "Unavailable",
+            "toast": {
+                "added": "Override added successfully",
+                "deleted": "Override deleted successfully",
+                "error": "Something went wrong"
+            }
+        }
+    },
+    "Bookings": {
+        "title": "Calendar",
+        "filter": "Filter by service",
+        "allServices": "All Services",
+        "today": "Today",
+        "weekDays": {
+            "0": "Sun",
+            "1": "Mon",
+            "2": "Tue",
+            "3": "Wed",
+            "4": "Thu",
+            "5": "Fri",
+            "6": "Sat"
+        },
+        "more": "+ {count} more",
+        "scheduled": "{count} booking(s) scheduled",
+        "noBookings": "No bookings for this day.",
+        "notProvided": "Not provided",
+        "online": "Online",
+        "inPerson": "In Person",
+        "cancel": {
+            "button": "Cancel",
+            "title": "Are you sure?",
+            "description": "This action cannot be undone. This will permanently cancel the booking.",
+            "confirm": "Yes, cancel booking",
+            "cancel": "Cancel"
+        },
+        "reschedule": {
+            "button": "Reschedule",
+            "title": "Reschedule Booking",
+            "description": "Select a new date and time for this booking. The client will be notified.",
+            "changeDate": "Change Date",
+            "noSlots": "No slots available for this date.",
+            "confirm": "Confirm New Time",
+            "cancel": "Cancel",
+            "success": "Booking rescheduled successfully"
+        }
+    },
+    "Settings": {
+        "profile": {
+            "title": "Profile Information",
+            "description": "Update your public profile details and personal information.",
+            "form": {
+                "coverImage": "Cover Image",
+                "noCover": "No cover image",
+                "recCover": "Recommended 1200x400px",
+                "changeCover": "Change Cover",
+                "profilePicture": "Profile Picture",
+                "change": "Change",
+                "recProfile": "Recommended size: 500x500px",
+                "uploading": "Uploading...",
+                "fullName": "Full Name",
+                "username": "Username",
+                "bio": "Bio",
+                "capacity": "Global Team Capacity",
+                "capacityDesc": "Maximum number of clients you can serve simultaneously across ALL services.",
+                "advanced": "Advanced",
+                "whatsapp": "WhatsApp Number",
+                "address": "Default Address",
+                "timeZone": "Time Zone",
+                "language": "Language",
+                "emailNotif": "Email Notifications",
+                "emailNotifDesc": "Receive updates about your bookings.",
+                "save": "Save Changes",
+                "saving": "Saving..."
+            }
+        },
+        "subscription": {
+            "title": "Subscription",
+            "descriptionAdmin": "Information about your administrative account",
+            "descriptionUser": "Manage your plan and payment method",
+            "adminAccess": "As an administrator, you have full access without a subscription",
+            "currentPlan": "Current Plan",
+            "renews": "Renews on",
+            "expires": "Expires on",
+            "manage": "Manage Subscription",
+            "manageDesc": "You can change your plan, update your card, or cancel your subscription from the management portal",
+            "noActive": "You do not have an active subscription",
+            "viewPlans": "View Available Plans",
+            "status": {
+                "ACTIVE": "Active",
+                "PAST_DUE": "Past Due",
+                "CANCELLED": "Cancelled",
+                "INACTIVE": "Inactive",
+                "TRIALING": "Trialing"
+            },
+            "plans": {
+                "MONTHLY": "Monthly Plan",
+                "QUARTERLY": "Quarterly Plan",
+                "ANNUAL": "Annual Plan"
+            },
+            "prices": {
+                "MONTHLY": "€10/month",
+                "QUARTERLY": "€25.50/3 months",
+                "ANNUAL": "€84/year"
+            }
+        },
+        "stripe": {
+            "title": "Payments & Stripe Connect",
+            "description": "Connect your Stripe account to receive payments directly from your clients.",
+            "active": "Active",
+            "checking": "Checking status...",
+            "connected": {
+                "title": "Connected Account",
+                "description": "Your Stripe account is ready to receive payments.",
+                "config": "Stripe Configuration",
+                "disconnect": "Disconnect"
+            },
+            "disconnected": {
+                "title": "Receive payments for your services",
+                "description": "To collect payments for your appointments (e.g. upfront payments), you need to connect a Stripe account. Funds will be transferred directly to your bank account configured in Stripe.",
+                "connect": "Connect with Stripe",
+                "connecting": "Connecting...",
+                "incomplete": "Setup incomplete. Please continue connection."
+            },
+            "confirmDisconnect": "Are you sure? This will prevent you from receiving payments."
+        }
+    },
+    "Clients": {
+        "title": "Clients",
+        "subtitle": "You have {count} unique clients.",
+        "clientList": "Client List",
+        "table": {
+            "columns": {
+                "name": "Name",
+                "contactInfo": "Contact Info",
+                "totalBookings": "Total Bookings",
+                "lastVisit": "Last Visit"
+            },
+            "filterPlaceholder": "Filter by name...",
+            "noResults": "No results.",
+            "pagination": {
+                "page": "Page",
+                "of": "of",
+                "previous": "Previous",
+                "next": "Next"
+            }
+        }
+    },
+    "Logs": {
+        "title": "Notification Logs",
+        "loading": "Loading logs...",
+        "error": "Error",
+        "filters": {
+            "label": "Filter by Type:",
+            "allTypes": "All Types",
+            "options": {
+                "CLIENT_CONFIRMATION": "Confirmation",
+                "BOOKING_RECEIVED": "New Booking",
+                "CLIENT_CANCELLATION": "Cancellation",
+                "CLIENT_RESCHEDULE": "Reschedule",
+                "REMINDER_24H": "24h Reminder",
+                "REMINDER_1H": "1h Reminder"
+            }
+        },
+        "table": {
+            "headers": {
+                "date": "Date",
+                "type": "Type",
+                "status": "Status",
+                "recipient": "Recipient",
+                "details": "Details"
+            },
+            "noLogs": "No logs found.",
+            "view": "View",
+            "dialogTitle": "Log Details",
+            "pagination": {
+                "previous": "Previous",
+                "of": "of",
+                "page": "Page",
+                "next": "Next"
+            }
+        }
+    }
+}

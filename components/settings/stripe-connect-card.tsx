@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Loader2, CheckCircle, AlertCircle, ExternalLink } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export function StripeConnectCard({ user }: { user: any }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +16,7 @@ export function StripeConnectCard({ user }: { user: any }) {
     const [connectData, setConnectData] = useState<any>(null);
     const searchParams = useSearchParams();
     const router = useRouter();
+    const t = useTranslations("Settings.stripe");
 
     const isRefresh = searchParams.get("stripe_connect") === "refresh";
     const isReturn = searchParams.get("stripe_connect") === "return";
@@ -62,7 +64,7 @@ export function StripeConnectCard({ user }: { user: any }) {
     };
 
     const handleDisconnect = async () => {
-        if (!confirm("Are you sure? This will prevent you from receiving payments.")) return;
+        if (!confirm(t('confirmDisconnect'))) return;
 
         setIsLoading(true);
         try {
@@ -88,29 +90,29 @@ export function StripeConnectCard({ user }: { user: any }) {
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle>Pagos y Stripe Connect</CardTitle>
+                        <CardTitle>{t('title')}</CardTitle>
                         <CardDescription>
-                            Conecta tu cuenta de Stripe para recibir pagos de tus clientes directamente.
+                            {t('description')}
                         </CardDescription>
                     </div>
                     {connectData?.connected && (
-                        <Badge variant="default" className="bg-green-600">Activo</Badge>
+                        <Badge variant="default" className="bg-green-600">{t('active')}</Badge>
                     )}
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">
                 {isChecking ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin" /> Checking status...
+                        <Loader2 className="h-4 w-4 animate-spin" /> {t('checking')}
                     </div>
                 ) : isConnected ? (
                     <div className="space-y-4">
                         <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start gap-3">
                             <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                             <div>
-                                <h4 className="font-medium text-green-900 dark:text-green-400">Cuenta Conectada</h4>
+                                <h4 className="font-medium text-green-900 dark:text-green-400">{t('connected.title')}</h4>
                                 <p className="text-sm text-green-700 dark:text-green-500 mt-1">
-                                    Tu cuenta de Stripe está lista para recibir pagos.
+                                    {t('connected.description')}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-2">
                                     ID: {user.stripeConnectAccountId}
@@ -121,38 +123,37 @@ export function StripeConnectCard({ user }: { user: any }) {
                         <div className="flex gap-2">
                             <Button variant="outline" onClick={handleConnect}> {/* Re-onboarding often handles dashboard login link or update */}
                                 <ExternalLink className="mr-2 h-4 w-4" />
-                                Configuración Stripe
+                                {t('connected.config')}
                             </Button>
 
                             <Button variant="destructive" onClick={handleDisconnect} disabled={isLoading}>
-                                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Desconectar"}
+                                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('connected.disconnect')}
                             </Button>
                         </div>
                     </div>
                 ) : (
                     <div className="space-y-4">
                         <div className="p-4 bg-muted rounded-lg">
-                            <h4 className="font-medium mb-2">Recibe pagos por tus servicios</h4>
+                            <h4 className="font-medium mb-2">{t('disconnected.title')}</h4>
                             <p className="text-sm text-muted-foreground mb-4">
-                                Para cobrar por tus citas (ej. pago por adelantado), necesitas conectar una cuenta de Stripe.
-                                Los fondos se transferirán directamente a tu cuenta bancaria configurada en Stripe.
+                                {t('disconnected.description')}
                             </p>
 
                             <Button onClick={handleConnect} disabled={isLoading} className="w-full sm:w-auto">
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Conectando...
+                                        {t('disconnected.connecting')}
                                     </>
                                 ) : (
-                                    "Conectar con Stripe"
+                                    t('disconnected.connect')
                                 )}
                             </Button>
                         </div>
                         {hasAccountId && !isConnected && (
                             <div className="flex items-center gap-2 text-yellow-600 text-sm">
                                 <AlertCircle className="h-4 w-4" />
-                                <span>Configuración incompleta. Por favor continúa la conexión.</span>
+                                <span>{t('disconnected.incomplete')}</span>
                             </div>
                         )}
                     </div>

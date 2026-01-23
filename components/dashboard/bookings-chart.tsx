@@ -9,6 +9,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
+import { useTranslations } from "next-intl";
 
 interface BookingsChartProps {
     data: {
@@ -18,6 +19,8 @@ interface BookingsChartProps {
 }
 
 export function BookingsChart({ data }: BookingsChartProps) {
+    const t = useTranslations('DashboardOverview');
+
     return (
         <ResponsiveContainer width="100%" height={350}>
             <BarChart data={data}>
@@ -41,7 +44,7 @@ export function BookingsChart({ data }: BookingsChartProps) {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "8px",
                     }}
-                    formatter={(value: number) => [value, "Bookings"]}
+                    formatter={(value: number) => [value, t('bookings')]}
                 />
                 <Bar
                     dataKey="bookings"
@@ -52,3 +55,4 @@ export function BookingsChart({ data }: BookingsChartProps) {
         </ResponsiveContainer>
     );
 }
+
