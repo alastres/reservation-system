@@ -55,7 +55,7 @@ const DashboardLayout = async ({
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold mr-2 shadow-lg shadow-primary/25">
                         S
                     </div>
-                    <h1 className={cn("text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400", font.className)}>
+                    <h1 className={cn("text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400", font.className)}>
                         Scheduler
                     </h1>
                 </div>

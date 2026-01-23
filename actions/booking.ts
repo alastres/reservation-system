@@ -69,7 +69,8 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
         timeZone,
         service.bufferTime,
         service.user.availabilityExceptions,
-        service.minNotice
+        service.minNotice,
+        service.capacity
     );
 
     return { slots };
@@ -190,8 +191,8 @@ export const createBooking = async (
             }
         );
 
-        if (paymentResult.error) {
-            return { error: paymentResult.error };
+        if (paymentResult.error || !paymentResult.paymentIntent) {
+            return { error: paymentResult.error || "Payment initialization failed" };
         }
 
         // Return the client secret so the frontend can show the payment form
