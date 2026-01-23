@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CreditCard, Calendar, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { StripeConnectCard } from "@/components/settings/stripe-connect-card";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,8 @@ export default async function SettingsPage() {
             subscriptionPlan: true,
             subscriptionEndsAt: true,
             maxConcurrentClients: true,
+            stripeConnectAccountId: true,
+            stripeConnectStatus: true,
         },
     });
 
@@ -86,6 +89,13 @@ export default async function SettingsPage() {
                     <ProfileForm user={user as any} />
                 </CardContent>
             </Card>
+
+            {/* Stripe Connect Section */}
+            {!isAdmin && (
+                <div className="col-span-1 md:col-span-2">
+                    <StripeConnectCard user={user} />
+                </div>
+            )}
 
             {/* Subscription Section */}
             {!isAdmin && (
