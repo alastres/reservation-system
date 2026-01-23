@@ -28,67 +28,88 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
     }
 
     // 1. Determine "Day" in Target TimeZone
-    // dateStr is "2024-XX-XX". We want 00:00:00 in `timeZone`.
-    // fromZonedTime takes "YYYY-MM-DD HH:mm:ss" effectively if passed strings, 
-    // but easier to make a string and parse it as if it's in that zone.
     const startOfDayInZone = fromZonedTime(`${dateStr} 00:00:00`, timeZone);
     const endOfDayInZone = fromZonedTime(`${dateStr} 23:59:59.999`, timeZone);
 
-    // DB Queries should check against these UTC equivalents
     const dayStart = startOfDayInZone;
     const dayEnd = endOfDayInZone;
 
-    // Fetch bookings that overlap with this target day
-    const bookings = await prisma.booking.findMany({
-        where: {
-            service: { userId: service.userId },
-            startTime: { lt: dayEnd },
-            endTime: { gt: dayStart },
-            status: "CONFIRMED"
-        }
-    });
+    // --- Dynamic Concurrency Scope Logic ---
+    let bookings: any[] = [];
+    let effectiveCapacity = 1;
 
-    console.log("[getSlotsAction] Debug Info:", {
-        serviceId,
-        dateStr,
-        timeZone,
-        dayStart: dayStart.toISOString(),
-        dayEnd: dayEnd.toISOString(),
-        bookingsFound: bookings.length,
-        bookings: bookings.map(b => ({ start: b.startTime, end: b.endTime, status: b.status }))
-    });
+    if (service.isConcurrencyEnabled) {
+        // A. Service Scope (Isolated)
+        effectiveCapacity = service.maxConcurrency || 1;
+        bookings = await prisma.booking.findMany({
+            where: {
+                serviceId: service.id, // Only this service
+                startTime: { lt: dayEnd },
+                endTime: { gt: dayStart },
+                status: "CONFIRMED"
+            }
+        });
+    } else {
+        // B. Global Scope (Shared)
+        effectiveCapacity = service.user.maxConcurrentClients || 1;
+        bookings = await prisma.booking.findMany({
+            where: {
+                service: {
+                    userId: service.userId,
+                    isConcurrencyEnabled: false // Only sum up Global Pool consumers
+                },
+                startTime: { lt: dayEnd },
+                endTime: { gt: dayStart },
+                status: "CONFIRMED"
+            }
+        });
+    }
 
-    // Fetch Google Calendar Busy Times
-    const googleBusyTimes = await getBusyTimes(service.userId, dayStart, dayEnd);
+    // Google Busy Times Handling
+    // Logic: If Service Scope is used, should we care about Google Calendar?
+    // Usually Google Calendar represents the "Human" owner.
+    // If "Service A" has 2 slots (Employees), maybe Google Calendar shouldn't block it?
+    // User Requirement: "tengo dos personas para que atiendan...".
+    // If it's a team, the OWNER'S Google Calendar shouldn't necessarily block the team slots.
+    // HOWEVER, for safety/MVP, we'll keep Google Calendar blocking unless explicitly requested otherwise.
+    // OR: Maybe only block if "Global Scope" is used?
+    // "In another service I have 3 people". The Owner isn't necessarily 3 people.
+    // IMPL DECISION: If concurrency > 1 (Team), Google Calendar events (Personal) should PROBABLY NOT block availability,
+    // unless those events are manually synced bookings.
+    // But let's stick to the prompt: "The system... base always its info on is this is active".
+    // If I have 3 barbers, my personal dentist appointment shouldn't block the barbershop.
+    // So: Only fetch Google Busy Times if `!isConcurrencyEnabled` OR if maxConcurrency == 1?
+    // Let's keep it simple: If `isConcurrencyEnabled` is TRUE, we IGNORE Google Calendar personal events (unless we add staff calendars later).
 
-    // Filter out Google Busy Times that overlap exactly with existing system bookings
-    // This prevents double counting if Google Calendar Sync is enabled.
-    // If a Google Event starts/ends at the same time as a Booking, we assume it's the same event.
-    const uniqueGoogleBusyTimes = googleBusyTimes.filter(gBusy => {
-        const gStart = new Date(gBusy.start!).getTime();
-        const gEnd = new Date(gBusy.end!).getTime();
+    let allBusySlots = [...bookings];
 
-        const isDuplicate = bookings.some(b => {
-            const bStart = b.startTime.getTime();
-            const bEnd = b.endTime.getTime();
-            return Math.abs(gStart - bStart) < 60000 && Math.abs(gEnd - bEnd) < 60000; // 1 minute tolerance
+    if (!service.isConcurrencyEnabled) {
+        // Only merge Google Busy Times for the Global/Owner pool
+        const googleBusyTimes = await getBusyTimes(service.userId, dayStart, dayEnd);
+
+        const uniqueGoogleBusyTimes = googleBusyTimes.filter(gBusy => {
+            const gStart = new Date(gBusy.start!).getTime();
+            const gEnd = new Date(gBusy.end!).getTime();
+
+            const isDuplicate = bookings.some(b => {
+                const bStart = b.startTime.getTime();
+                const bEnd = b.endTime.getTime();
+                return Math.abs(gStart - bStart) < 60000 && Math.abs(gEnd - bEnd) < 60000;
+            });
+            return !isDuplicate;
         });
 
-        return !isDuplicate;
-    });
-
-    // Merge bookings and busy times
-    const allBusySlots = [
-        ...bookings,
-        ...uniqueGoogleBusyTimes.map(busy => ({
-            startTime: new Date(busy.start!),
-            endTime: new Date(busy.end!)
-        }))
-    ];
-
+        allBusySlots = [
+            ...bookings,
+            ...uniqueGoogleBusyTimes.map(busy => ({
+                startTime: new Date(busy.start!),
+                endTime: new Date(busy.end!)
+            }))
+        ];
+    }
 
     const slots = getAvailableSlots(
-        startOfDayInZone, // Use the calculate start of day
+        startOfDayInZone,
         service.duration,
         service.user.availabilityRules,
         allBusySlots,
@@ -96,7 +117,7 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
         service.bufferTime,
         service.user.availabilityExceptions,
         service.minNotice,
-        service.user.maxConcurrentClients || 1
+        effectiveCapacity // Pass computed capacity
     );
 
     return { slots };
@@ -156,12 +177,16 @@ export const createBooking = async (
 
     // 3. Availability Check for ALL dates
     // For group bookings: check if capacity is reached
+    // 3. Availability Check for ALL dates
+    // For group bookings: check if capacity is reached
     for (const date of datesToBook) {
         const checkStart = date;
         const checkEnd = addMinutes(checkStart, service.duration);
         const checkBuffEnd = addMinutes(checkEnd, service.bufferTime || 0);
 
-        // Count existing bookings for this time slot
+        // --- 1. Internal Slot Capacity (Group Booking Logic) ---
+        // This is "how many people can fit in ONE booking event" (e.g. Yoga Class)
+        // Kept as is.
         const existingCount = await prisma.booking.count({
             where: {
                 serviceId: service.id,
@@ -171,27 +196,59 @@ export const createBooking = async (
             }
         });
 
-        const maxGlobal = service.user.maxConcurrentClients || 1;
-        const isGroupService = service.capacity > 1;
-        const shouldCheckServiceCapacity = isGroupService || maxGlobal === 1;
-
-        if (shouldCheckServiceCapacity && existingCount >= service.capacity) {
+        // Determine effective capacity logic
+        // "Capacity" field in Service is usually 1 for 1-on-1.
+        // If > 1, it's a group class.
+        if (service.capacity > 1 && existingCount >= service.capacity) {
             const conflictDate = format(checkStart, "yyyy-MM-dd");
             return { error: `Slot on ${conflictDate} is fully booked (${service.capacity}/${service.capacity} spots taken).` };
         }
 
-        // Global Capacity Check (Staff Scalability)
-        const totalConcurrentBookings = await prisma.booking.count({
-            where: {
-                service: { userId: service.userId },
-                startTime: { lt: checkBuffEnd },
-                endTime: { gt: checkStart },
-                status: "CONFIRMED"
-            }
-        });
+        // --- 2. Concurrency Logic (Staff/Resource Availability) ---
+        // New Logic: Check if we use Service-Specific Concurrency or Global User Concurrency
 
-        if (totalConcurrentBookings >= maxGlobal) {
-            return { error: `No staff available at this time (Global limit ${maxGlobal} reached).` };
+        let concurrencyLimit = service.user.maxConcurrentClients || 1;
+        let currentConcurrencyCount = 0;
+
+        if (service.isConcurrencyEnabled) {
+            // A. Service-Specific Scope
+            // This service has its own dedicated resource pool (e.g. "2 Barbers").
+            // It only competes with itself.
+            concurrencyLimit = service.maxConcurrency || 1;
+
+            currentConcurrencyCount = await prisma.booking.count({
+                where: {
+                    serviceId: service.id, // Only check THIS service
+                    startTime: { lt: checkBuffEnd },
+                    endTime: { gt: checkStart },
+                    status: "CONFIRMED"
+                }
+            });
+        } else {
+            // B. Global Scope (Default)
+            // This service shares the provider's global pool (e.g. "The Owner").
+            // It competes with ALL other services that allow share the global pool.
+            // It should NOT be blocked by services that have their own isolated pool.
+
+            concurrencyLimit = service.user.maxConcurrentClients || 1;
+
+            currentConcurrencyCount = await prisma.booking.count({
+                where: {
+                    service: {
+                        userId: service.userId,
+                        // CRITICAL: Exclude services that define their own concurrency.
+                        // We only sum up bookings that consume the GLOBAL pool.
+                        isConcurrencyEnabled: false
+                    },
+                    startTime: { lt: checkBuffEnd },
+                    endTime: { gt: checkStart },
+                    status: "CONFIRMED"
+                }
+            });
+        }
+
+        if (currentConcurrencyCount >= concurrencyLimit) {
+            return { error: `No staff available at this time (Limit ${concurrencyLimit} reached).` };
         }
     }
 

@@ -49,6 +49,8 @@ interface ServiceProps {
     customInputs?: any[];
     isRecurrenceEnabled: boolean;
     maxRecurrenceCount: number;
+    isConcurrencyEnabled: boolean;
+    maxConcurrency: number;
 }
 
 interface ServiceFormProps {
@@ -132,6 +134,8 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
             isRecurrenceEnabled: service?.isRecurrenceEnabled ?? false,
             maxRecurrenceCount: service?.maxRecurrenceCount || 4,
             requiresPayment: (service as any)?.requiresPayment ?? false,
+            isConcurrencyEnabled: service?.isConcurrencyEnabled ?? false,
+            maxConcurrency: service?.maxConcurrency || 1,
         },
     });
 
@@ -227,73 +231,28 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="capacity"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Capacity</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                type="number"
-                                                min={1}
-                                                disabled={isPending}
-                                                onChange={e => field.onChange(e.target.value === "" ? 1 : parseInt(e.target.value))}
+                    <FormField
+                        control={form.control}
+                        name="color"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Color Theme</FormLabel>
+                                <FormControl>
+                                    <div className="flex flex-wrap gap-2">
+                                        {["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#3b82f6"].map((color) => (
+                                            <div
+                                                key={color}
+                                                className={`w-8 h-8 rounded-full cursor-pointer transition-all border-2 ${field.value === color ? "border-white scale-110" : "border-transparent opacity-50 hover:opacity-100"}`}
+                                                style={{ backgroundColor: color }}
+                                                onClick={() => field.onChange(color)}
                                             />
-                                        </FormControl>
-                                        <FormDescription>Max people per slot (1 = individual, &gt;1 = group)</FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="bufferTime"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Buffer (min)</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                type="number"
-                                                min={0}
-                                                disabled={isPending}
-                                                onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="color"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Color Theme</FormLabel>
-                                        <FormControl>
-                                            <div className="flex flex-wrap gap-2">
-                                                {["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#3b82f6"].map((color) => (
-                                                    <div
-                                                        key={color}
-                                                        className={`w-8 h-8 rounded-full cursor-pointer transition-all border-2 ${field.value === color ? "border-white scale-110" : "border-transparent opacity-50 hover:opacity-100"}`}
-                                                        style={{ backgroundColor: color }}
-                                                        onClick={() => field.onChange(color)}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                    </div>
+                                        ))}
+                                    </div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <FormField
                         control={form.control}
                         name="description"
@@ -408,6 +367,59 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             </FormItem>
                         )}
                     />
+                </div>
+
+                {/* Concurrency Settings */}
+                <div className="space-y-4 border border-input/50 rounded-lg p-4 bg-muted/20">
+                    <div className="space-y-0.5">
+                        <FormLabel className="text-base">Service Concurrency (Staff/Resources)</FormLabel>
+                        <FormDescription>
+                            Define if this service has its own dedicated capacity (e.g., 2 Barbers) or shares your global availability.
+                        </FormDescription>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <FormField
+                            control={form.control}
+                            name="isConcurrencyEnabled"
+                            render={({ field }) => (
+                                <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-card">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-sm font-medium">Use Custom Capacity</FormLabel>
+                                        <FormDescription className="text-xs">
+                                            If enabled, this service creates its own capacity pool.
+                                        </FormDescription>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={isPending}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="maxConcurrency"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Max Concurrent Clients</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            type="number"
+                                            min={1}
+                                            disabled={isPending || !form.watch("isConcurrencyEnabled")}
+                                            onChange={e => field.onChange(parseInt(e.target.value))}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>How many clients can be booked at the same time for THIS service.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 </div>
 
                 {/* Recurrence Settings */}

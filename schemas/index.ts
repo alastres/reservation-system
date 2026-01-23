@@ -51,4 +51,6 @@ export const ServiceSchema = z.object({
     isRecurrenceEnabled: z.boolean().default(false),
     maxRecurrenceCount: z.number().int().min(1).default(4),
     requiresPayment: z.boolean().default(false),
+    isConcurrencyEnabled: z.boolean().default(false),
+    maxConcurrency: z.number().int().min(1).default(1),
 });
