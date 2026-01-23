@@ -15,7 +15,7 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
     // dateStr is iso date "YYYY-MM-DD"
     const service = await prisma.service.findUnique({
         where: { id: serviceId },
-        include: { user: { include: { availabilityRules: true, bookings: true, availabilityExceptions: true } } }
+        include: { user: { include: { availabilityRules: true, availabilityExceptions: true } } }
     });
 
     if (!service) return { error: "Service not found" };
@@ -514,8 +514,8 @@ async function handleBookingFulfillment(
     dateStr?: string,   // "YYYY-MM-DD"
     time?: string      // "HH:MM"
 ) {
-    // 1. Sync with Google Calendar
-    for (const date of datesToBook) {
+    // 1. Sync with Google Calendar (Parallelized)
+    await Promise.all(datesToBook.map(async (date) => {
         const start = date;
         const end = addMinutes(start, service.duration);
 
@@ -566,7 +566,7 @@ async function handleBookingFulfillment(
                 });
             }
         }
-    }
+    }));
 
     // 2. Determine Location Details for Email
     let locationDetails = "";
