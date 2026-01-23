@@ -227,68 +227,72 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="capacity"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Capacity</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            type="number"
-                                            min={1}
-                                            disabled={isPending}
-                                            onChange={e => field.onChange(e.target.value === "" ? 1 : parseInt(e.target.value))}
-                                        />
-                                    </FormControl>
-                                    <FormDescription>Max people per slot (1 = individual, &gt;1 = group)</FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="bufferTime"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Buffer (min)</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            type="number"
-                                            min={0}
-                                            disabled={isPending}
-                                            onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="color"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Color Theme</FormLabel>
-                                    <FormControl>
-                                        <div className="flex flex-wrap gap-2">
-                                            {["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#3b82f6"].map((color) => (
-                                                <div
-                                                    key={color}
-                                                    className={`w-8 h-8 rounded-full cursor-pointer transition-all border-2 ${field.value === color ? "border-white scale-110" : "border-transparent opacity-50 hover:opacity-100"}`}
-                                                    style={{ backgroundColor: color }}
-                                                    onClick={() => field.onChange(color)}
-                                                />
-                                            ))}
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="capacity"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Capacity</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                type="number"
+                                                min={1}
+                                                disabled={isPending}
+                                                onChange={e => field.onChange(e.target.value === "" ? 1 : parseInt(e.target.value))}
+                                            />
+                                        </FormControl>
+                                        <FormDescription>Max people per slot (1 = individual, &gt;1 = group)</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="bufferTime"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Buffer (min)</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                type="number"
+                                                min={0}
+                                                disabled={isPending}
+                                                onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="color"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Color Theme</FormLabel>
+                                        <FormControl>
+                                            <div className="flex flex-wrap gap-2">
+                                                {["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#3b82f6"].map((color) => (
+                                                    <div
+                                                        key={color}
+                                                        className={`w-8 h-8 rounded-full cursor-pointer transition-all border-2 ${field.value === color ? "border-white scale-110" : "border-transparent opacity-50 hover:opacity-100"}`}
+                                                        style={{ backgroundColor: color }}
+                                                        onClick={() => field.onChange(color)}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                     </div>
                     <FormField
                         control={form.control}
