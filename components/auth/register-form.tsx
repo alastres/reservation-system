@@ -15,12 +15,14 @@ import {
 } from "@/components/ui/form";
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import { Button } from "@/components/ui/button";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { register } from "@/actions/register";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
+import { useTranslations } from "next-intl";
 
 export const RegisterForm = () => {
+    const t = useTranslations('Auth');
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
@@ -61,8 +63,8 @@ export const RegisterForm = () => {
 
     return (
         <CardWrapper
-            headerLabel="Create an account"
-            backButtonLabel="Already have an account?"
+            headerLabel={t('createAccount')}
+            backButtonLabel={t('alreadyHaveAccount')}
             backButtonHref="/auth/login"
             showSocial
         >
@@ -77,7 +79,7 @@ export const RegisterForm = () => {
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Name</FormLabel>
+                                    <FormLabel>{t('name')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
@@ -94,7 +96,7 @@ export const RegisterForm = () => {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Email</FormLabel>
+                                    <FormLabel>{t('email')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
@@ -112,7 +114,7 @@ export const RegisterForm = () => {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>{t('password')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
@@ -133,10 +135,11 @@ export const RegisterForm = () => {
                         type="submit"
                         className="w-full"
                     >
-                        Create an account
+                        {t('register')}
                     </Button>
                 </form>
             </Form>
         </CardWrapper>
     );
 };
+

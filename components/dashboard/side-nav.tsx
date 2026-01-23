@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import {
     LayoutDashboard,
@@ -17,66 +16,68 @@ import {
 import { cn } from "@/lib/utils";
 import { UserButton } from "@/components/auth/user-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useTranslations } from "next-intl";
 
 const font = Plus_Jakarta_Sans({ weight: "600", subsets: ["latin"] });
-
-const routes = [
-    {
-        label: "Dashboard",
-        icon: LayoutDashboard,
-        href: "/dashboard",
-        color: "text-primary",
-    },
-    {
-        label: "Services",
-        icon: Briefcase,
-        href: "/dashboard/services",
-        color: "text-primary",
-    },
-    {
-        label: "Availability",
-        icon: Clock,
-        href: "/dashboard/availability",
-        color: "text-primary",
-    },
-    {
-        label: "Bookings",
-        icon: Calendar,
-        href: "/dashboard/bookings",
-        color: "text-primary",
-    },
-    {
-        label: "Clients",
-        icon: Users,
-        href: "/dashboard/clients",
-        color: "text-primary",
-    },
-    {
-        label: "Logs",
-        icon: Bug,
-        href: "/dashboard/logs",
-        color: "text-primary",
-    },
-    {
-        label: "Settings",
-        icon: Settings,
-        href: "/dashboard/settings",
-        color: "text-muted-foreground",
-    },
-    {
-        label: "Admin Panel",
-        icon: ShieldCheck,
-        href: "/admin",
-        color: "text-rose-500",
-    },
-];
 
 interface SideNavProps {
     role?: string;
 }
 
 export const SideNav = ({ role }: SideNavProps) => {
-    const pathname = usePathname();
+    const pathname = usePathname(); // This returns pathname without locale prefix!
+    const t = useTranslations('Dashboard');
+
+    const routes = [
+        {
+            label: t('dashboard'),
+            icon: LayoutDashboard,
+            href: "/dashboard",
+            color: "text-primary",
+        },
+        {
+            label: t('services'),
+            icon: Briefcase,
+            href: "/dashboard/services",
+            color: "text-primary",
+        },
+        {
+            label: t('availability'),
+            icon: Clock,
+            href: "/dashboard/availability",
+            color: "text-primary",
+        },
+        {
+            label: t('bookings'),
+            icon: Calendar,
+            href: "/dashboard/bookings",
+            color: "text-primary",
+        },
+        {
+            label: t('clients'),
+            icon: Users,
+            href: "/dashboard/clients",
+            color: "text-primary",
+        },
+        {
+            label: t('logs'),
+            icon: Bug,
+            href: "/dashboard/logs",
+            color: "text-primary",
+        },
+        {
+            label: t('settings'),
+            icon: Settings,
+            href: "/dashboard/settings",
+            color: "text-muted-foreground",
+        },
+        {
+            label: t('adminPanel'),
+            icon: ShieldCheck,
+            href: "/admin",
+            color: "text-rose-500",
+        },
+    ];
 
     const filteredRoutes = routes.filter(route => {
         if (route.href === "/dashboard/logs" || route.href === "/admin") {

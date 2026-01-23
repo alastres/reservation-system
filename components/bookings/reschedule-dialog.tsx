@@ -16,6 +16,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { getSlotsAction, rescheduleBooking } from "@/actions/booking";
+import { useTranslations } from "next-intl";
 
 interface RescheduleDialogProps {
     booking: {
@@ -35,7 +36,10 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
     const [loadingSlots, setLoadingSlots] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
+
     const router = useRouter();
+    const t = useTranslations("Bookings.reschedule");
+    const tToast = useTranslations("Bookings.reschedule"); // Use generic bookings or specific for success
 
     // Reset state when dialog opens
     useEffect(() => {
@@ -79,7 +83,7 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
             if (res.error) {
                 toast.error(res.error);
             } else {
-                toast.success(res.success);
+                toast.success(t('success'));
                 setOpen(false);
                 router.refresh();
             }
@@ -91,14 +95,14 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="mr-2">
                     <CalendarClock className="w-4 h-4 mr-2" />
-                    Reschedule
+                    {t('button')}
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-5xl w-full max-h-[95vh] flex flex-col p-6 overflow-hidden">
                 <DialogHeader>
-                    <DialogTitle>Reschedule Booking</DialogTitle>
+                    <DialogTitle>{t('title')}</DialogTitle>
                     <DialogDescription>
-                        Select a new date and time for this booking. The client will be notified.
+                        {t('description')}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -128,7 +132,7 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
                                         setSelectedSlot(null);
                                     }}
                                 >
-                                    Change Date
+                                    {t('changeDate')}
                                 </Button>
                             </div>
 
@@ -139,7 +143,7 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
                             ) : (
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-8">
                                     {slots.length === 0 && (
-                                        <p className="col-span-full text-muted-foreground text-center py-10">No slots available for this date.</p>
+                                        <p className="col-span-full text-muted-foreground text-center py-10">{t('noSlots')}</p>
                                     )}
                                     {slots.map((slot) => (
                                         <Button
@@ -159,10 +163,10 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4 border-t mt-auto">
-                    <Button variant="ghost" onClick={() => setOpen(false)} disabled={isPending}>Cancel</Button>
+                    <Button variant="ghost" onClick={() => setOpen(false)} disabled={isPending}>{t('cancel')}</Button>
                     <Button onClick={handleConfirm} disabled={!date || !selectedSlot || isPending}>
                         {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                        Confirm New Time
+                        {t('confirm')}
                     </Button>
                 </div>
             </DialogContent>

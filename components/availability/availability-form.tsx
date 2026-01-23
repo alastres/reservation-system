@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormField, FormItem, FormControl, FormLabel } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // Local schema for the form
 const FormSchema = z.object({
@@ -35,6 +36,7 @@ export const AvailabilityForm = ({ initialData }: AvailabilityFormProps) => {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const t = useTranslations("Availability.form");
 
     // Merge initialData with defaults
     const defaultSchedule = DAYS.map((_, index) => {
@@ -80,7 +82,7 @@ export const AvailabilityForm = ({ initialData }: AvailabilityFormProps) => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Weekly Schedule</CardTitle>
+                <CardTitle>{t('title')}</CardTitle>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -97,7 +99,7 @@ export const AvailabilityForm = ({ initialData }: AvailabilityFormProps) => {
                                             </FormControl>
                                         )}
                                     />
-                                    <span className="w-24 font-medium">{DAYS[index]}</span>
+                                    <span className="w-24 font-medium">{t(`days.${DAYS[index].toLowerCase()}`)}</span>
                                 </div>
                                 {form.watch(`schedule.${index}.isEnabled`) ? (
                                     <div className="flex items-center gap-x-2">
@@ -122,7 +124,7 @@ export const AvailabilityForm = ({ initialData }: AvailabilityFormProps) => {
                                         />
                                     </div>
                                 ) : (
-                                    <span className="text-muted-foreground text-sm italic">Unavailable</span>
+                                    <span className="text-muted-foreground text-sm italic">{t('unavailable')}</span>
                                 )}
                             </div>
                         ))}
@@ -130,7 +132,7 @@ export const AvailabilityForm = ({ initialData }: AvailabilityFormProps) => {
                         <FormSuccess message={success} />
                         <Button type="submit" disabled={isPending}>
                             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Save Changes
+                            {isPending ? t('saving') : t('save')}
                         </Button>
                     </form>
                 </Form>

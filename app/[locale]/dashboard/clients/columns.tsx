@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Mail, Phone, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format } from "date-fns";
+import { useTranslations, useFormatter } from "next-intl";
 
 // This type definition must match the data extracted in page.tsx
 export type Client = {
@@ -19,13 +19,14 @@ export type Client = {
 export const columns: ColumnDef<Client>[] = [
     {
         accessorKey: "name",
-        header: ({ column }) => {
+        header: function Header({ column }) {
+            const t = useTranslations('Clients.table.columns');
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Name
+                    {t('name')}
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
@@ -51,13 +52,14 @@ export const columns: ColumnDef<Client>[] = [
     },
     {
         accessorKey: "email",
-        header: ({ column }) => {
+        header: function Header({ column }) {
+            const t = useTranslations('Clients.table.columns');
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Contact Info
+                    {t('contactInfo')}
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
@@ -83,13 +85,14 @@ export const columns: ColumnDef<Client>[] = [
     },
     {
         accessorKey: "totalBookings",
-        header: ({ column }) => {
+        header: function Header({ column }) {
+            const t = useTranslations('Clients.table.columns');
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Total Bookings
+                    {t('totalBookings')}
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
@@ -105,20 +108,22 @@ export const columns: ColumnDef<Client>[] = [
     },
     {
         accessorKey: "lastBooking",
-        header: ({ column }) => {
+        header: function Header({ column }) {
+            const t = useTranslations('Clients.table.columns');
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Last Visit
+                    {t('lastVisit')}
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
-        cell: ({ row }) => {
+        cell: function Cell({ row }) {
+            const format = useFormatter();
             const date = row.getValue("lastBooking") as Date;
-            return <div className="pl-4">{format(date, "PPP")}</div>;
+            return <div className="pl-4">{format.dateTime(date, { dateStyle: 'long' })}</div>;
         },
     },
 ];

@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
+import { getTranslations } from "next-intl/server";
 
 type Booking = {
     id: string;
@@ -13,9 +14,11 @@ type Booking = {
     status: string;
 };
 
-export function RecentBookings({ bookings }: { bookings: Booking[] }) {
+export async function RecentBookings({ bookings }: { bookings: Booking[] }) {
+    const t = await getTranslations('DashboardOverview');
+
     if (bookings.length === 0) {
-        return <div className="text-sm text-muted-foreground">No recent bookings.</div>;
+        return <div className="text-sm text-muted-foreground">{t('noRecentBookings')}</div>;
     }
 
     return (
@@ -34,7 +37,7 @@ export function RecentBookings({ bookings }: { bookings: Booking[] }) {
                     </div>
                     <div className="ml-auto font-medium">
                         {booking.status === "CONFIRMED" ? (
-                            <span className="text-emerald-500 text-xs">Confirmed</span>
+                            <span className="text-emerald-500 text-xs">{t('confirmed')}</span>
                         ) : (
                             <span className="text-muted-foreground text-xs">{booking.status}</span>
                         )}
@@ -44,3 +47,4 @@ export function RecentBookings({ bookings }: { bookings: Booking[] }) {
         </div>
     );
 }
+
