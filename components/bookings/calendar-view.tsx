@@ -15,7 +15,8 @@ import {
     subMonths,
     isToday
 } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
+import { useTranslations, useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,6 +69,9 @@ import {
 export function CalendarView({ bookings, services }: CalendarViewProps) {
     const router = useRouter();
     const [currentDate, setCurrentDate] = useState(new Date());
+    const t = useTranslations("Bookings");
+    const locale = useLocale();
+    const dateLocale = locale === 'es' ? es : enUS;
 
     // Polling for real-time updates
     useEffect(() => {
@@ -115,14 +119,14 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
                 <div className="flex items-center justify-between flex-shrink-0">
                     <div className="flex items-center gap-2">
                         <h2 className="text-2xl font-bold capitalize">
-                            {format(currentDate, "MMMM yyyy", { locale: es })}
+                            {format(currentDate, "MMMM yyyy", { locale: dateLocale })}
                         </h2>
                         <div className="flex items-center rounded-md border border-input bg-transparent shadow-sm">
                             <Button variant="ghost" size="icon" onClick={prevMonth} className="h-8 w-8 hover:bg-muted">
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="icon" onClick={() => setCurrentDate(new Date())} className="h-8 px-2 text-xs font-normal hover:bg-muted">
-                                Hoy
+                                {t('today')}
                             </Button>
                             <Button variant="ghost" size="icon" onClick={nextMonth} className="h-8 w-8 hover:bg-muted">
                                 <ChevronRight className="h-4 w-4" />
@@ -133,10 +137,10 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
                     <div className="w-[200px]">
                         <Select value={filterServiceId} onValueChange={setFilterServiceId}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Filtrar por servicio" />
+                                <SelectValue placeholder={t('filter')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">Todos los servicios</SelectItem>
+                                <SelectItem value="all">{t('allServices')}</SelectItem>
                                 {services.map(s => (
                                     <SelectItem key={s.id} value={s.id}>
                                         <div className="flex items-center gap-2">
@@ -152,9 +156,15 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
 
                 <div className="flex-1">
                     <div className="grid grid-cols-7 gap-px bg-muted rounded-lg overflow-hidden border border-border shadow-sm min-h-0">
-                        {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => (
-                            <div key={day} className="p-2 text-center text-sm font-medium bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 text-muted-foreground sticky top-0 z-20 border-b">
-                                {day}
+                        {Array.from({ length: 7 }).map((_, i) => (
+                            // Start from Monday (1) to Sunday (0 in date-fns, but here we want formatted list)
+                            // Or better, just map 0-6 if our keys match standard Monday start 
+                            // Standard date-fns getDay returns 0 for Sunday. 
+                            // Our keys in JSON are 0-6 (Sun-Sat).
+                            // The calendar typically starts on Monday.
+                            // So we need: 1(Mon), 2(Tue), ..., 6(Sat), 0(Sun).
+                            <div key={i} className="p-2 text-center text-sm font-medium bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 text-muted-foreground sticky top-0 z-20 border-b">
+                                {t(`weekDays.${(i + 1) % 7}`)}
                             </div>
                         ))}
                         {calendarDays.map((day, idx) => {
@@ -217,7 +227,7 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
                                         ))}
                                         {dayBookings.length > 3 && (
                                             <div className="text-[10px] text-muted-foreground pl-1">
-                                                + {dayBookings.length - 3} más
+                                                {t('more', { count: dayBookings.length - 3 })}
                                             </div>
                                         )}
                                     </div>
@@ -233,20 +243,20 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 capitalize">
-                            {format(selectedDate, "EEEE d", { locale: es })}
+                            {format(selectedDate, "EEEE d", { locale: dateLocale })}
                             <span className="text-muted-foreground font-normal">
-                                {format(selectedDate, "MMMM", { locale: es })}
+                                {format(selectedDate, "MMMM", { locale: dateLocale })}
                             </span>
                         </DialogTitle>
                         <DialogDescription>
-                            {selectedDayBookings.length} cita{selectedDayBookings.length !== 1 && 's'} programada{selectedDayBookings.length !== 1 && 's'}.
+                            {t('scheduled', { count: selectedDayBookings.length })}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="mt-4 space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                         {selectedDayBookings.length === 0 ? (
                             <div className="text-center text-muted-foreground py-8 border rounded-lg border-dashed">
-                                No hay citas para este día.
+                                {t('noBookings')}
                             </div>
                         ) : (
                             selectedDayBookings.map(booking => (
@@ -284,17 +294,17 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
                                                 {booking.service.locationType === "PHONE" ? (
                                                     <>
                                                         <Phone className="w-3 h-3 mt-0.5 shrink-0" />
-                                                        <span>{booking.clientPhone || "No phone provided"}</span>
+                                                        <span>{booking.clientPhone || t('notProvided')}</span>
                                                     </>
                                                 ) : (
                                                     <>
                                                         <span className="shrink-0">📍</span>
                                                         <span>
                                                             {booking.service.locationType === "IN_PERSON"
-                                                                ? (booking.service.address || booking.service.user?.address || "In Person")
+                                                                ? (booking.service.address || booking.service.user?.address || t('inPerson'))
                                                                 : booking.service.locationType === "GOOGLE_MEET"
                                                                     ? "Google Meet"
-                                                                    : "Online"
+                                                                    : t('online')
                                                             }
                                                         </span>
                                                     </>

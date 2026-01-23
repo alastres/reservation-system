@@ -1,0 +1,350 @@
+{
+    "Landing": {
+        "heroTitle": "Gestión de Reservas Simplificada",
+        "heroSubtitle": "La solución completa para gestionar tus citas, clientes y pagos en un solo lugar.",
+        "getStarted": "Empezar Gratis",
+        "signIn": "Iniciar Sesión",
+        "features": "Características",
+        "pricing": "Precios"
+    },
+    "Common": {
+        "dashboard": "Panel de Control",
+        "settings": "Configuración",
+        "logout": "Cerrar Sesión"
+    },
+    "Auth": {
+        "welcomeBack": "Bienvenido de nuevo",
+        "dontHaveAccount": "¿No tienes cuenta?",
+        "createAccount": "Crear cuenta",
+        "alreadyHaveAccount": "¿Ya tienes cuenta?",
+        "email": "Correo electrónico",
+        "password": "Contraseña",
+        "name": "Nombre",
+        "forgotPassword": "¿Olvidaste tu contraseña?",
+        "login": "Iniciar Sesión",
+        "register": "Crear cuenta",
+        "loginSuccess": "¡Inicio de sesión exitoso!",
+        "somethingWentWrong": "Algo salió mal"
+    },
+    "Dashboard": {
+        "dashboard": "Inicio",
+        "services": "Servicios",
+        "availability": "Disponibilidad",
+        "bookings": "Reservas",
+        "clients": "Clientes",
+        "logs": "Registros",
+        "settings": "Configuración",
+        "adminPanel": "Panel Admin"
+    },
+    "DashboardOverview": {
+        "title": "Inicio",
+        "totalRevenue": "Ingresos Totales",
+        "lifetime": "De por vida",
+        "totalBookings": "Reservas Totales",
+        "allTime": "Todo el tiempo",
+        "upcomingBookings": "Próximas Reservas",
+        "scheduled": "Programadas",
+        "services": "Servicios",
+        "active": "Activos",
+        "revenueOverview": "Resumen de Ingresos",
+        "last30Days": "Tendencia de ingresos últimos 30 días",
+        "noRevenueData": "No hay datos de ingresos disponibles",
+        "recentBookings": "Reservas Recientes",
+        "latestBookingActivity": "Última actividad de reservas",
+        "bookingsByService": "Reservas por Servicio",
+        "top5Services": "Top 5 servicios por cantidad",
+        "noBookingData": "No hay datos de reservas disponibles",
+        "confirmed": "Confirmada",
+        "noRecentBookings": "No hay reservas recientes",
+        "revenue": "Ingresos",
+        "bookings": "Reservas"
+    },
+    "Services": {
+        "title": "Servicios",
+        "subtitle": "Gestiona tus ofertas de servicios y precios.",
+        "searchPlaceholder": "Buscar...",
+        "createService": "Crear Servicio",
+        "updateService": "Actualizar Servicio",
+        "noServicesTitle": "No hay servicios creados",
+        "noServicesDesc": "Comienza creando tu primera oferta de servicio.",
+        "noResultsTitle": "No se encontraron resultados",
+        "noResultsDesc": "No se encontraron servicios que coincidan con \"{query}\"",
+        "clearSearch": "Limpiar Búsqueda",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "duplicate": "Duplicar Servicio",
+        "cancel": "Cancelar",
+        "deleteService": "Eliminar Servicio",
+        "deleteConfirmation": "¿Estás seguro de que quieres eliminar este servicio? Esta acción no se puede deshacer.",
+        "deleting": "Eliminando...",
+        "editService": "Editar Servicio",
+        "editServiceDesc": "Realiza cambios en los detalles de tu servicio a continuación.",
+        "createServiceDesc": "Añade un nuevo servicio a tus ofertas.",
+        "form": {
+            "title": "Título",
+            "titlePlaceholder": "ej. Reunión de 30 Min",
+            "urlSlug": "Slug de URL",
+            "urlSlugDesc": "Enlace público: dominio.com/[usuario]/{slug}",
+            "duration": "Duración (min)",
+            "price": "Precio ($)",
+            "colorTheme": "Tema de Color",
+            "description": "Descripción",
+            "location": "Ubicación",
+            "selectLocation": "Seleccionar tipo de ubicación",
+            "googleMeet": "Google Meet",
+            "phoneCall": "Llamada Telefónica",
+            "inPerson": "En Persona",
+            "customLink": "Enlace Personalizado",
+            "googleMeetDesc": "Se generará un enlace de Meet automáticamente.",
+            "phoneCallDesc": "El cliente deberá proporcionar su número de teléfono.",
+            "inPersonDesc": "Debes proporcionar una dirección a continuación.",
+            "address": "Dirección",
+            "addressDesc": "Deja vacío para usar la dirección de tu perfil predeterminado.",
+            "meetingUrl": "URL de la Reunión",
+            "active": "Activo",
+            "activeDesc": "Desactivar para ocultar del perfil público",
+            "requirePayment": "Requerir Pago",
+            "requirePaymentDesc": "Los clientes deben pagar antes de confirmar la reserva",
+            "concurrency": "Concurrencia de Servicio",
+            "concurrencyDesc": "Define si este servicio tiene su propia capacidad dedicada o comparte tu disponibilidad global.",
+            "useCustomCapacity": "Usar Capacidad Personalizada",
+            "useCustomCapacityDesc": "Si se activa, este servicio crea su propio grupo de capacidad.",
+            "maxConcurrentClients": "Máx Clientes Concurrentes",
+            "maxConcurrentClientsDesc": "Cuántos clientes pueden reservar al mismo tiempo para ESTE servicio.",
+            "recursiveBookings": "Reservas Recurrentes",
+            "recursiveBookingsDesc": "Permitir a los clientes reservar citas recurrentes.",
+            "enableRecurrence": "Habilitar Recurrencia",
+            "maxOccurrences": "Máx Ocurrencias",
+            "limitRepeats": "Limitar cuántas veces se puede repetir.",
+            "customQuestions": "Preguntas Personalizadas",
+            "customQuestionsDesc": "Haz preguntas adicionales a tus clientes cuando reserven.",
+            "addQuestion": "Añadir Pregunta",
+            "label": "Etiqueta",
+            "type": "Tipo",
+            "required": "Requerido",
+            "types": {
+                "text": "Texto Corto",
+                "textarea": "Texto Largo",
+                "checkbox": "Casilla (Sí/No)"
+            }
+        },
+        "status": {
+            "created": "¡Servicio creado!",
+            "updated": "¡Servicio actualizado!",
+            "deleted": "¡Servicio eliminado!",
+            "duplicated": "¡Servicio duplicado!",
+            "toggled": "¡Estado del servicio actualizado!"
+        },
+        "noDescription": "No hay descripción disponible.",
+        "minutes": "mins"
+    },
+    "Availability": {
+        "title": "Configuración de Disponibilidad",
+        "form": {
+            "title": "Horario Semanal",
+            "save": "Guardar Cambios",
+            "saving": "Guardando...",
+            "days": {
+                "sunday": "Domingo",
+                "monday": "Lunes",
+                "tuesday": "Martes",
+                "wednesday": "Miércoles",
+                "thursday": "Jueves",
+                "friday": "Viernes",
+                "saturday": "Sábado"
+            },
+            "unavailable": "No disponible"
+        },
+        "override": {
+            "title": "Excepciones por Fecha",
+            "selectDate": "Seleccionar Fecha",
+            "pickDate": "Elegir una fecha",
+            "available": "¿Disponible?",
+            "startTime": "Hora Inicio",
+            "endTime": "Hora Fin",
+            "add": "Agregar Excepción",
+            "active": "Excepciones Activas",
+            "empty": "No hay excepciones configuradas.",
+            "unavailable": "No disponible",
+            "toast": {
+                "added": "Excepción agregada exitosamente",
+                "deleted": "Excepción eliminada exitosamente",
+                "error": "Algo salió mal"
+            }
+        }
+    },
+    "Bookings": {
+        "title": "Calendario",
+        "filter": "Filtrar por servicio",
+        "allServices": "Todos los servicios",
+        "today": "Hoy",
+        "weekDays": {
+            "0": "Dom",
+            "1": "Lun",
+            "2": "Mar",
+            "3": "Mié",
+            "4": "Jue",
+            "5": "Vie",
+            "6": "Sáb"
+        },
+        "more": "+ {count} más",
+        "scheduled": "{count} cita(s) programada(s)",
+        "noBookings": "No hay citas para este día.",
+        "notProvided": "No provisto",
+        "online": "En línea",
+        "inPerson": "En Persona",
+        "cancel": {
+            "button": "Cancelar",
+            "title": "¿Estás seguro?",
+            "description": "Esta acción no se puede deshacer. Esto cancelará permanentemente la reserva.",
+            "confirm": "Sí, cancelar reserva",
+            "cancel": "Cancelar"
+        },
+        "reschedule": {
+            "button": "Reagendar",
+            "title": "Reagendar Reserva",
+            "description": "Seleccione una nueva fecha y hora para esta reserva. El cliente será notificado.",
+            "changeDate": "Cambiar Fecha",
+            "noSlots": "No hay horarios disponibles para esta fecha.",
+            "confirm": "Confirmar Nueva Hora",
+            "cancel": "Cancelar",
+            "success": "Reserva reagendada exitosamente"
+        }
+    },
+    "Settings": {
+        "profile": {
+            "title": "Información del Perfil",
+            "description": "Actualiza los detalles de tu perfil público e información personal.",
+            "form": {
+                "coverImage": "Imagen de Portada",
+                "noCover": "Sin imagen de portada",
+                "recCover": "Recomendado 1200x400px",
+                "changeCover": "Cambiar Portada",
+                "profilePicture": "Foto de Perfil",
+                "change": "Cambiar",
+                "recProfile": "Recomendado tamaño: 500x500px",
+                "uploading": "Subiendo...",
+                "fullName": "Nombre Completo",
+                "username": "Nombre de usuario",
+                "bio": "Biografía",
+                "capacity": "Capacidad Global del Equipo",
+                "capacityDesc": "Número máximo de clientes que puedes atender simultáneamente en TODOS los servicios.",
+                "advanced": "Avanzado",
+                "whatsapp": "Número de WhatsApp",
+                "address": "Dirección Predeterminada",
+                "timeZone": "Zona Horaria",
+                "language": "Idioma",
+                "emailNotif": "Notificaciones por Correo",
+                "emailNotifDesc": "Recibe actualizaciones sobre tus reservas.",
+                "save": "Guardar Cambios",
+                "saving": "Guardando..."
+            }
+        },
+        "subscription": {
+            "title": "Suscripción",
+            "descriptionAdmin": "Información de tu cuenta administrativa",
+            "descriptionUser": "Administra tu plan y método de pago",
+            "adminAccess": "Como administrador, tienes acceso completo sin necesidad de suscripción",
+            "currentPlan": "Plan Actual",
+            "renews": "Próxima renovación",
+            "expires": "Vence el",
+            "manage": "Gestionar Suscripción",
+            "manageDesc": "Puedes cambiar de plan, actualizar tu tarjeta o cancelar tu suscripción desde el portal de gestión",
+            "noActive": "No tienes una suscripción activa",
+            "viewPlans": "Ver Planes Disponibles",
+            "status": {
+                "ACTIVE": "Activa",
+                "PAST_DUE": "Pago Pendiente",
+                "CANCELLED": "Cancelada",
+                "INACTIVE": "Inactiva",
+                "TRIALING": "Período de Prueba"
+            },
+            "plans": {
+                "MONTHLY": "Plan Mensual",
+                "QUARTERLY": "Plan Trimestral",
+                "ANNUAL": "Plan Anual"
+            },
+            "prices": {
+                "MONTHLY": "€10/mes",
+                "QUARTERLY": "€25.50/3 meses",
+                "ANNUAL": "€84/año"
+            }
+        },
+        "stripe": {
+            "title": "Pagos y Stripe Connect",
+            "description": "Conecta tu cuenta de Stripe para recibir pagos de tus clientes directamente.",
+            "active": "Activo",
+            "checking": "Verificando estado...",
+            "connected": {
+                "title": "Cuenta Conectada",
+                "description": "Tu cuenta de Stripe está lista para recibir pagos.",
+                "config": "Configuración Stripe",
+                "disconnect": "Desconectar"
+            },
+            "disconnected": {
+                "title": "Recibe pagos por tus servicios",
+                "description": "Para cobrar por tus citas (ej. pago por adelantado), necesitas conectar una cuenta de Stripe. Los fondos se transferirán directamente a tu cuenta bancaria configurada en Stripe.",
+                "connect": "Conectar con Stripe",
+                "connecting": "Conectando...",
+                "incomplete": "Configuración incompleta. Por favor continúa la conexión."
+            },
+            "confirmDisconnect": "¿Estás seguro? Esto evitará que recibas pagos."
+        }
+    },
+    "Clients": {
+        "title": "Clientes",
+        "subtitle": "Tienes {count} clientes únicos.",
+        "clientList": "Lista de Clientes",
+        "table": {
+            "columns": {
+                "name": "Nombre",
+                "contactInfo": "Información de Contacto",
+                "totalBookings": "Reservas Totales",
+                "lastVisit": "Última Visita"
+            },
+            "filterPlaceholder": "Filtrar por nombre...",
+            "noResults": "Sin resultados.",
+            "pagination": {
+                "page": "Página",
+                "of": "de",
+                "previous": "Anterior",
+                "next": "Siguiente"
+            }
+        }
+    },
+    "Logs": {
+        "title": "Registros de Notificación",
+        "loading": "Cargando registros...",
+        "error": "Error",
+        "filters": {
+            "label": "Filtrar por Tipo:",
+            "allTypes": "Todos los Tipos",
+            "options": {
+                "CLIENT_CONFIRMATION": "Confirmación",
+                "BOOKING_RECEIVED": "Nueva Reserva",
+                "CLIENT_CANCELLATION": "Cancelación",
+                "CLIENT_RESCHEDULE": "Reprogramación",
+                "REMINDER_24H": "Recordatorio 24h",
+                "REMINDER_1H": "Recordatorio 1h"
+            }
+        },
+        "table": {
+            "headers": {
+                "date": "Fecha",
+                "type": "Tipo",
+                "status": "Estado",
+                "recipient": "Destinatario",
+                "details": "Detalles"
+            },
+            "noLogs": "No se encontraron registros.",
+            "view": "Ver",
+            "dialogTitle": "Detalles del Registro",
+            "pagination": {
+                "previous": "Anterior",
+                "of": "de",
+                "page": "Página",
+                "next": "Siguiente"
+            }
+        }
+    }
+}

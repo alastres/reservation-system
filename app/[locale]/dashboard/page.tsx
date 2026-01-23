@@ -9,6 +9,7 @@ import { RecentBookings } from "@/components/dashboard/recent-bookings";
 import { DashboardAutoRefresh } from "@/components/dashboard/auto-refresh";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { BookingsChart } from "@/components/dashboard/bookings-chart";
+import { getTranslations } from "next-intl/server";
 
 async function getDashboardStats(userId: string) {
     const totalBookings = await prisma.booking.count({
@@ -123,6 +124,7 @@ export default async function DashboardPage() {
     }
 
     const sections = await getDashboardStats(session.user.id);
+    const t = await getTranslations('DashboardOverview');
 
     return (
         <MotionDiv
@@ -134,7 +136,7 @@ export default async function DashboardPage() {
             <DashboardAutoRefresh />
             <MotionDiv variants={slideUp} className="flex items-center justify-between space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                    Dashboard
+                    {t('title')}
                 </h2>
             </MotionDiv>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -142,14 +144,14 @@ export default async function DashboardPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Total Revenue
+                                {t('totalRevenue')}
                             </CardTitle>
                             <DollarSign className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">${sections.revenue.toFixed(2)}</div>
                             <p className="text-xs text-muted-foreground border-l-2 border-emerald-500 pl-2 mt-1">
-                                <span className="text-emerald-500 font-medium font-mono">Lifetime</span>
+                                <span className="text-emerald-500 font-medium font-mono">{t('lifetime')}</span>
                             </p>
                         </CardContent>
                     </Card>
@@ -158,14 +160,14 @@ export default async function DashboardPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Total Bookings
+                                {t('totalBookings')}
                             </CardTitle>
                             <Users className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{sections.totalBookings}</div>
                             <p className="text-xs text-muted-foreground border-l-2 border-primary pl-2 mt-1">
-                                <span className="text-primary font-medium font-mono">All time</span>
+                                <span className="text-primary font-medium font-mono">{t('allTime')}</span>
                             </p>
                         </CardContent>
                     </Card>
@@ -174,14 +176,14 @@ export default async function DashboardPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Upcoming Bookings
+                                {t('upcomingBookings')}
                             </CardTitle>
                             <Calendar className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{sections.upcomingBookings}</div>
                             <p className="text-xs text-muted-foreground border-l-2 border-purple-500 pl-2 mt-1">
-                                <span className="text-purple-500 font-medium font-mono">Scheduled</span>
+                                <span className="text-purple-500 font-medium font-mono">{t('scheduled')}</span>
                             </p>
                         </CardContent>
                     </Card>
@@ -190,14 +192,14 @@ export default async function DashboardPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Services
+                                {t('services')}
                             </CardTitle>
                             <Activity className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">--</div>
                             <p className="text-xs text-muted-foreground border-l-2 border-indigo-500 pl-2 mt-1">
-                                <span className="text-indigo-500 font-medium font-mono">Active</span>
+                                <span className="text-indigo-500 font-medium font-mono">{t('active')}</span>
                             </p>
                         </CardContent>
                     </Card>
@@ -207,9 +209,9 @@ export default async function DashboardPage() {
                 <MotionDiv variants={fadeIn} className="lg:col-span-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Revenue Overview</CardTitle>
+                            <CardTitle>{t('revenueOverview')}</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                Last 30 days revenue trend
+                                {t('last30Days')}
                             </p>
                         </CardHeader>
                         <CardContent className="pl-2">
@@ -217,7 +219,7 @@ export default async function DashboardPage() {
                                 <RevenueChart data={sections.revenueChartData} />
                             ) : (
                                 <div className="h-[350px] flex items-center justify-center text-muted-foreground">
-                                    No revenue data available
+                                    {t('noRevenueData')}
                                 </div>
                             )}
                         </CardContent>
@@ -226,9 +228,9 @@ export default async function DashboardPage() {
                 <MotionDiv variants={fadeIn} className="lg:col-span-3">
                     <Card className="col-span-3">
                         <CardHeader>
-                            <CardTitle>Recent Bookings</CardTitle>
+                            <CardTitle>{t('recentBookings')}</CardTitle>
                             <div className="text-sm text-muted-foreground">
-                                Latest booking activity.
+                                {t('latestBookingActivity')}
                             </div>
                         </CardHeader>
                         <CardContent>
@@ -241,9 +243,9 @@ export default async function DashboardPage() {
                 <MotionDiv variants={fadeIn}>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Bookings by Service</CardTitle>
+                            <CardTitle>{t('bookingsByService')}</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                Top 5 services by booking count
+                                {t('top5Services')}
                             </p>
                         </CardHeader>
                         <CardContent className="pl-2">
@@ -251,7 +253,7 @@ export default async function DashboardPage() {
                                 <BookingsChart data={sections.bookingsChartData} />
                             ) : (
                                 <div className="h-[350px] flex items-center justify-center text-muted-foreground">
-                                    No booking data available
+                                    {t('noBookingData')}
                                 </div>
                             )}
                         </CardContent>

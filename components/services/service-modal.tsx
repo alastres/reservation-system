@@ -8,6 +8,7 @@ import {
     SheetDescription,
 } from "@/components/ui/sheet";
 import { ServiceForm } from "@/components/services/service-form";
+import { useTranslations } from "next-intl";
 
 interface ServiceModalProps {
     isOpen: boolean;
@@ -22,15 +23,17 @@ export const ServiceModal = ({
     service,
     onServiceSaved
 }: ServiceModalProps) => {
+    const t = useTranslations('Services');
+
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetContent className="w-full sm:w-[640px] sm:max-w-[640px] overflow-y-auto">
                 <SheetHeader>
                     <SheetTitle>
-                        {service ? "Edit Service" : "Create Service"}
+                        {service ? t('editService') : t('createService')}
                     </SheetTitle>
                     <SheetDescription>
-                        {service ? "Make changes to your service details below." : "Add a new service to your offerings."}
+                        {service ? t('editServiceDesc') : t('createServiceDesc')}
                     </SheetDescription>
                 </SheetHeader>
                 <div className="mt-8">

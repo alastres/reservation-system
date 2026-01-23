@@ -6,6 +6,7 @@ import { cancelBooking } from "@/actions/booking";
 import { toast } from "sonner";
 import { useTransition } from "react";
 import { XCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -21,6 +22,7 @@ import {
 export function CancelBookingButton({ id }: { id: string }) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
+    const t = useTranslations("Bookings.cancel");
 
     const handleCancel = () => {
         console.log("Cancel button clicked for id:", id);
@@ -46,20 +48,21 @@ export function CancelBookingButton({ id }: { id: string }) {
                     className="text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
                     <XCircle className="w-4 h-4 mr-2" />
-                    Cancel
+                    <XCircle className="w-4 h-4 mr-2" />
+                    {t('button')}
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('title')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action cannot be undone. This will permanently cancel the booking.
+                        {t('description')}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
                     <AlertDialogAction onClick={handleCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                        Yes, cancel booking
+                        {t('confirm')}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

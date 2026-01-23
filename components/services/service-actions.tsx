@@ -5,6 +5,7 @@ import { deleteService } from "@/actions/services";
 import { toast } from "sonner";
 import { useTransition, useState } from "react";
 import { Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import {
     Dialog,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 
 export function DeleteServiceButton({ id, onDelete }: { id: string, onDelete?: (id: string) => void }) {
+    const t = useTranslations('Services');
     const [isPending, startTransition] = useTransition();
     const [open, setOpen] = useState(false);
 
@@ -28,7 +30,7 @@ export function DeleteServiceButton({ id, onDelete }: { id: string, onDelete?: (
             deleteService(id).then((data) => {
                 if (data.error) toast.error(data.error);
                 if (data.success) {
-                    toast.success(data.success);
+                    toast.success(t('status.deleted'));
                     setOpen(false);
                     if (onDelete) {
                         onDelete(id);
@@ -53,9 +55,9 @@ export function DeleteServiceButton({ id, onDelete }: { id: string, onDelete?: (
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Delete Service</DialogTitle>
+                        <DialogTitle>{t('deleteService')}</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete this service? This action cannot be undone.
+                            {t('deleteConfirmation')}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -67,14 +69,14 @@ export function DeleteServiceButton({ id, onDelete }: { id: string, onDelete?: (
                             }}
                             disabled={isPending}
                         >
-                            Cancel
+                            {t('cancel')}
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={handleDelete}
                             disabled={isPending}
                         >
-                            {isPending ? "Deleting..." : "Delete"}
+                            {isPending ? t('deleting') : t('delete')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -90,6 +92,7 @@ import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 
 export function DuplicateServiceButton({ id, onDuplicate }: { id: string, onDuplicate?: (service: any) => void }) {
+    const t = useTranslations('Services');
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
 
@@ -100,7 +103,7 @@ export function DuplicateServiceButton({ id, onDuplicate }: { id: string, onDupl
             duplicateService(id).then((data) => {
                 if (data.error) toast.error(data.error);
                 if (data.success) {
-                    toast.success(data.success);
+                    toast.success(t('status.duplicated'));
                     router.refresh();
                     if (onDuplicate && data.service) {
                         onDuplicate(data.service);
@@ -116,7 +119,7 @@ export function DuplicateServiceButton({ id, onDuplicate }: { id: string, onDupl
             size="sm"
             onClick={handleDuplicate}
             disabled={isPending}
-            title="Duplicate Service"
+            title={t('duplicate')}
         >
             <Copy className="w-4 h-4" />
         </Button>
@@ -124,6 +127,7 @@ export function DuplicateServiceButton({ id, onDuplicate }: { id: string, onDupl
 }
 
 export function ServiceStatusToggle({ id, isActive, onToggle }: { id: string, isActive: boolean, onToggle?: (isActive: boolean) => void }) {
+    const t = useTranslations('Services');
     const [isPending, startTransition] = useTransition();
 
     const handleToggle = (checked: boolean) => {
@@ -132,7 +136,7 @@ export function ServiceStatusToggle({ id, isActive, onToggle }: { id: string, is
                 if (data.error) {
                     toast.error(data.error);
                 } else {
-                    toast.success(data.success);
+                    toast.success(t('status.toggled'));
                     if (onToggle) {
                         onToggle(checked);
                     }

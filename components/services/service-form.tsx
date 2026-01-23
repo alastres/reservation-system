@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useTranslations } from "next-intl";
 
 interface ServiceProps {
     id: string;
@@ -60,13 +61,13 @@ interface ServiceFormProps {
 }
 
 export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormProps) => {
+    const t = useTranslations('Services');
     const user = useCurrentUser();
     const router = useRouter();
     const [error, setError] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition();
 
     const onSubmit = (values: z.infer<typeof ServiceSchema>) => {
-        // ... (onSubmit logic unchanged)
         setError("");
 
         startTransition(() => {
@@ -78,7 +79,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             toast.error(data.error);
                         }
                         if (data.success) {
-                            toast.success(data.success);
+                            toast.success(t('status.updated'));
                             router.refresh();
                             if (onServiceSaved && data.service) {
                                 onServiceSaved(data.service);
@@ -96,7 +97,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             toast.error(data.error);
                         }
                         if (data.success) {
-                            toast.success(data.success);
+                            toast.success(t('status.created'));
                             router.refresh();
                             if (onServiceSaved && data.service) {
                                 onServiceSaved(data.service);
@@ -144,20 +145,6 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
         name: "customInputs",
     });
 
-    // Auto-fill address from profile if empty when switching to IN_PERSON
-    const locationType = form.watch("locationType");
-    const currentAddress = form.watch("address");
-
-    // We need useEffect to react to locationType changes
-    // But be careful not to overwrite if user typed something
-    // Only set if address is empty and we have a user address
-
-    // Actually, react-hook-form defaultValues logic is better for initial load.
-    // For runtime switching, we can use an effect.
-
-    // Note: user object might need casting if types aren't updated yet globally
-    const userAddress = (user as any)?.address;
-
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -167,9 +154,9 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         name="title"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Title</FormLabel>
+                                <FormLabel>{t('form.title')}</FormLabel>
                                 <FormControl>
-                                    <Input {...field} disabled={isPending} placeholder="e.g. 30 Min Meeting" />
+                                    <Input {...field} disabled={isPending} placeholder={t('form.titlePlaceholder')} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -180,14 +167,14 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         name="url"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>URL Slug</FormLabel>
+                                <FormLabel>{t('form.urlSlug')}</FormLabel>
                                 <FormControl>
                                     <div className="flex items-center">
                                         <span className="bg-muted border border-r-0 rounded-l-md px-3 py-2 text-sm text-muted-foreground">/</span>
                                         <Input {...field} className="rounded-l-none" disabled={isPending} placeholder="30-min-meeting" />
                                     </div>
                                 </FormControl>
-                                <FormDescription>Public link: domain.com/[username]/{field.value}</FormDescription>
+                                <FormDescription>{t('form.urlSlugDesc')}</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -198,7 +185,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             name="duration"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Duration (min)</FormLabel>
+                                    <FormLabel>{t('form.duration')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
@@ -216,7 +203,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             name="price"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Price ($)</FormLabel>
+                                    <FormLabel>{t('form.price')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
@@ -236,7 +223,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         name="color"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Color Theme</FormLabel>
+                                <FormLabel>{t('form.colorTheme')}</FormLabel>
                                 <FormControl>
                                     <div className="flex flex-wrap gap-2">
                                         {["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#3b82f6"].map((color) => (
@@ -258,7 +245,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         name="description"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
+                                <FormLabel>{t('form.description')}</FormLabel>
                                 <FormControl>
                                     <Textarea {...field} disabled={isPending} />
                                 </FormControl>
@@ -271,24 +258,24 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         name="locationType"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Location</FormLabel>
+                                <FormLabel>{t('form.location')}</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select location type" />
+                                            <SelectValue placeholder={t('form.selectLocation')} />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="GOOGLE_MEET">Google Meet</SelectItem>
-                                        <SelectItem value="PHONE">Phone Call</SelectItem>
-                                        <SelectItem value="IN_PERSON">In Person</SelectItem>
-                                        <SelectItem value="CUSTOM">Custom Link</SelectItem>
+                                        <SelectItem value="GOOGLE_MEET">{t('form.googleMeet')}</SelectItem>
+                                        <SelectItem value="PHONE">{t('form.phoneCall')}</SelectItem>
+                                        <SelectItem value="IN_PERSON">{t('form.inPerson')}</SelectItem>
+                                        <SelectItem value="CUSTOM">{t('form.customLink')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormDescription>
-                                    {field.value === "GOOGLE_MEET" && "A Meet link will be generated automatically."}
-                                    {field.value === "PHONE" && "Client will be required to provide their phone number."}
-                                    {field.value === "IN_PERSON" && "You must provide an address below."}
+                                    {field.value === "GOOGLE_MEET" && t('form.googleMeetDesc')}
+                                    {field.value === "PHONE" && t('form.phoneCallDesc')}
+                                    {field.value === "IN_PERSON" && t('form.inPersonDesc')}
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -301,12 +288,12 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             name="address"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Address</FormLabel>
+                                    <FormLabel>{t('form.address')}</FormLabel>
                                     <FormControl>
                                         <Input {...field} disabled={isPending} placeholder="123 Main St, City" />
                                     </FormControl>
                                     <FormDescription>
-                                        Leave empty to use your Default Profile Address.
+                                        {t('form.addressDesc')}
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -320,7 +307,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             name="locationUrl"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Meeting URL</FormLabel>
+                                    <FormLabel>{t('form.meetingUrl')}</FormLabel>
                                     <FormControl>
                                         <Input {...field} disabled={isPending} placeholder="https://..." />
                                     </FormControl>
@@ -335,8 +322,8 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         render={({ field }) => (
                             <FormItem className="flex items-center justify-between rounded-lg border p-4">
                                 <div className="space-y-0.5">
-                                    <FormLabel className="text-base">Active</FormLabel>
-                                    <FormDescription>Turn off to hide from public profile</FormDescription>
+                                    <FormLabel className="text-base">{t('form.active')}</FormLabel>
+                                    <FormDescription>{t('form.activeDesc')}</FormDescription>
                                 </div>
                                 <FormControl>
                                     <Switch
@@ -354,8 +341,8 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         render={({ field }) => (
                             <FormItem className="flex items-center justify-between rounded-lg border p-4">
                                 <div className="space-y-0.5">
-                                    <FormLabel className="text-base">Require Payment</FormLabel>
-                                    <FormDescription>Clients must pay before booking is confirmed</FormDescription>
+                                    <FormLabel className="text-base">{t('form.requirePayment')}</FormLabel>
+                                    <FormDescription>{t('form.requirePaymentDesc')}</FormDescription>
                                 </div>
                                 <FormControl>
                                     <Switch
@@ -372,9 +359,9 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                 {/* Concurrency Settings */}
                 <div className="space-y-4 border border-input/50 rounded-lg p-4 bg-muted/20">
                     <div className="space-y-0.5">
-                        <FormLabel className="text-base">Service Concurrency (Staff/Resources)</FormLabel>
+                        <FormLabel className="text-base">{t('form.concurrency')}</FormLabel>
                         <FormDescription>
-                            Define if this service has its own dedicated capacity (e.g., 2 Barbers) or shares your global availability.
+                            {t('form.concurrencyDesc')}
                         </FormDescription>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
@@ -384,9 +371,9 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             render={({ field }) => (
                                 <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-card">
                                     <div className="space-y-0.5">
-                                        <FormLabel className="text-sm font-medium">Use Custom Capacity</FormLabel>
+                                        <FormLabel className="text-sm font-medium">{t('form.useCustomCapacity')}</FormLabel>
                                         <FormDescription className="text-xs">
-                                            If enabled, this service creates its own capacity pool.
+                                            {t('form.useCustomCapacityDesc')}
                                         </FormDescription>
                                     </div>
                                     <FormControl>
@@ -404,7 +391,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             name="maxConcurrency"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Max Concurrent Clients</FormLabel>
+                                    <FormLabel>{t('form.maxConcurrentClients')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
@@ -414,7 +401,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                             onChange={e => field.onChange(parseInt(e.target.value))}
                                         />
                                     </FormControl>
-                                    <FormDescription>How many clients can be booked at the same time for THIS service.</FormDescription>
+                                    <FormDescription>{t('form.maxConcurrentClientsDesc')}</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -425,8 +412,8 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                 {/* Recurrence Settings */}
                 <div className="space-y-4 border border-input/50 rounded-lg p-4 bg-muted/20">
                     <div className="space-y-0.5">
-                        <FormLabel className="text-base">Recursive Bookings</FormLabel>
-                        <FormDescription>Allow customers to book recurring appointments (e.g., weekly).</FormDescription>
+                        <FormLabel className="text-base">{t('form.recursiveBookings')}</FormLabel>
+                        <FormDescription>{t('form.recursiveBookingsDesc')}</FormDescription>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                         <FormField
@@ -435,7 +422,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             render={({ field }) => (
                                 <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-card">
                                     <div className="space-y-0.5">
-                                        <FormLabel className="text-sm font-medium">Enable Recurrence</FormLabel>
+                                        <FormLabel className="text-sm font-medium">{t('form.enableRecurrence')}</FormLabel>
                                     </div>
                                     <FormControl>
                                         <Switch
@@ -452,7 +439,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             name="maxRecurrenceCount"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Max Occurrences</FormLabel>
+                                    <FormLabel>{t('form.maxOccurrences')}</FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
@@ -462,7 +449,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                             onChange={e => field.onChange(parseInt(e.target.value))}
                                         />
                                     </FormControl>
-                                    <FormDescription>Limit how many times it can repeat.</FormDescription>
+                                    <FormDescription>{t('form.limitRepeats')}</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -474,8 +461,8 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                 <div className="space-y-4 border border-input/50 rounded-lg p-4 bg-muted/20">
                     <div className="flex items-center justify-between">
                         <div>
-                            <FormLabel className="text-base">Custom Questions</FormLabel>
-                            <FormDescription>Ask your clients additional questions when they book.</FormDescription>
+                            <FormLabel className="text-base">{t('form.customQuestions')}</FormLabel>
+                            <FormDescription>{t('form.customQuestionsDesc')}</FormDescription>
                         </div>
                         <Button
                             type="button"
@@ -486,7 +473,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                 append({ id: crypto.randomUUID(), label: "", type: "text", required: false, options: [] });
                             }}
                         >
-                            + Add Question
+                            + {t('form.addQuestion')}
                         </Button>
                     </div>
 
@@ -494,14 +481,14 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         {fieldsReturn.fields.map((fieldItem, index) => (
                             <div key={fieldItem.id} className="grid grid-cols-12 gap-3 items-end border p-3 rounded-md bg-card shadow-sm">
                                 <FormItem className="col-span-4">
-                                    <FormLabel>Label</FormLabel>
+                                    <FormLabel>{t('form.label')}</FormLabel>
                                     <FormControl>
-                                        <Input {...form.register(`customInputs.${index}.label`)} placeholder="e.g. Phone Number" disabled={isPending} />
+                                        <Input {...form.register(`customInputs.${index}.label`)} placeholder={t('form.titlePlaceholder')} disabled={isPending} />
                                     </FormControl>
                                 </FormItem>
 
                                 <FormItem className="col-span-3">
-                                    <FormLabel>Type</FormLabel>
+                                    <FormLabel>{t('form.type')}</FormLabel>
                                     {/* Using Controller or Register for Select is tricky, simplified select */}
                                     <FormControl>
                                         <select
@@ -509,10 +496,9 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                             {...form.register(`customInputs.${index}.type`)}
                                             disabled={isPending}
                                         >
-                                            <option value="text">Short Text</option>
-                                            <option value="textarea">Long Text</option>
-                                            <option value="checkbox">Checkbox (Yes/No)</option>
-                                            {/* <option value="select">Dropdown</option> */}
+                                            <option value="text">{t('form.types.text')}</option>
+                                            <option value="textarea">{t('form.types.textarea')}</option>
+                                            <option value="checkbox">{t('form.types.checkbox')}</option>
                                         </select>
                                     </FormControl>
                                 </FormItem>
@@ -526,7 +512,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                             disabled={isPending}
                                         />
                                     </FormControl>
-                                    <FormLabel className="font-normal cursor-pointer">Required</FormLabel>
+                                    <FormLabel className="font-normal cursor-pointer">{t('form.required')}</FormLabel>
                                 </FormItem>
 
                                 <div className="col-span-2 flex justify-end">
@@ -549,7 +535,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                 <FormError message={error} />
 
                 <Button type="submit" disabled={isPending}>
-                    {service ? "Update Service" : "Create Service"}
+                    {service ? t('updateService') : t('createService')}
                 </Button>
             </form>
         </Form>

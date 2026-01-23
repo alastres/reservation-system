@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,6 +34,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [isUploading, setIsUploading] = useState(false);
+    const t = useTranslations("Settings.profile.form");
 
     const [formData, setFormData] = useState({
         name: user.name || "",
@@ -105,7 +107,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
             updateProfile({
                 ...formData,
                 coverImage: formData.coverImage,
-                coverImage: formData.coverImage,
                 notificationPreferences: formData.notificationPreferences,
                 maxConcurrentClients: Number(formData.maxConcurrentClients)
             })
@@ -126,7 +127,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         <form onSubmit={onSubmit} className="space-y-6 max-w-2xl bg-card p-6 rounded-xl border shadow-sm">
             {/* Cover Image Section */}
             <div className="space-y-4">
-                <Label>Cover Image</Label>
+                <Label>{t('coverImage')}</Label>
                 <div className="relative group w-full h-48 bg-muted rounded-xl overflow-hidden border-2 border-dashed border-muted-foreground/25 flex items-center justify-center">
                     {formData.coverImage ? (
                         <img
@@ -136,8 +137,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
                         />
                     ) : (
                         <div className="text-center text-muted-foreground p-4">
-                            <p className="text-sm font-medium">No cover image</p>
-                            <p className="text-xs">Recommended 1200x400px</p>
+                            <p className="text-sm font-medium">{t('noCover')}</p>
+                            <p className="text-xs">{t('recCover')}</p>
                         </div>
                     )}
 
@@ -146,7 +147,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                             htmlFor="cover-upload"
                             className="cursor-pointer bg-white/90 text-black px-4 py-2 rounded-full text-sm font-medium shadow-lg hover:bg-white transition-colors"
                         >
-                            Change Cover
+                            {t('changeCover')}
                         </Label>
                         <Input
                             id="cover-upload"
@@ -161,7 +162,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             </div>
 
             <div className="space-y-4">
-                <Label>Profile Picture</Label>
+                <Label>{t('profilePicture')}</Label>
                 <div className="flex items-center gap-6">
                     <div className="relative group">
                         {formData.image ? (
@@ -182,7 +183,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                                 htmlFor="image-upload"
                                 className="cursor-pointer bg-black/60 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm"
                             >
-                                Change
+                                {t('change')}
                             </Label>
                         </div>
                     </div>
@@ -197,17 +198,17 @@ export function ProfileForm({ user }: ProfileFormProps) {
                             disabled={isUploading || isPending}
                         />
                         <div className="text-sm text-muted-foreground">
-                            <p>Recommended size: 500x500px</p>
-                            <p>JPG, PNG, GIF allowed.</p>
+                            <p>{t('recProfile')}</p>
+                            <p>{t('recProfile').includes('br') ? 'JPG, PNG, GIF' : 'JPG, PNG, GIF allowed.'}</p> {/* Adjust if needed */}
                         </div>
-                        {isUploading && <p className="text-xs text-primary animate-pulse">Uploading...</p>}
+                        {isUploading && <p className="text-xs text-primary animate-pulse">{t('uploading')}</p>}
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name">{t('fullName')}</Label>
                     <Input
                         id="name"
                         placeholder="John Doe"
@@ -218,7 +219,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
+                    <Label htmlFor="username">{t('username')}</Label>
                     <Input
                         id="username"
                         placeholder="username"
@@ -232,26 +233,27 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 </div>
             </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                    id="bio"
-                    placeholder="Tell us about yourself..."
-                    className="resize-none min-h-[100px]"
-                    value={formData.bio}
-                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    disabled={isPending}
-                />
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="bio">{t('bio')}</Label>
+                    <Textarea
+                        id="bio"
+                        placeholder={t('bio') + "..."}
+                        className="resize-none min-h-[100px]"
+                        value={formData.bio}
+                        onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                        disabled={isPending}
+                    />
+                </div>
             </div>
 
             <div className="space-y-2 p-4 border rounded-lg bg-muted/20">
                 <div className="flex items-center justify-between">
-                    <Label htmlFor="maxConcurrentClients" className="font-semibold text-base">Global Team Capacity</Label>
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Advanced</span>
+                    <Label htmlFor="maxConcurrentClients" className="font-semibold text-base">{t('capacity')}</Label>
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">{t('advanced')}</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">
-                    Maximum number of clients you can serve simultaneously across ALL services.
-                    Set this to your Staff Count or limit.
+                    {t('capacityDesc')}
                 </p>
                 <Input
                     id="maxConcurrentClients"
@@ -266,19 +268,18 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="phone">WhatsApp Number</Label>
+                    <Label htmlFor="phone">{t('whatsapp')}</Label>
                     <PhoneInput
-                        placeholder="Enter phone number"
+                        placeholder={t('whatsapp')}
                         value={formData.phone}
                         onChange={(val: string | undefined) => setFormData({ ...formData, phone: val || "" })}
                         disabled={isPending}
                         defaultCountry="ES"
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
-                    <p className="text-xs text-muted-foreground">Used for "Phone Call" location & public profile.</p>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="address">Default Address</Label>
+                    <Label htmlFor="address">{t('address')}</Label>
                     <Input
                         id="address"
                         placeholder="123 Main St, City"
@@ -286,13 +287,12 @@ export function ProfileForm({ user }: ProfileFormProps) {
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                         disabled={isPending}
                     />
-                    <p className="text-xs text-muted-foreground">Used if you select "In Person" location.</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label>Time Zone</Label>
+                    <Label>{t('timeZone')}</Label>
                     <TimezoneSelect
                         value={formData.timeZone}
                         onChange={(val) => setFormData({ ...formData, timeZone: val })}
@@ -300,7 +300,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="language">Language</Label>
+                    <Label htmlFor="language">{t('language')}</Label>
                     <Select
                         value={formData.language}
                         onValueChange={(value) => setFormData({ ...formData, language: value })}
@@ -318,11 +318,12 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 </div>
             </div>
 
+
             <div className="flex items-center justify-between rounded-lg border p-4 bg-muted/30">
                 <div className="space-y-0.5">
-                    <Label className="text-base font-medium">Email Notifications</Label>
+                    <Label className="text-base font-medium">{t('emailNotif')}</Label>
                     <p className="text-sm text-muted-foreground">
-                        Receive updates about your bookings.
+                        {t('emailNotifDesc')}
                     </p>
                 </div>
                 <Switch
@@ -339,7 +340,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
             <div className="flex justify-end pt-4">
                 <Button type="submit" disabled={isPending || isUploading} className="min-w-[120px]">
-                    {isPending ? "Saving..." : "Save Changes"}
+                    {isPending ? t('saving') : t('save')}
                 </Button>
             </div>
         </form>

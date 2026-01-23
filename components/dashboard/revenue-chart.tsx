@@ -9,6 +9,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
+import { useTranslations } from "next-intl";
 
 interface RevenueChartProps {
     data: {
@@ -18,6 +19,8 @@ interface RevenueChartProps {
 }
 
 export function RevenueChart({ data }: RevenueChartProps) {
+    const t = useTranslations('DashboardOverview');
+
     return (
         <ResponsiveContainer width="100%" height={350}>
             <LineChart data={data}>
@@ -42,7 +45,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "8px",
                     }}
-                    formatter={(value: number) => [`$${value.toFixed(2)}`, "Revenue"]}
+                    formatter={(value: number) => [`$${value.toFixed(2)}`, t('revenue')]}
                 />
                 <Line
                     type="monotone"
@@ -55,3 +58,4 @@ export function RevenueChart({ data }: RevenueChartProps) {
         </ResponsiveContainer>
     );
 }
+

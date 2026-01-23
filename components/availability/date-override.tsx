@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Trash2, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -37,6 +38,7 @@ export function DateOverride({ initialExceptions }: DateOverrideProps) {
     const [startTime, setStartTime] = useState("09:00");
     const [endTime, setEndTime] = useState("17:00");
     const [isPending, startTransition] = useTransition();
+    const t = useTranslations("Availability.override");
 
     const handleAdd = () => {
         if (!date) return;
@@ -44,9 +46,9 @@ export function DateOverride({ initialExceptions }: DateOverrideProps) {
         startTransition(() => {
             saveException(date, isAvailable, isAvailable ? startTime : undefined, isAvailable ? endTime : undefined)
                 .then((data) => {
-                    if (data.error) toast.error(data.error);
+                    if (data.error) toast.error(t('toast.error'));
                     if (data.success) {
-                        toast.success(data.success);
+                        toast.success(t('toast.added'));
                         setDate(undefined); // Reset
                     }
                 });
@@ -56,8 +58,8 @@ export function DateOverride({ initialExceptions }: DateOverrideProps) {
     const handleDelete = (id: string) => {
         startTransition(() => {
             deleteException(id).then((data) => {
-                if (data.error) toast.error(data.error);
-                if (data.success) toast.success(data.success);
+                if (data.error) toast.error(t('toast.error'));
+                if (data.success) toast.success(t('toast.deleted'));
             });
         });
     };
@@ -65,12 +67,12 @@ export function DateOverride({ initialExceptions }: DateOverrideProps) {
     return (
         <Card className="mt-6">
             <CardHeader>
-                <CardTitle>Date-Specific Overrides</CardTitle>
+                <CardTitle>{t('title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="flex flex-col md:flex-row gap-4 items-end border p-4 rounded-lg bg-muted/20">
                     <div className="space-y-2 flex-1">
-                        <Label>Select Date</Label>
+                        <Label>{t('selectDate')}</Label>
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button
@@ -81,7 +83,7 @@ export function DateOverride({ initialExceptions }: DateOverrideProps) {
                                     )}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                    {date ? format(date, "PPP") : <span>{t('pickDate')}</span>}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
@@ -96,18 +98,18 @@ export function DateOverride({ initialExceptions }: DateOverrideProps) {
                     </div>
 
                     <div className="space-y-2 flex flex-col items-center">
-                        <Label className="mb-2">Available?</Label>
+                        <Label className="mb-2">{t('available')}</Label>
                         <Switch checked={isAvailable} onCheckedChange={setIsAvailable} />
                     </div>
 
                     {isAvailable && (
                         <>
                             <div className="space-y-2">
-                                <Label>Start Time</Label>
+                                <Label>{t('startTime')}</Label>
                                 <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
                             </div>
                             <div className="space-y-2">
-                                <Label>End Time</Label>
+                                <Label>{t('endTime')}</Label>
                                 <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
                             </div>
                         </>
@@ -115,13 +117,13 @@ export function DateOverride({ initialExceptions }: DateOverrideProps) {
 
                     <Button onClick={handleAdd} disabled={!date || isPending}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Add Override
+                        {t('add')}
                     </Button>
                 </div>
 
                 <div className="space-y-4">
-                    <h3 className="font-semibold text-sm text-muted-foreground">Active Overrides</h3>
-                    {initialExceptions.length === 0 && <p className="text-sm text-muted-foreground italic">No overrides set.</p>}
+                    <h3 className="font-semibold text-sm text-muted-foreground">{t('active')}</h3>
+                    {initialExceptions.length === 0 && <p className="text-sm text-muted-foreground italic">{t('empty')}</p>}
 
                     <div className="grid gap-3">
                         {initialExceptions.map((ex) => (
@@ -133,7 +135,7 @@ export function DateOverride({ initialExceptions }: DateOverrideProps) {
                                             {ex.startTime} - {ex.endTime}
                                         </Badge>
                                     ) : (
-                                        <Badge variant="destructive">Unavailable</Badge>
+                                        <Badge variant="destructive">{t('unavailable')}</Badge>
                                     )}
                                 </div>
                                 <Button variant="ghost" size="sm" onClick={() => handleDelete(ex.id)} disabled={isPending}>
