@@ -34,6 +34,7 @@ export default async function SettingsPage() {
             subscriptionStatus: true,
             subscriptionPlan: true,
             subscriptionEndsAt: true,
+            maxConcurrentClients: true,
         },
     });
 

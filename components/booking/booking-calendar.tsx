@@ -27,7 +27,7 @@ interface BookingCalendarProps {
 
 export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
     const [date, setDate] = useState<Date | undefined>(new Date());
-    const [slots, setSlots] = useState<string[]>([]);
+    const [slots, setSlots] = useState<{ time: string; spots: number }[]>([]);
     const [loadingSlots, setLoadingSlots] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
     const [bookingStage, setBookingStage] = useState<"SLOT" | "AUTH" | "FORM" | "PAYMENT" | "SUCCESS">("SLOT");
@@ -73,8 +73,8 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
         fetchSlots();
     }, [date, service.id, user.timeZone]);
 
-    const handleSlotClick = (slot: string) => {
-        setSelectedSlot(slot);
+    const handleSlotClick = (slotTime: string) => {
+        setSelectedSlot(slotTime);
         if (!session) {
             setBookingStage("AUTH");
         } else {
@@ -235,12 +235,15 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                 ) : (
                                     slots.map((slot) => (
                                         <Button
-                                            key={slot}
-                                            variant="outline"
-                                            className="w-full"
-                                            onClick={() => handleSlotClick(slot)}
+                                            key={slot.time}
+                                            variant={selectedSlot === slot.time ? "default" : "outline"}
+                                            className={`w-full h-auto py-3 flex flex-col items-center gap-1 ${selectedSlot === slot.time ? "bg-primary text-primary-foreground" : ""}`}
+                                            onClick={() => handleSlotClick(slot.time)}
                                         >
-                                            {slot}
+                                            <span className="text-base font-medium">{slot.time}</span>
+                                            <span className="text-xs opacity-70">
+                                                {slot.spots} {slot.spots === 1 ? "spot" : "spots"} left
+                                            </span>
                                         </Button>
                                     ))
                                 )}

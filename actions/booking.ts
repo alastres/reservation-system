@@ -48,13 +48,39 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
         }
     });
 
+    console.log("[getSlotsAction] Debug Info:", {
+        serviceId,
+        dateStr,
+        timeZone,
+        dayStart: dayStart.toISOString(),
+        dayEnd: dayEnd.toISOString(),
+        bookingsFound: bookings.length,
+        bookings: bookings.map(b => ({ start: b.startTime, end: b.endTime, status: b.status }))
+    });
+
     // Fetch Google Calendar Busy Times
     const googleBusyTimes = await getBusyTimes(service.userId, dayStart, dayEnd);
+
+    // Filter out Google Busy Times that overlap exactly with existing system bookings
+    // This prevents double counting if Google Calendar Sync is enabled.
+    // If a Google Event starts/ends at the same time as a Booking, we assume it's the same event.
+    const uniqueGoogleBusyTimes = googleBusyTimes.filter(gBusy => {
+        const gStart = new Date(gBusy.start!).getTime();
+        const gEnd = new Date(gBusy.end!).getTime();
+
+        const isDuplicate = bookings.some(b => {
+            const bStart = b.startTime.getTime();
+            const bEnd = b.endTime.getTime();
+            return Math.abs(gStart - bStart) < 60000 && Math.abs(gEnd - bEnd) < 60000; // 1 minute tolerance
+        });
+
+        return !isDuplicate;
+    });
 
     // Merge bookings and busy times
     const allBusySlots = [
         ...bookings,
-        ...googleBusyTimes.map(busy => ({
+        ...uniqueGoogleBusyTimes.map(busy => ({
             startTime: new Date(busy.start!),
             endTime: new Date(busy.end!)
         }))
@@ -70,7 +96,7 @@ export const getSlotsAction = async (dateStr: string, serviceId: string, timeZon
         service.bufferTime,
         service.user.availabilityExceptions,
         service.minNotice,
-        service.capacity
+        service.user.maxConcurrentClients || 1
     );
 
     return { slots };
@@ -145,10 +171,27 @@ export const createBooking = async (
             }
         });
 
-        // Check if slot has reached capacity
-        if (existingCount >= service.capacity) {
+        const maxGlobal = service.user.maxConcurrentClients || 1;
+        const isGroupService = service.capacity > 1;
+        const shouldCheckServiceCapacity = isGroupService || maxGlobal === 1;
+
+        if (shouldCheckServiceCapacity && existingCount >= service.capacity) {
             const conflictDate = format(checkStart, "yyyy-MM-dd");
             return { error: `Slot on ${conflictDate} is fully booked (${service.capacity}/${service.capacity} spots taken).` };
+        }
+
+        // Global Capacity Check (Staff Scalability)
+        const totalConcurrentBookings = await prisma.booking.count({
+            where: {
+                service: { userId: service.userId },
+                startTime: { lt: checkBuffEnd },
+                endTime: { gt: checkStart },
+                status: "CONFIRMED"
+            }
+        });
+
+        if (totalConcurrentBookings >= maxGlobal) {
+            return { error: `No staff available at this time (Global limit ${maxGlobal} reached).` };
         }
     }
 

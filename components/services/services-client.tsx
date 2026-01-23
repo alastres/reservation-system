@@ -224,8 +224,9 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                                             if (service.user?.username) {
                                                 window.open(`/${service.user.username}/${service.url}`, '_blank');
                                             } else {
-                                                toast.error("Service owner has no username set.");
-                                                console.error("Missing username for service", service);
+                                                // Avoid error spam, maybe just log or do nothing. 
+                                                // It's possible the optimistic update hasn't populated user yet.
+                                                console.warn("Service owner has no username set", service);
                                             }
                                         }}
                                         className="group relative overflow-hidden transition-all hover:shadow-xl hover:bg-white/5 border-white/10 bg-card/40 backdrop-blur-md h-full cursor-pointer"

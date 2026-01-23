@@ -62,7 +62,7 @@ export const getAvailableSlots = (
 
     if (!isDayEnabled) return [];
 
-    const slots: string[] = [];
+    const slots: { time: string, spots: number }[] = [];
 
     // Parse rule start/end times
     const dayStart = parse(ruleStart, "HH:mm", date);
@@ -89,7 +89,10 @@ export const getAvailableSlots = (
         }).length;
 
         if (overlappingBookingsCount < capacity) {
-            slots.push(format(currentSlot, "HH:mm"));
+            slots.push({
+                time: format(currentSlot, "HH:mm"),
+                spots: capacity - overlappingBookingsCount
+            });
         }
 
         // Increment logic

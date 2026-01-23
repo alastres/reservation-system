@@ -21,6 +21,7 @@ model User {
   username String? @unique
   timeZone String  @default("UTC")
   language String  @default("es") // "es" or "en"
+  maxConcurrentClients Int @default(1)
 
   // Profile
   bio           String?
