@@ -1,4 +1,5 @@
 import { addMinutes, format, parse, isBefore, isAfter, isEqual, startOfDay } from "date-fns";
+import { toZonedTime, formatInTimeZone } from "date-fns-tz";
 
 type AvailabilityRule = {
     dayOfWeek: number;
@@ -51,7 +52,9 @@ export const getAvailableSlots = (
         }
     } else {
         // Weekly rules
-        const dayOfWeek = date.getDay();
+        // CRITICAL FIX: Convert global UTC date to PROVIDER's timezone to determine day of week.
+        const zonedDate = toZonedTime(date, timeZone);
+        const dayOfWeek = zonedDate.getDay();
         const rule = rules.find(r => r.dayOfWeek === dayOfWeek);
         if (rule) {
             ruleStart = rule.startTime;
@@ -64,9 +67,13 @@ export const getAvailableSlots = (
 
     const slots: { time: string, spots: number }[] = [];
 
-    // Parse rule start/end times
-    const dayStart = parse(ruleStart, "HH:mm", date);
-    const dayEnd = parse(ruleEnd, "HH:mm", date);
+    // Parse rule start/end times manually to avoid timezone shifting by date-fns parse
+    // date is already the Start of Day in Target TimeZone (UTC representation)
+    const [startH, startM] = ruleStart.split(":").map(Number);
+    const [endH, endM] = ruleEnd.split(":").map(Number);
+
+    const dayStart = addMinutes(date, (startH * 60) + startM);
+    const dayEnd = addMinutes(date, (endH * 60) + endM);
 
     let currentSlot = dayStart;
 
@@ -90,7 +97,7 @@ export const getAvailableSlots = (
 
         if (overlappingBookingsCount < capacity) {
             slots.push({
-                time: format(currentSlot, "HH:mm"),
+                time: formatInTimeZone(currentSlot, timeZone, "HH:mm"),
                 spots: capacity - overlappingBookingsCount
             });
         }

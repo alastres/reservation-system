@@ -229,25 +229,53 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                 ) : (
                     <>
                         {bookingStage === "SLOT" && (
-                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                                {slots.length === 0 ? (
-                                    <p className="col-span-full text-muted-foreground text-center py-10">No slots available for this day.</p>
-                                ) : (
-                                    slots.map((slot) => (
-                                        <Button
-                                            key={slot.time}
-                                            variant={selectedSlot === slot.time ? "default" : "outline"}
-                                            className={`w-full h-auto py-3 flex flex-col items-center gap-1 ${selectedSlot === slot.time ? "bg-primary text-primary-foreground" : ""}`}
-                                            onClick={() => handleSlotClick(slot.time)}
-                                        >
-                                            <span className="text-base font-medium">{slot.time}</span>
-                                            <span className="text-xs opacity-70">
-                                                {slot.spots} {slot.spots === 1 ? "spot" : "spots"} left
-                                            </span>
-                                        </Button>
-                                    ))
-                                )}
-                            </div>
+                            <>
+                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {slots.length === 0 ? (
+                                        <p className="col-span-full text-muted-foreground text-center py-10">No slots available for this day.</p>
+                                    ) : (
+                                        slots.map((slot) => (
+                                            <Button
+                                                key={slot.time}
+                                                variant={selectedSlot === slot.time ? "default" : "outline"}
+                                                className={`w-full h-auto py-3 flex flex-col items-center gap-1 ${selectedSlot === slot.time ? "bg-primary text-primary-foreground" : ""}`}
+                                                onClick={() => handleSlotClick(slot.time)}
+                                            >
+                                                <span className="text-base font-medium">{slot.time}</span>
+                                                <span className="text-xs opacity-70">
+                                                    {slot.spots} {slot.spots === 1 ? "spot" : "spots"} left
+                                                </span>
+                                            </Button>
+                                        ))
+                                    )}
+                                </div>
+
+                                {/* TimeZone Warning */}
+                                {(() => {
+                                    const clientTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                                    const providerTimeZone = user.timeZone || "UTC";
+
+                                    console.log("[TimeZone Debug]", { client: clientTimeZone, provider: providerTimeZone, mismatch: clientTimeZone !== providerTimeZone });
+
+                                    if (date && clientTimeZone !== providerTimeZone) {
+                                        return (
+                                            <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-sm text-yellow-600 dark:text-yellow-400 animate-in fade-in slide-in-from-top-2">
+                                                <p className="font-semibold flex items-center gap-2">
+                                                    <span className="text-lg">⚠️</span> Time Zone Difference
+                                                </p>
+                                                <div className="mt-1 space-y-1 opacity-90">
+                                                    <p>Times shown are in: <strong>{providerTimeZone}</strong></p>
+                                                    <p>Your time zone: <strong>{clientTimeZone}</strong></p>
+                                                    <p className="text-xs mt-2 italic">
+                                                        * Please note the time difference when booking.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })()}
+                            </>
                         )}
 
                         {bookingStage === "AUTH" && (
