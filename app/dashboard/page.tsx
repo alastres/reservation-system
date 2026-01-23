@@ -63,7 +63,7 @@ async function getDashboardStats(userId: string) {
         }
     });
 
-    const revenue = bookings.reduce((acc: number, booking: any) => acc + booking.service.price, 0);
+    const revenue = bookings.reduce((acc: number, booking: any) => acc + (booking.amountPaid || 0), 0);
 
     // Chart Data: Revenue over last 30 days
     const thirtyDaysAgo = new Date();
@@ -79,7 +79,7 @@ async function getDashboardStats(userId: string) {
         if (!acc[date]) {
             acc[date] = 0;
         }
-        acc[date] += booking.service.price;
+        acc[date] += (booking.amountPaid || 0);
         return acc;
     }, {});
 
