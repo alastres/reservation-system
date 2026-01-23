@@ -89,14 +89,17 @@ export const createGoogleEvent = async (
             conferenceDataVersion: options?.withMeet ? 1 : 0,
             requestBody: body,
         });
-        console.log("[GoogleCalendar] Event created successfully:", res.data.id);
+        console.log("[GoogleCalendar] Event created successfully. ID:", res.data.id);
 
         return {
             id: res.data.id || null,
             meetLink: res.data.hangoutLink || null
         };
-    } catch (error) {
-        console.error("[GoogleCalendar] Error creating event:", error);
+    } catch (error: any) {
+        console.error("[GoogleCalendar] Error creating event:", error.message || error);
+        if (error.response) {
+            console.error("[GoogleCalendar] Response data:", error.response.data);
+        }
         return null;
     }
 };
