@@ -46,7 +46,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
         phone: (user as any).phone || "",
         notificationPreferences: {
             email: (user.notificationPreferences as any)?.email ?? true,
-        }
+        },
+        maxConcurrentClients: (user as any).maxConcurrentClients || 1,
     });
 
     // Sync state with props when user data updates (e.g. after save)
@@ -63,7 +64,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
             phone: (user as any).phone || "",
             notificationPreferences: {
                 email: (user.notificationPreferences as any)?.email ?? true,
-            }
+            },
+            maxConcurrentClients: (user as any).maxConcurrentClients || 1,
         });
     }, [user]);
 
@@ -103,7 +105,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
             updateProfile({
                 ...formData,
                 coverImage: formData.coverImage,
-                notificationPreferences: formData.notificationPreferences
+                coverImage: formData.coverImage,
+                notificationPreferences: formData.notificationPreferences,
+                maxConcurrentClients: Number(formData.maxConcurrentClients)
             })
                 .then(async (data) => {
                     if (data.error) {
@@ -236,6 +240,26 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     className="resize-none min-h-[100px]"
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                    disabled={isPending}
+                />
+            </div>
+
+            <div className="space-y-2 p-4 border rounded-lg bg-muted/20">
+                <div className="flex items-center justify-between">
+                    <Label htmlFor="maxConcurrentClients" className="font-semibold text-base">Global Team Capacity</Label>
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Advanced</span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
+                    Maximum number of clients you can serve simultaneously across ALL services.
+                    Set this to your Staff Count or limit.
+                </p>
+                <Input
+                    id="maxConcurrentClients"
+                    type="number"
+                    min="1"
+                    className="max-w-[100px]"
+                    value={formData.maxConcurrentClients}
+                    onChange={(e) => setFormData({ ...formData, maxConcurrentClients: Number(e.target.value) })}
                     disabled={isPending}
                 />
             </div>
