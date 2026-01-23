@@ -19,6 +19,7 @@ export const RegisterSchema = z.object({
     name: z.string().min(1, {
         message: "Name is required",
     }),
+    timeZone: z.string().optional(),
 });
 
 export const ServiceSchema = z.object({

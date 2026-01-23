@@ -31,12 +31,25 @@ export const RegisterForm = () => {
             email: "",
             password: "",
             name: "",
+            timeZone: "UTC", // Default fallback
         },
     });
+
+    // Auto-detect timezone
+    useEffect(() => {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (tz) {
+            form.setValue("timeZone", tz);
+        }
+    }, [form]);
 
     const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
         setError("");
         setSuccess("");
+        // Ensure timezone is set if not already
+        if (!values.timeZone) {
+            values.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+        }
 
         startTransition(() => {
             register(values).then((data) => {
