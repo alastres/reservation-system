@@ -5,11 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { connectGoogle, disconnectGoogle } from "@/actions/integrations";
 import { CalendarCheck, XCircle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function IntegrationsPage() {
     const session = await auth();
+    const t = await getTranslations("Settings.integrations");
 
     if (!session?.user?.id) {
         redirect("/auth/login");
@@ -30,10 +32,10 @@ export default async function IntegrationsPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <CalendarCheck className="w-5 h-5 text-blue-500" />
-                        Google Calendar
+                        {t('googleCalendar')}
                     </CardTitle>
                     <CardDescription>
-                        Connect your Google Calendar to automatically block busy times and add new bookings.
+                        {t('description')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -42,11 +44,11 @@ export default async function IntegrationsPage() {
                             <div className={`w-3 h-3 rounded-full ${isConnected ? "bg-green-500 animate-pulse" : "bg-gray-300"}`} />
                             <div className="space-y-1">
                                 <p className="font-medium text-sm">
-                                    {isConnected ? "Connected" : "Not Connected"}
+                                    {isConnected ? t('connected') : t('notConnected')}
                                 </p>
                                 {isConnected && (
                                     <p className="text-xs text-muted-foreground">
-                                        Synced for availability checks and event creation.
+                                        {t('synced')}
                                     </p>
                                 )}
                             </div>
@@ -56,13 +58,13 @@ export default async function IntegrationsPage() {
                             <form action={disconnectGoogle}>
                                 <Button variant="outline" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
                                     <XCircle className="w-4 h-4 mr-2" />
-                                    Disconnect
+                                    {t('disconnect')}
                                 </Button>
                             </form>
                         ) : (
                             <form action={connectGoogle}>
                                 <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                                    Connect Calendar
+                                    {t('connect')}
                                 </Button>
                             </form>
                         )}
@@ -72,3 +74,4 @@ export default async function IntegrationsPage() {
         </div>
     );
 }
+

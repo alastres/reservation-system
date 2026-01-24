@@ -354,6 +354,20 @@
         }
     },
     "Settings": {
+        "title": "Configuración",
+        "nav": {
+            "profile": "Perfil",
+            "integrations": "Integraciones"
+        },
+        "integrations": {
+            "googleCalendar": "Google Calendar",
+            "description": "Conecta tu Google Calendar para bloquear automáticamente horarios ocupados y añadir nuevas reservas.",
+            "connected": "Conectado",
+            "notConnected": "No Conectado",
+            "synced": "Sincronizado para verificación de disponibilidad y creación de eventos.",
+            "disconnect": "Desconectar",
+            "connect": "Conectar Calendario"
+        },
         "profile": {
             "title": "Información del Perfil",
             "description": "Actualiza los detalles de tu perfil público e información personal.",
@@ -486,6 +500,58 @@
                 "of": "de",
                 "page": "Página",
                 "next": "Siguiente"
+            }
+        }
+    },
+    "Admin": {
+        "nav": {
+            "overview": "Resumen",
+            "users": "Usuarios",
+            "logs": "Registros",
+            "exit": "Salir"
+        },
+        "overview": {
+            "title": "Panel de Control",
+            "subtitle": "Bienvenido de nuevo al centro de mando.",
+            "stats": {
+                "totalUsers": "Usuarios Totales",
+                "totalBookings": "Reservas Totales",
+                "confirmed": "Confirmadas",
+                "activeToday": "Activos Hoy"
+            },
+            "recentActivity": "Actividad Reciente",
+            "quickActions": "Acciones Rápidas",
+            "inviteUser": "Invitar Usuario",
+            "inviteDesc": "Enviar invitación por correo"
+        },
+        "users": {
+            "title": "Gestión de Usuarios",
+            "subtitle": "Ver y administrar usuarios del sistema.",
+            "table": {
+                "user": "Usuario",
+                "role": "Rol",
+                "stats": "Estadísticas",
+                "joined": "Se unió",
+                "actions": "Acciones",
+                "noUsers": "No se encontraron usuarios",
+                "noUsersDesc": "Los usuarios registrados aparecerán aquí."
+            },
+            "stats": {
+                "services": "Servicios:",
+                "bookings": "Reservas:"
+            }
+        },
+        "logs": {
+            "title": "Registros del Sistema",
+            "subtitle": "Rastro de auditoría de acciones del sistema.",
+            "table": {
+                "timestamp": "Fecha y Hora",
+                "action": "Acción",
+                "user": "Usuario",
+                "details": "Detalles",
+                "ipAddress": "Dirección IP",
+                "noLogs": "No se encontraron registros del sistema",
+                "noLogsDesc": "Las acciones realizadas en el sistema aparecerán aquí."
             }
         }
     }

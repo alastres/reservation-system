@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Users, CalendarCheck, Clock, TrendingUp } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export default async function AdminDashboardPage() {
     const userCount = await prisma.user.count();
@@ -7,10 +8,11 @@ export default async function AdminDashboardPage() {
     const confirmedCount = await prisma.booking.count({
         where: { status: 'CONFIRMED' }
     });
+    const t = await getTranslations("Admin.overview");
 
     const stats = [
         {
-            title: "Total Users",
+            title: t("stats.totalUsers"),
             value: userCount,
             icon: Users,
             color: "text-blue-500",
@@ -18,7 +20,7 @@ export default async function AdminDashboardPage() {
             trend: "+12% this month" // Placeholder for now
         },
         {
-            title: "Total Bookings",
+            title: t("stats.totalBookings"),
             value: bookingCount,
             icon: Clock,
             color: "text-purple-500",
@@ -26,7 +28,7 @@ export default async function AdminDashboardPage() {
             trend: "+5% this month"
         },
         {
-            title: "Confirmed",
+            title: t("stats.confirmed"),
             value: confirmedCount,
             icon: CalendarCheck,
             color: "text-emerald-500",
@@ -35,7 +37,7 @@ export default async function AdminDashboardPage() {
         },
         // Placeholder for revenue or other metric
         {
-            title: "Active Today",
+            title: t("stats.activeToday"),
             value: "24",
             icon: TrendingUp,
             color: "text-amber-500",
@@ -47,8 +49,8 @@ export default async function AdminDashboardPage() {
     return (
         <div className="space-y-8">
             <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight text-white">Dashboard Overview</h2>
-                <p className="text-slate-400">Welcome back to the command center.</p>
+                <h2 className="text-3xl font-bold tracking-tight text-white">{t("title")}</h2>
+                <p className="text-slate-400">{t("subtitle")}</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -77,21 +79,21 @@ export default async function AdminDashboardPage() {
             {/* Placeholder for Chart */}
             <div className="grid gap-6 md:grid-cols-7">
                 <div className="col-span-4 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-                    <h3 className="text-lg font-medium text-white mb-4">Recent Activity</h3>
+                    <h3 className="text-lg font-medium text-white mb-4">{t("recentActivity")}</h3>
                     <div className="h-[300px] flex items-center justify-center text-slate-500 border border-dashed border-white/10 rounded-lg">
                         Chart: Monthly Bookings (Coming Soon)
                     </div>
                 </div>
                 <div className="col-span-3 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-                    <h3 className="text-lg font-medium text-white mb-4">Quick Actions</h3>
+                    <h3 className="text-lg font-medium text-white mb-4">{t("quickActions")}</h3>
                     <div className="space-y-4">
                         <button className="w-full text-left p-3 rounded-lg hover:bg-white/5 flex items-center gap-3 transition-colors border border-white/5">
                             <div className="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
                                 <Users className="h-4 w-4" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-slate-200">Invite User</p>
-                                <p className="text-xs text-slate-500">Send an email invitation</p>
+                                <p className="text-sm font-medium text-slate-200">{t("inviteUser")}</p>
+                                <p className="text-xs text-slate-500">{t("inviteDesc")}</p>
                             </div>
                         </button>
                         {/* More quick actions... */}

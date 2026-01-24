@@ -1,21 +1,23 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+import { useTranslations } from "next-intl";
+
 export const SettingsNav = () => {
     const pathname = usePathname();
+    const t = useTranslations("Settings.nav");
 
     const items = [
         {
-            title: "Profile",
+            title: t('profile'),
             href: "/dashboard/settings",
             isActive: pathname === "/dashboard/settings"
         },
         {
-            title: "Integrations",
+            title: t('integrations'),
             href: "/dashboard/settings/integrations",
             isActive: pathname === "/dashboard/settings/integrations"
         }

@@ -98,23 +98,29 @@ export const SideNav = ({ role }: SideNavProps) => {
                     </h1>
                 </Link>
                 <div className="space-y-1">
-                    {filteredRoutes.map((route) => (
-                        <Link
-                            key={route.href}
-                            href={route.href}
-                            className={cn(
-                                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer rounded-r-none rounded-l-lg transition-all",
-                                pathname === route.href
-                                    ? "bg-gradient-to-r from-primary/20 to-transparent text-primary border-l-2 border-primary"
-                                    : "text-muted-foreground hover:bg-accent hover:text-primary"
-                            )}
-                        >
-                            <div className="flex items-center flex-1">
-                                <route.icon className={cn("h-5 w-5 mr-3", pathname === route.href ? "text-primary shadow-primary/50 drop-shadow-md" : "text-muted-foreground group-hover:text-primary")} />
-                                {route.label}
-                            </div>
-                        </Link>
-                    ))}
+                    {filteredRoutes.map((route) => {
+                        const isActive = pathname === route.href || (
+                            route.href !== "/dashboard" && pathname.startsWith(route.href)
+                        );
+
+                        return (
+                            <Link
+                                key={route.href}
+                                href={route.href}
+                                className={cn(
+                                    "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer rounded-r-none rounded-l-lg transition-all",
+                                    isActive
+                                        ? "bg-gradient-to-r from-primary/20 to-transparent text-primary border-l-2 border-primary"
+                                        : "text-muted-foreground hover:bg-accent hover:text-primary"
+                                )}
+                            >
+                                <div className="flex items-center flex-1">
+                                    <route.icon className={cn("h-5 w-5 mr-3", isActive ? "text-primary shadow-primary/50 drop-shadow-md" : "text-muted-foreground group-hover:text-primary")} />
+                                    {route.label}
+                                </div>
+                            </Link>
+                        );
+                    })}
                 </div>
             </div>
             <div className="px-3 py-2">
