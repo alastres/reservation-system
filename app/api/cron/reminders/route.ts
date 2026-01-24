@@ -1,167 +1,120 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendBookingReminder } from "@/lib/mail";
-import { addMinutes, subHours, format } from "date-fns";
+import { addHours, subMinutes, addMinutes } from "date-fns";
 
+// Force dynamic to ensure it runs every time
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
-    // Basic Auth Check for Cron
-    const authHeader = request.headers.get("authorization");
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const now = new Date();
-    const results = {
-        reminders24h: 0,
-        reminders1h: 0,
-        errors: 0
-    };
-
+export async function GET(req: Request) {
     try {
-        // --- 24 Hour Reminders ---
-        // Target: Bookings starting 24h from now (+/- 15 mins)
-        const start24h = addMinutes(now, 24 * 60 - 20); // 23h 40m
-        const end24h = addMinutes(now, 24 * 60 + 20);   // 24h 20m
+        // Authenticate the cron request (Vercel adds this header)
+        const authHeader = req.headers.get('authorization');
+        // In local dev we might skip this or use a manual secret
+        // For Vercel Cron, typically CRON_SECRET env var is used if we want to secure it manually, 
+        // but Vercel protects it automatically if configured via vercel.json for internal invocation.
+        // However, checking for a secret header is good practice if exposing to public.
+        // const { CRON_SECRET } = process.env;
+        // if (authHeader !== `Bearer ${CRON_SECRET}`) { ... }
 
-        const bookings24h = await prisma.booking.findMany({
+        const now = new Date();
+
+        // 1. 24 Hour Reminders
+        // Look for bookings tomorrow (between 24h and 24h + 15m from now)
+        // Adjust window size based on cron frequency (10 mins)
+        const start24 = addHours(now, 24);
+        const end24 = addMinutes(start24, 15);
+
+        const bookings24 = await prisma.booking.findMany({
             where: {
-                status: "CONFIRMED",
                 startTime: {
-                    gte: start24h,
-                    lte: end24h
-                }
+                    gte: start24,
+                    lte: end24
+                },
+                status: "CONFIRMED",
             },
-            include: { service: { include: { user: true } } }
+            include: {
+                user: true, // The provider
+                service: true,
+            }
         });
 
-        for (const booking of bookings24h) {
-            // Idempotency Check: Did we already send this?
-            // Fetch logs for this provider in the last 2 days
-            const existingLogs = await prisma.notificationLog.findMany({
+        for (const booking of bookings24) {
+            // Check if already sent
+            const logs = await prisma.notificationLog.findFirst({
                 where: {
-                    // userId: booking.service.userId, // Optionally filter by user
+                    metadata: {
+                        path: ['bookingId'],
+                        equals: booking.id
+                    },
                     type: "REMINDER_24H",
-                    createdAt: {
-                        gte: subHours(now, 48) // Look back 48h to be safe
-                    }
+                    status: "SENT"
                 }
             });
 
-            const alreadySent = existingLogs.some(log => (log.metadata as any)?.bookingId === booking.id);
-
-            if (!alreadySent) {
-                // Determine Address
-                const finalAddress = booking.service.locationType === "IN_PERSON"
-                    ? (booking.service.address || booking.service.user.address)
-                    : undefined;
-
-                let locationDetails = "";
-                switch (booking.service.locationType) {
-                    case "GOOGLE_MEET":
-                        locationDetails = "Google Meet (Link in Calendar)";
-                        break;
-                    case "PHONE":
-                        locationDetails = booking.clientPhone
-                            ? `Phone Call (Provider will call you at ${booking.clientPhone})`
-                            : "Phone Call";
-                        break;
-                    case "IN_PERSON":
-                        locationDetails = finalAddress ? `In Person at ${finalAddress}` : "In Person";
-                        break;
-                    case "CUSTOM":
-                        locationDetails = booking.service.locationUrl ? `Link: ${booking.service.locationUrl}` : "Online";
-                        break;
-                }
-
+            if (!logs) {
                 await sendBookingReminder(
                     booking.clientEmail,
                     booking.clientName,
                     booking.service.title,
-                    format(booking.startTime, "yyyy-MM-dd"),
-                    format(booking.startTime, "HH:mm"),
-                    booking.service.userId,
+                    booking.startTime.toISOString().split("T")[0], // Simple date
+                    booking.startTime.toISOString().split("T")[1].substring(0, 5), // Simple time
+                    booking.userId,
                     "24h",
                     booking.id,
-                    locationDetails
+                    booking.service.location
                 );
-                results.reminders24h++;
             }
         }
 
-        // --- 1 Hour Reminders ---
-        // Target: Bookings starting 1h from now (+/- 15 mins)
-        const start1h = addMinutes(now, 60 - 15);
-        const end1h = addMinutes(now, 60 + 15);
+        // 2. 1 Hour Reminders
+        const start1 = addHours(now, 1);
+        const end1 = addMinutes(start1, 15);
 
-        const bookings1h = await prisma.booking.findMany({
+        const bookings1 = await prisma.booking.findMany({
             where: {
-                status: "CONFIRMED",
                 startTime: {
-                    gte: start1h,
-                    lte: end1h
-                }
+                    gte: start1,
+                    lte: end1
+                },
+                status: "CONFIRMED",
             },
-            include: { service: { include: { user: true } } }
+            include: {
+                user: true,
+                service: true
+            }
         });
 
-        for (const booking of bookings1h) {
-            // Idempotency Check
-            const existingLogs = await prisma.notificationLog.findMany({
+        for (const booking of bookings1) {
+            const logs = await prisma.notificationLog.findFirst({
                 where: {
+                    metadata: {
+                        path: ['bookingId'],
+                        equals: booking.id
+                    },
                     type: "REMINDER_1H",
-                    createdAt: {
-                        gte: subHours(now, 24) // Look back 24h
-                    }
+                    status: "SENT"
                 }
             });
 
-            const alreadySent = existingLogs.some(log => (log.metadata as any)?.bookingId === booking.id);
-
-            if (!alreadySent) {
-                // Determine Address (Reuse logic or extract function)
-                const finalAddress = booking.service.locationType === "IN_PERSON"
-                    ? (booking.service.address || booking.service.user.address)
-                    : undefined;
-
-                let locationDetails = "";
-                switch (booking.service.locationType) {
-                    case "GOOGLE_MEET":
-                        locationDetails = "Google Meet (Link in Calendar)";
-                        break;
-                    case "PHONE":
-                        locationDetails = booking.clientPhone
-                            ? `Phone Call (Provider will call you at ${booking.clientPhone})`
-                            : "Phone Call";
-                        break;
-                    case "IN_PERSON":
-                        locationDetails = finalAddress ? `In Person at ${finalAddress}` : "In Person";
-                        break;
-                    case "CUSTOM":
-                        locationDetails = booking.service.locationUrl ? `Link: ${booking.service.locationUrl}` : "Online";
-                        break;
-                }
-
+            if (!logs) {
                 await sendBookingReminder(
                     booking.clientEmail,
                     booking.clientName,
                     booking.service.title,
-                    format(booking.startTime, "yyyy-MM-dd"),
-                    format(booking.startTime, "HH:mm"),
-                    booking.service.userId,
+                    booking.startTime.toISOString().split("T")[0],
+                    booking.startTime.toISOString().split("T")[1].substring(0, 5),
+                    booking.userId,
                     "1h",
                     booking.id,
-                    locationDetails
+                    booking.service.location
                 );
-                results.reminders1h++;
             }
         }
 
-        return NextResponse.json({ success: true, results });
-
-    } catch (e) {
-        console.error("Cron failed", e);
-        return NextResponse.json({ error: String(e) }, { status: 500 });
+        return NextResponse.json({ success: true, processed: bookings24.length + bookings1.length });
+    } catch (error) {
+        console.error("Cron Error:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

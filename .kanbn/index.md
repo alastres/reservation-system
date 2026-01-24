@@ -13,6 +13,17 @@ columns:
 
 # Todo
 
+- [ ] Vercel Deployment Prep
+  id: vercel-prep
+  description: Configure standalone build, cron jobs, and caching.
+  tag: devops
+  checklist:
+    - [ ] Update next.config.ts (standalone)
+    - [ ] Create vercel.json (cron)
+    - [ ] Implement Reminder Cron API
+    - [ ] Implement Caching (unstable_cache)
+    - [ ] Add Global Error Boundary
+
 # In Progress
 
 # Done
