@@ -12,9 +12,12 @@ import { format } from "date-fns";
 import { UserRoleSelect } from "@/components/admin/user-role-select";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import { auth } from "@/lib/auth";
+import { getTranslations } from "next-intl/server";
 
 export default async function AdminUsersPage() {
     const session = await auth();
+    const t = await getTranslations("Admin.users");
+
     const users = await prisma.user.findMany({
         orderBy: { createdAt: 'desc' },
         select: {
@@ -34,8 +37,8 @@ export default async function AdminUsersPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">User Management</h2>
-                    <p className="text-slate-400">View and manage system users.</p>
+                    <h2 className="text-3xl font-bold tracking-tight text-white">{t("title")}</h2>
+                    <p className="text-slate-400">{t("subtitle")}</p>
                 </div>
             </div>
 
@@ -43,11 +46,11 @@ export default async function AdminUsersPage() {
                 <Table>
                     <TableHeader>
                         <TableRow className="border-b border-white/10 hover:bg-white/5">
-                            <TableHead className="text-slate-300">User</TableHead>
-                            <TableHead className="text-slate-300">Role</TableHead>
-                            <TableHead className="text-slate-300">Stats</TableHead>
-                            <TableHead className="text-slate-300">Joined</TableHead>
-                            <TableHead className="text-right text-slate-300">Actions</TableHead>
+                            <TableHead className="text-slate-300">{t("table.user")}</TableHead>
+                            <TableHead className="text-slate-300">{t("table.role")}</TableHead>
+                            <TableHead className="text-slate-300">{t("table.stats")}</TableHead>
+                            <TableHead className="text-slate-300">{t("table.joined")}</TableHead>
+                            <TableHead className="text-right text-slate-300">{t("table.actions")}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -55,8 +58,8 @@ export default async function AdminUsersPage() {
                             <TableRow>
                                 <TableCell colSpan={5} className="h-24 text-center">
                                     <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
-                                        <p className="text-sm font-medium">No users found</p>
-                                        <p className="text-xs">Registered users will appear here.</p>
+                                        <p className="text-sm font-medium">{t("table.noUsers")}</p>
+                                        <p className="text-xs">{t("table.noUsersDesc")}</p>
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -77,11 +80,11 @@ export default async function AdminUsersPage() {
                                     <TableCell>
                                         <div className="text-xs space-y-1 text-slate-400">
                                             <div className="flex items-center gap-2">
-                                                <span className="w-16">Services:</span>
+                                                <span className="w-16">{t("stats.services")}</span>
                                                 <span className="text-slate-200 font-medium">{user._count.services}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span className="w-16">Bookings:</span>
+                                                <span className="w-16">{t("stats.bookings")}</span>
                                                 <span className="text-slate-200 font-medium">{user._count.bookings}</span>
                                             </div>
                                         </div>

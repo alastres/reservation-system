@@ -2,9 +2,10 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Role } from "@prisma/client";
 import { Toaster } from 'sonner';
-import Link from "next/link";
-import { LayoutDashboard, Users, FileText, LogOut } from "lucide-react";
+import { Link } from "@/i18n/routing";
+import { LayoutDashboard, Users, FileText, LogOut, ChartPie } from "lucide-react";
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
+import { getTranslations } from "next-intl/server";
 
 export default async function AdminLayout({
     children,
@@ -12,6 +13,7 @@ export default async function AdminLayout({
     children: React.ReactNode;
 }) {
     const session = await auth();
+    const t = await getTranslations("Admin.nav");
 
     if (!session?.user || session.user.role !== Role.ADMIN) {
         redirect("/");
@@ -38,21 +40,21 @@ export default async function AdminLayout({
                             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
                         >
                             <LayoutDashboard className="w-4 h-4" />
-                            Overview
+                            {t('overview')}
                         </Link>
                         <Link
                             href="/admin/users"
                             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
                         >
                             <Users className="w-4 h-4" />
-                            Users
+                            {t('users')}
                         </Link>
                         <Link
                             href="/admin/logs"
                             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
                         >
                             <FileText className="w-4 h-4" />
-                            Logs
+                            {t('logs')}
                         </Link>
                     </div>
                 </div>
@@ -67,7 +69,7 @@ export default async function AdminLayout({
                         className="flex items-center gap-2 text-xs bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-full transition-all text-slate-300 hover:text-white group"
                     >
                         <LogOut className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
-                        Exit
+                        {t('exit')}
                     </Link>
                 </div>
             </nav>
