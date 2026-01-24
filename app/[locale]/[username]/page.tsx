@@ -2,6 +2,7 @@ import { getUserByUsername } from "@/data/user";
 import { notFound } from "next/navigation";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { ProfileContent } from "@/components/profile/profile-content";
+import { getTranslations } from "next-intl/server";
 
 export const revalidate = 0;
 
@@ -12,6 +13,7 @@ interface PublicProfileProps {
 const PublicProfilePage = async ({ params }: PublicProfileProps) => {
     const { username } = await params;
     const user = await getUserByUsername(username);
+    const t = await getTranslations("Profile");
 
     if (!user) return notFound();
 
@@ -27,7 +29,7 @@ const PublicProfilePage = async ({ params }: PublicProfileProps) => {
             <AutoRefresh />
 
             <div className="mt-auto pt-16 text-slate-600 text-sm text-center z-10">
-                Powered by <span className="font-bold text-slate-500">Reservation System</span>
+                {t("poweredBy")} <span className="font-bold text-slate-500">Reservation System</span>
             </div>
         </div>
     );

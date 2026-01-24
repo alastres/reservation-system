@@ -5,12 +5,14 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTranslations } from "next-intl";
 
 interface ProfileContentProps {
     user: any;
 }
 
 export function ProfileContent({ user }: ProfileContentProps) {
+    const t = useTranslations("Profile");
     const [dominantColor, setDominantColor] = useState<string>("rgb(49, 46, 129)"); // indigo-950 default
     const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
     const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -167,7 +169,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
                 {user.bio && (
                     <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                         <h2 className="text-xs font-semibold tracking-widest uppercase text-slate-500 mb-3">
-                            About Me
+                            {t("aboutMe")}
                         </h2>
                         <p className="max-w-2xl text-slate-300 leading-relaxed bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-xl">
                             {user.bio}
@@ -197,7 +199,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
             <div className="relative max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 mt-12">
                 <div className="mb-8 text-center">
                     <h2 className="text-xs font-semibold tracking-widest uppercase text-slate-500 mb-2">
-                        Services
+                        {t("services")}
                     </h2>
                     <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-indigo-500 to-transparent mx-auto"></div>
                 </div>
@@ -208,8 +210,8 @@ export function ProfileContent({ user }: ProfileContentProps) {
                             <div className="mx-auto w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
                                 <span className="text-3xl">📭</span>
                             </div>
-                            <h3 className="text-xl font-semibold text-slate-200 mb-2">No Services Available</h3>
-                            <p className="text-slate-400">This user hasn't listed any services yet. Please check back later.</p>
+                            <h3 className="text-xl font-semibold text-slate-200 mb-2">{t("noServices")}</h3>
+                            <p className="text-slate-400">{t("noServicesDesc")}</p>
                         </div>
                     ) : (
                         user.services.map((service: any, index: number) => (
@@ -252,7 +254,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
                                             <span className="inline-block w-1 h-1 rounded-full bg-slate-600" />
                                             <span className="flex items-center gap-1.5">
                                                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" />
-                                                <span className="text-sm">Available</span>
+                                                <span className="text-sm">{t("available")}</span>
                                             </span>
                                         </CardDescription>
                                     </CardHeader>
@@ -266,7 +268,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
                                     <CardFooter className="relative pt-4">
                                         <Button className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-900/50 border border-white/10 group-hover:shadow-indigo-500/50 transition-all duration-300" asChild>
                                             <Link href={`/${user.username}/${service.url}`} className="flex items-center justify-center gap-2">
-                                                <span>Book Now</span>
+                                                <span>{t("bookNow")}</span>
                                                 <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                 </svg>

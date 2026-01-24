@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { es, enUS } from "date-fns/locale";
 import { getSlotsAction, createBooking, confirmPaymentAndBooking } from "@/actions/booking";
 import { Loader2, Check, CreditCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -17,8 +18,11 @@ import { ClientAuthDialog } from "@/components/auth/client-auth-dialog";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { CheckoutForm } from "./checkout-form";
+import { useTranslations, useLocale } from "next-intl";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
+const locales: Record<string, any> = { es, en: enUS };
 
 interface BookingCalendarProps {
     service: any;
@@ -26,6 +30,10 @@ interface BookingCalendarProps {
 }
 
 export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
+    const t = useTranslations("Booking");
+    const locale = useLocale();
+    const dateLocale = locales[locale] || enUS;
+
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [slots, setSlots] = useState<{ time: string; spots: number }[]>([]);
     const [loadingSlots, setLoadingSlots] = useState(false);
@@ -89,23 +97,23 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
     const handleConfirmBooking = () => {
         if (!date || !selectedSlot) return;
         if (!name || !email) {
-            setBookingError("Name and Email are required");
+            setBookingError(t("errors.nameEmailRequired"));
             return;
         }
 
         if (!validateEmail(email)) {
-            setBookingError("Invalid email address format");
+            setBookingError(t("errors.invalidEmail"));
             return;
         }
 
         // Validate Phone if required
         if (service.locationType === "PHONE") {
             if (!clientPhone) {
-                setBookingError("Phone number is required for this service");
+                setBookingError(t("errors.phoneRequired"));
                 return;
             }
             if (!isValidPhoneNumber(clientPhone)) {
-                setBookingError("Please enter a valid phone number");
+                setBookingError(t("errors.invalidPhone"));
                 return;
             }
         }
@@ -114,7 +122,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
         if (service.customInputs) {
             for (const field of (service.customInputs as any[])) {
                 if (field.required && !answers[field.label]) {
-                    setBookingError(`${field.label} is required`);
+                    setBookingError(t("errors.fieldRequired", { field: field.label }));
                     return;
                 }
             }
@@ -140,7 +148,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                         setBookingStage("SUCCESS");
                     }
                 })
-                .catch(err => setBookingError("An unexpected error occurred."));
+                .catch(err => setBookingError(t("errors.generic")));
         });
     };
 
@@ -149,7 +157,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
         if (res.success) {
             setBookingStage("SUCCESS");
         } else {
-            setBookingError(res.error || "Failed to confirm booking after payment");
+            setBookingError(res.error || t("errors.paymentFailed"));
         }
     };
 
@@ -173,24 +181,24 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                 </div>
 
                 <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 mb-2">
-                    Booking Confirmed!
+                    {t("successTitle")}
                 </h2>
 
                 <p className="text-muted-foreground text-center max-w-sm mb-8 text-lg">
-                    You're all set! We've reserved your spot.
+                    {t("successDesc")}
                 </p>
 
                 <div className="bg-muted/30 backdrop-blur-sm border border-border p-6 rounded-2xl w-full max-w-sm space-y-4 mb-8">
                     <div className="flex justify-between items-center border-b border-border/50 pb-3">
-                        <span className="text-muted-foreground text-sm font-medium">Service</span>
+                        <span className="text-muted-foreground text-sm font-medium">{t("service")}</span>
                         <span className="font-semibold text-foreground">{service.title}</span>
                     </div>
                     <div className="flex justify-between items-center border-b border-border/50 pb-3">
-                        <span className="text-muted-foreground text-sm font-medium">Date</span>
-                        <span className="font-semibold text-foreground">{date ? format(date, "MMM do, yyyy") : ""}</span>
+                        <span className="text-muted-foreground text-sm font-medium">{t("date")}</span>
+                        <span className="font-semibold text-foreground">{date ? format(date, "MMM d, yyyy", { locale: dateLocale }) : ""}</span>
                     </div>
                     <div className="flex justify-between items-center max-w-full">
-                        <span className="text-muted-foreground text-sm font-medium w-1/3">Time</span>
+                        <span className="text-muted-foreground text-sm font-medium w-1/3">{t("time")}</span>
                         <span className="font-semibold text-foreground w-2/3 text-right truncate">{selectedSlot}</span>
                     </div>
                 </div>
@@ -199,7 +207,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                     onClick={() => window.location.reload()}
                     className="bg-foreground text-background hover:bg-foreground/90 font-semibold px-8 rounded-full shadow-lg"
                 >
-                    Book Another Appointment
+                    {t("bookAnother")}
                 </Button>
             </div>
         );
@@ -214,12 +222,13 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                     onSelect={setDate}
                     className="rounded-md border shadow-sm p-4"
                     disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    locale={dateLocale}
                 />
             </div>
 
             <div className="flex-1 overflow-y-auto">
                 <h3 className="font-semibold mb-4 text-lg">
-                    {date ? format(date, "EEEE, MMMM do") : "Select a date"}
+                    {date ? format(date, "EEEE, MMMM d", { locale: dateLocale }) : t("selectDate")}
                 </h3>
 
                 {loadingSlots ? (
@@ -232,7 +241,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                             <>
                                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                                     {slots.length === 0 ? (
-                                        <p className="col-span-full text-muted-foreground text-center py-10">No slots available for this day.</p>
+                                        <p className="col-span-full text-muted-foreground text-center py-10">{t("noSlots")}</p>
                                     ) : (
                                         slots.map((slot) => (
                                             <Button
@@ -243,7 +252,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                             >
                                                 <span className="text-base font-medium">{slot.time}</span>
                                                 <span className="text-xs opacity-70">
-                                                    {slot.spots} {slot.spots === 1 ? "spot" : "spots"} left
+                                                    {t("spotsLeft", { count: slot.spots })}
                                                 </span>
                                             </Button>
                                         ))
@@ -261,13 +270,13 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                         return (
                                             <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-sm text-yellow-600 dark:text-yellow-400 animate-in fade-in slide-in-from-top-2">
                                                 <p className="font-semibold flex items-center gap-2">
-                                                    <span className="text-lg">⚠️</span> Time Zone Difference
+                                                    <span className="text-lg">⚠️</span> {t("timeZoneWarning")}
                                                 </p>
                                                 <div className="mt-1 space-y-1 opacity-90">
-                                                    <p>Times shown are in: <strong>{providerTimeZone}</strong></p>
-                                                    <p>Your time zone: <strong>{clientTimeZone}</strong></p>
+                                                    <p>{t("providerTimeZone")}: <strong>{providerTimeZone}</strong></p>
+                                                    <p>{t("clientTimeZone")}: <strong>{clientTimeZone}</strong></p>
                                                     <p className="text-xs mt-2 italic">
-                                                        * Please note the time difference when booking.
+                                                        * {t("timeZoneNote")}
                                                     </p>
                                                 </div>
                                             </div>
@@ -295,19 +304,19 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                             <div className="max-w-md space-y-4 animate-in fade-in slide-in-from-right-4">
                                 <div className="mb-4 p-3 bg-muted/50 border rounded text-sm space-y-2">
                                     <div>
-                                        <span className="font-semibold text-gray-700">Selected Time:</span> {date && format(date, "MMM dd")} @ {selectedSlot}
-                                        <Button variant="link" size="sm" onClick={() => setBookingStage("SLOT")} className="ml-2 text-sky-600 p-0 h-auto">Change</Button>
+                                        <span className="font-semibold text-gray-700">{t("selectedTime")}:</span> {date && format(date, "MMM d", { locale: dateLocale })} @ {selectedSlot}
+                                        <Button variant="link" size="sm" onClick={() => setBookingStage("SLOT")} className="ml-2 text-sky-600 p-0 h-auto">{t("change")}</Button>
                                     </div>
                                 </div>
 
                                 {/* Custom / Standard Fields */}
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label>Your Name <span className="text-red-500">*</span></Label>
+                                        <Label>{t("yourName")} <span className="text-red-500">*</span></Label>
                                         <Input placeholder="John Doe" value={name} onChange={e => setName(e.target.value)} disabled={isBooking} />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Email Address <span className="text-red-500">*</span></Label>
+                                        <Label>{t("email")} <span className="text-red-500">*</span></Label>
                                         <Input
                                             type="email"
                                             placeholder="john@example.com"
@@ -320,9 +329,9 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
                                     {service.locationType === "PHONE" && (
                                         <div className="space-y-2">
-                                            <Label>Phone Number <span className="text-red-500">*</span></Label>
+                                            <Label>{t("phone")} <span className="text-red-500">*</span></Label>
                                             <PhoneInput
-                                                placeholder="Enter phone number"
+                                                placeholder={t("enterPhone")}
                                                 value={clientPhone}
                                                 onChange={setClientPhone}
                                                 disabled={isBooking}
@@ -333,18 +342,18 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                     )}
 
                                     <div className="space-y-2">
-                                        <Label>Additional Notes</Label>
-                                        <Textarea placeholder="Any specific topics?" value={notes} onChange={e => setNotes(e.target.value)} disabled={isBooking} />
+                                        <Label>{t("notes")}</Label>
+                                        <Textarea placeholder={t("notesPlaceholder")} value={notes} onChange={e => setNotes(e.target.value)} disabled={isBooking} />
                                     </div>
                                 </div>
 
                                 <FormError message={bookingError} />
 
                                 <div className="pt-2 flex gap-3">
-                                    <Button variant="ghost" onClick={() => setBookingStage("SLOT")} disabled={isBooking}>Back</Button>
+                                    <Button variant="ghost" onClick={() => setBookingStage("SLOT")} disabled={isBooking}>{t("back")}</Button>
                                     <Button className="flex-1" onClick={handleConfirmBooking} disabled={isBooking}>
                                         {isBooking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        {service.requiresPayment ? `Pay $${service.price} & Confirm` : "Confirm Booking"}
+                                        {service.requiresPayment ? t("payAndConfirm", { price: service.price }) : t("confirm")}
                                     </Button>
                                 </div>
                             </div>
@@ -357,8 +366,8 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                         <CreditCard className="h-6 w-6" />
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-lg text-foreground">Secure Payment</p>
-                                        <p className="text-sm text-muted-foreground">Confirm your booking for <strong>${service.price}</strong></p>
+                                        <p className="font-semibold text-lg text-foreground">{t("securePayment")}</p>
+                                        <p className="text-sm text-muted-foreground">{t("paymentDesc")} <strong>${service.price}</strong></p>
                                     </div>
                                 </div>
 

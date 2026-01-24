@@ -48,7 +48,6 @@ export function CancelBookingButton({ id }: { id: string }) {
                     className="text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
                     <XCircle className="w-4 h-4 mr-2" />
-                    <XCircle className="w-4 h-4 mr-2" />
                     {t('button')}
                 </Button>
             </AlertDialogTrigger>
