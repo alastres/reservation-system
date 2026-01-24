@@ -34,7 +34,6 @@ export async function POST(req: Request) {
             case "payment_intent.succeeded": {
                 const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
-                // Update booking status to PAID
                 await prisma.booking.updateMany({
                     where: { paymentIntentId: paymentIntent.id },
                     data: {
@@ -51,7 +50,6 @@ export async function POST(req: Request) {
             case "payment_intent.payment_failed": {
                 const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
-                // Update booking status to FAILED
                 await prisma.booking.updateMany({
                     where: { paymentIntentId: paymentIntent.id },
                     data: {
@@ -66,7 +64,6 @@ export async function POST(req: Request) {
             case "payment_intent.canceled": {
                 const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
-                // Update booking status to CANCELLED
                 await prisma.booking.updateMany({
                     where: { paymentIntentId: paymentIntent.id },
                     data: {
@@ -79,19 +76,16 @@ export async function POST(req: Request) {
                 break;
             }
 
-            // SUBSCRIPTION EVENTS (Platform subscriptions for owners)
             case "customer.subscription.created":
             case "customer.subscription.updated": {
-                const subscription = event.data.object as Stripe.Subscription;
+                const subscription = event.data.object as any;
 
-                // Get user from metadata or customer
                 const userId = subscription.metadata?.userId;
                 if (!userId) {
                     console.error("No userId in subscription metadata");
                     break;
                 }
 
-                // Determine subscription plan from price
                 let plan: "MONTHLY" | "QUARTERLY" | "ANNUAL" | null = null;
                 const priceId = subscription.items.data[0]?.price.id;
 
@@ -133,10 +127,9 @@ export async function POST(req: Request) {
             case "invoice.payment_succeeded": {
                 const invoice = event.data.object as Stripe.Invoice;
 
-                // Update subscription end date when payment succeeds
-                if (invoice.subscription) {
-                    const subscription = await stripe.subscriptions.retrieve(
-                        invoice.subscription as string
+                if ((invoice as any).subscription) {
+                    const subscription: any = await stripe.subscriptions.retrieve(
+                        (invoice as any).subscription as string
                     );
 
                     await prisma.user.updateMany({
@@ -155,9 +148,9 @@ export async function POST(req: Request) {
             case "invoice.payment_failed": {
                 const invoice = event.data.object as Stripe.Invoice;
 
-                if (invoice.subscription) {
+                if ((invoice as any).subscription) {
                     await prisma.user.updateMany({
-                        where: { stripeSubscriptionId: invoice.subscription as string },
+                        where: { stripeSubscriptionId: (invoice as any).subscription as string },
                         data: {
                             subscriptionStatus: "PAST_DUE",
                         },
@@ -171,13 +164,12 @@ export async function POST(req: Request) {
             case "checkout.session.completed": {
                 const session = event.data.object as Stripe.Checkout.Session;
 
-                // Handle subscription checkout completion
                 if (session.mode === "subscription" && session.client_reference_id) {
                     const userId = session.client_reference_id;
                     const subscriptionId = session.subscription as string;
 
                     if (subscriptionId) {
-                        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+                        const subscription: any = await stripe.subscriptions.retrieve(subscriptionId);
 
                         let plan: "MONTHLY" | "QUARTERLY" | "ANNUAL" | null = null;
                         const priceId = subscription.items.data[0]?.price.id;

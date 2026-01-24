@@ -45,7 +45,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "8px",
                     }}
-                    formatter={(value: number) => [`$${value.toFixed(2)}`, t('revenue')]}
+                    formatter={(value: number | undefined) => [`$${(value || 0).toFixed(2)}`, t('revenue')]}
                 />
                 <Line
                     type="monotone"
