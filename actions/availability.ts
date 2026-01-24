@@ -13,9 +13,13 @@ const AvailabilitySchema = z.array(z.object({
     endTime: z.string(),   // "17:00"
 }));
 
+import { getTranslations } from "next-intl/server";
+
 export const saveAvailability = async (rules: z.infer<typeof AvailabilitySchema>) => {
     const session = await auth();
-    if (!session?.user?.id) return { error: "Unauthorized" };
+    const t = await getTranslations("Errors");
+    const tSuccess = await getTranslations("Success");
+    if (!session?.user?.id) return { error: t("unauthorized") };
 
     const userId = session.user.id;
 
@@ -37,9 +41,9 @@ export const saveAvailability = async (rules: z.infer<typeof AvailabilitySchema>
         });
 
         revalidatePath("/dashboard/availability");
-        return { success: "Availability saved" };
+        return { success: tSuccess("availabilitySaved") };
     } catch {
-        return { error: "Failed to save availability" };
+        return { error: t("availabilitySaveFailed") };
     }
 };
 
@@ -54,7 +58,6 @@ export const getAvailability = async () => {
         });
         return rules;
     } catch {
-        return [];
         return [];
     }
 };
@@ -76,17 +79,11 @@ export const getExceptions = async () => {
 
 export const saveException = async (date: Date, isAvailable: boolean, startTime?: string, endTime?: string) => {
     const session = await auth();
-    if (!session?.user?.id) return { error: "Unauthorized" };
+    const t = await getTranslations("Errors");
+    const tSuccess = await getTranslations("Success");
+    if (!session?.user?.id) return { error: t("unauthorized") };
 
     try {
-        // Upsert logic based on date + userId
-        // Since Prisma doesn't support composite unique on date (it's DateTime), we might need findFirst
-        // But date is unique for a user effectively. 
-        // Ideally we should have a unique index on [userId, date] in schema. 
-        // Let's check schema... assuming we treat it as unique per day.
-
-        // Simplified: Check if exists, update or create.
-
         const existing = await prisma.availabilityException.findFirst({
             where: {
                 userId: session.user.id,
@@ -112,16 +109,18 @@ export const saveException = async (date: Date, isAvailable: boolean, startTime?
         }
 
         revalidatePath("/dashboard/availability");
-        return { success: "Exception saved" };
+        return { success: tSuccess("exceptionSaved") };
     } catch (e) {
         console.error(e);
-        return { error: "Failed to save exception" };
+        return { error: t("exceptionSaveFailed") };
     }
 };
 
 export const deleteException = async (exceptionId: string) => {
     const session = await auth();
-    if (!session?.user?.id) return { error: "Unauthorized" };
+    const t = await getTranslations("Errors");
+    const tSuccess = await getTranslations("Success");
+    if (!session?.user?.id) return { error: t("unauthorized") };
 
     try {
         await prisma.availabilityException.delete({
@@ -131,8 +130,8 @@ export const deleteException = async (exceptionId: string) => {
             }
         });
         revalidatePath("/dashboard/availability");
-        return { success: "Exception removed" };
+        return { success: tSuccess("exceptionRemoved") };
     } catch {
-        return { error: "Failed to remove exception" };
+        return { error: t("exceptionDeleteFailed") };
     }
 };

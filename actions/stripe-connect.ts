@@ -8,11 +8,14 @@ import { revalidatePath } from "next/cache";
 /**
  * Create a Stripe Connect account and get onboarding link
  */
+import { getTranslations } from "next-intl/server";
+
 export async function createConnectAccount() {
+    const t = await getTranslations("Stripe");
     try {
         const session = await auth();
         if (!session?.user?.id) {
-            return { error: "Unauthorized" };
+            return { error: t("unauthorized") };
         }
 
         const user = await prisma.user.findUnique({
@@ -21,7 +24,7 @@ export async function createConnectAccount() {
         });
 
         if (!user) {
-            return { error: "User not found" };
+            return { error: t("userNotFound") };
         }
 
         let accountId = user.stripeConnectAccountId;
@@ -56,18 +59,16 @@ export async function createConnectAccount() {
         return { success: true, url: accountLink.url };
     } catch (error: any) {
         console.error("Error creating Connect account:", error);
-        return { error: error.message || "Failed to initiate Stripe Connect" };
+        return { error: t("connectFailed") };
     }
 }
 
-/**
- * Check Stripe Connect status
- */
 export async function getConnectStatus() {
+    const t = await getTranslations("Stripe");
     try {
         const session = await auth();
         if (!session?.user?.id) {
-            return { error: "Unauthorized" };
+            return { error: t("unauthorized") };
         }
 
         const user = await prisma.user.findUnique({
@@ -94,18 +95,16 @@ export async function getConnectStatus() {
         return { connected: isEnabled, details: JSON.parse(JSON.stringify(account)) };
     } catch (error: any) {
         console.error("Error checking Connect status:", error);
-        return { error: "Failed to check status" };
+        return { error: t("statusFailed") };
     }
 }
 
-/**
- * Disconnect Stripe Account
- */
 export async function disconnectStripeAccount() {
+    const t = await getTranslations("Stripe");
     try {
         const session = await auth();
         if (!session?.user?.id) {
-            return { error: "Unauthorized" };
+            return { error: t("unauthorized") };
         }
 
         await prisma.user.update({
@@ -118,9 +117,9 @@ export async function disconnectStripeAccount() {
 
         revalidatePath("/dashboard/settings");
 
-        return { success: "Disconnected successfully" };
+        return { success: t("disconnectSuccess") };
     } catch (error) {
         console.error("Disconnect error", error);
-        return { error: "Failed to disconnect" };
+        return { error: t("disconnectFailed") };
     }
 }

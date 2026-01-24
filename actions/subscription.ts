@@ -23,11 +23,14 @@ export async function isFirstUser(): Promise<boolean> {
 /**
  * Create Stripe Checkout session for subscription
  */
+import { getTranslations } from "next-intl/server";
+
 export async function createSubscriptionCheckout(plan: "MONTHLY" | "QUARTERLY" | "ANNUAL") {
+    const t = await getTranslations("Subscription");
     try {
         const session = await auth();
         if (!session?.user?.id) {
-            return { error: "Unauthorized" };
+            return { error: t("unauthorized") };
         }
 
         const user = await prisma.user.findUnique({
@@ -36,7 +39,7 @@ export async function createSubscriptionCheckout(plan: "MONTHLY" | "QUARTERLY" |
         });
 
         if (!user?.email) {
-            return { error: "User email not found" };
+            return { error: t("emailNotFound") };
         }
 
         // Check if user already has active subscription
@@ -48,13 +51,13 @@ export async function createSubscriptionCheckout(plan: "MONTHLY" | "QUARTERLY" |
             });
 
             if (subscriptions.data.length > 0) {
-                return { error: "You already have an active subscription" };
+                return { error: t("alreadyActive") };
             }
         }
 
         const priceId = PRICE_IDS[plan];
         if (!priceId) {
-            return { error: "Invalid subscription plan" };
+            return { error: t("invalidPlan") };
         }
 
         // Create checkout session
@@ -80,18 +83,16 @@ export async function createSubscriptionCheckout(plan: "MONTHLY" | "QUARTERLY" |
         return { success: true, url: checkoutSession.url };
     } catch (error: any) {
         console.error("Error creating checkout session:", error);
-        return { error: error.message || "Failed to create checkout session" };
+        return { error: t("createFailed") };
     }
 }
 
-/**
- * Create Stripe Customer Portal session
- */
 export async function createPortalSession() {
+    const t = await getTranslations("Subscription");
     try {
         const session = await auth();
         if (!session?.user?.id) {
-            return { error: "Unauthorized" };
+            return { error: t("unauthorized") };
         }
 
         const user = await prisma.user.findUnique({
@@ -100,39 +101,27 @@ export async function createPortalSession() {
         });
 
         if (!user?.stripeCustomerId) {
-            return { error: "No se encontró una suscripción activa. Por favor suscríbete primero." };
+            return { error: t("noSubscriptionFound") };
         }
-
-        console.log("Creating portal session for customer:", user.stripeCustomerId);
-        console.log("Return URL:", `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings`);
 
         const portalSession = await stripe.billingPortal.sessions.create({
             customer: user.stripeCustomerId,
             return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings`,
         });
 
-        console.log("Portal session created successfully:", portalSession.id);
         return { success: true, url: portalSession.url };
     } catch (error: any) {
         console.error("Error creating portal session:", error);
-        console.error("Error details:", {
-            message: error.message,
-            type: error.type,
-            code: error.code,
-            statusCode: error.statusCode,
-        });
-        return { error: error.message || "Failed to create portal session" };
+        return { error: t("portalFailed") };
     }
 }
 
-/**
- * Get subscription status for current user
- */
 export async function getSubscriptionStatus() {
+    const t = await getTranslations("Subscription");
     try {
         const session = await auth();
         if (!session?.user?.id) {
-            return { error: "Unauthorized" };
+            return { error: t("unauthorized") };
         }
 
         const user = await prisma.user.findUnique({
@@ -148,18 +137,16 @@ export async function getSubscriptionStatus() {
         return { success: true, subscription: user };
     } catch (error: any) {
         console.error("Error getting subscription status:", error);
-        return { error: error.message || "Failed to get subscription status" };
+        return { error: t("statusFailed") };
     }
 }
 
-/**
- * Cancel subscription
- */
 export async function cancelSubscription() {
+    const t = await getTranslations("Subscription");
     try {
         const session = await auth();
         if (!session?.user?.id) {
-            return { error: "Unauthorized" };
+            return { error: t("unauthorized") };
         }
 
         const user = await prisma.user.findUnique({
@@ -168,7 +155,7 @@ export async function cancelSubscription() {
         });
 
         if (!user?.stripeSubscriptionId) {
-            return { error: "No active subscription found" };
+            return { error: t("noActiveSubscription") };
         }
 
         // Cancel at period end
@@ -185,9 +172,9 @@ export async function cancelSubscription() {
 
         revalidatePath("/subscription/manage");
 
-        return { success: "Subscription will be cancelled at the end of the billing period" };
+        return { success: t("cancelSuccess") };
     } catch (error: any) {
         console.error("Error cancelling subscription:", error);
-        return { error: error.message || "Failed to cancel subscription" };
+        return { error: t("cancelFailed") };
     }
 }

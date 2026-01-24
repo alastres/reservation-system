@@ -135,12 +135,35 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
   )
 }
 
+import { useTranslations } from "next-intl"
+
 function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   const { error, formMessageId } = useFormField()
+  const t = useTranslations("Validation")
   const body = error ? String(error?.message ?? "") : props.children
 
   if (!body) {
     return null
+  }
+
+  // Try to translate if key exists, otherwise use body
+  // Note: next-intl throws or returns keys on missing, so we check if using keys approach
+  // A simple way is to check if the body is a simple key string (no spaces) 
+  // or just try to translate it. logic:
+  let message = body;
+  if (typeof body === 'string') {
+    try {
+      if (body.includes(" ") === false) {
+        // Assumption: Translation keys don't have spaces usually
+        // Or check if t(body) !== body (but next-intl behavior depends on config)
+        // We'll trust that if we put keys in schema, they are valid keys.
+        // If body matches a key in Validation namespace, translate it.
+        // Using basic try/catch if mapped
+        message = t(body as any) === body ? body : t(body as any);
+      }
+    } catch {
+      // Fallback
+    }
   }
 
   return (
@@ -150,7 +173,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
       className={cn("text-destructive text-sm", className)}
       {...props}
     >
-      {body}
+      {message}
     </p>
   )
 }

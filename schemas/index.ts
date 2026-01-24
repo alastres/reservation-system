@@ -2,39 +2,39 @@ import * as z from "zod";
 
 export const LoginSchema = z.object({
     email: z.string().email({
-        message: "Email is required",
+        message: "email",
     }),
     password: z.string().min(1, {
-        message: "Password is required",
+        message: "required",
     }),
 });
 
 export const RegisterSchema = z.object({
     email: z.string().email({
-        message: "Email is required",
+        message: "email",
     }),
     password: z.string().min(6, {
-        message: "Minimum 6 characters required",
+        message: "password_min",
     }),
     name: z.string().min(1, {
-        message: "Name is required",
+        message: "name_required",
     }),
     timeZone: z.string().optional(),
 });
 
 export const ServiceSchema = z.object({
-    title: z.string().min(1, "Title is required"),
+    title: z.string().min(1, "title_required"),
     description: z.string().optional(),
-    duration: z.number().min(1, "Duration must be at least 1 minute"),
-    price: z.number().min(0),
+    duration: z.number().min(1, "duration_min"),
+    price: z.number().min(0, "price_min"),
     locationType: z.enum(["GOOGLE_MEET", "ZOOM", "PHONE", "IN_PERSON", "CUSTOM"]).default("GOOGLE_MEET"),
     locationUrl: z.string().optional(),
     address: z.string().optional(),
     location: z.string().optional(), // Keeping for backward compatibility or display
     url: z.string().min(1, {
-        message: "URL slug is required"
+        message: "url_slug_required"
     }).regex(/^[a-z0-9-]+$/, {
-        message: "Only lowercase letters, numbers, and hyphens"
+        message: "url_slug_regex"
     }),
     color: z.string().min(1).default("#6366f1"),
     capacity: z.number().int().min(1).default(1),
@@ -43,7 +43,7 @@ export const ServiceSchema = z.object({
     isActive: z.boolean().default(true).optional(),
     customInputs: z.array(z.object({
         id: z.string(),
-        label: z.string().min(1, "Label is required"),
+        label: z.string().min(1, "label_required"),
         type: z.enum(["text", "textarea", "checkbox", "select"]),
         required: z.boolean().default(false),
         options: z.array(z.string()).optional()
@@ -53,4 +53,5 @@ export const ServiceSchema = z.object({
     requiresPayment: z.boolean().default(false),
     isConcurrencyEnabled: z.boolean().default(false),
     maxConcurrency: z.number().int().min(1).default(1),
+    userId: z.string().optional(),
 });

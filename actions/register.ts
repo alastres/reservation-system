@@ -8,11 +8,14 @@ import { getUserByEmail } from "@/data/user";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 
+import { getTranslations } from "next-intl/server";
+
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
     const validatedFields = RegisterSchema.safeParse(values);
+    const t = await getTranslations("Auth");
 
     if (!validatedFields.success) {
-        return { error: "Invalid fields!" };
+        return { error: t("invalidFields") };
     }
 
     const { email, password, name, timeZone } = validatedFields.data;
@@ -21,7 +24,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     const existingUser = await getUserByEmail(email);
 
     if (existingUser) {
-        return { error: "Email already in use!" };
+        return { error: t("emailInUse") };
     }
 
     // Generate username from email + random suffix
@@ -47,5 +50,5 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
         verificationToken.token,
     );
 
-    return { success: "Confirmation email sent!" };
+    return { success: t("confirmationSent") };
 };
