@@ -1,9 +1,9 @@
-import { v4 as uuidv4 } from "uuid";
 import { prisma } from "@/lib/prisma";
 
 export const generateVerificationToken = async (email: string) => {
-    const token = uuidv4();
-    const expires = new Date(new Date().getTime() + 3600 * 1000); // 1 hour
+    // Generate 6 digit code
+    const token = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(new Date().getTime() + 15 * 60 * 1000); // 15 minutes expiration for OTP
 
     const existingToken = await prisma.verificationToken.findFirst({
         where: { identifier: email }
