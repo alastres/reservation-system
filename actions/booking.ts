@@ -11,20 +11,23 @@ import { sendBookingConfirmation, sendNewBookingNotification, sendRescheduledBoo
 import { getBusyTimes, createGoogleEvent } from "@/lib/google-calendar";
 
 
+import { getTranslations } from "next-intl/server";
+
 export const getSlotsAction = async (dateStr: string, serviceId: string, timeZone: string) => {
     // dateStr is iso date "YYYY-MM-DD"
+    const t = await getTranslations("Errors");
     const service = await prisma.service.findUnique({
         where: { id: serviceId },
         include: { user: { include: { availabilityRules: true, availabilityExceptions: true } } }
     });
 
-    if (!service) return { error: "Service not found" };
+    if (!service) return { error: t("serviceNotFound") };
 
     // Valid TimeZone check
     try {
         Intl.DateTimeFormat(undefined, { timeZone });
     } catch (e) {
-        return { error: "Invalid TimeZone" };
+        return { error: t("invalidTimeZone") };
     }
 
     // 1. Determine "Day" in Target TimeZone
@@ -132,11 +135,13 @@ export const createBooking = async (
     clientTimeZone?: string
 ) => {
     // 1. Verify existence
+    const t = await getTranslations("Errors");
+    const tSuccess = await getTranslations("Success");
     const service = await prisma.service.findUnique({
         where: { id: serviceId },
         include: { user: true }
     });
-    if (!service) return { error: "Service not found" };
+    if (!service) return { error: t("serviceNotFound") };
 
     // 2. Determine Dates to Book
     // Parse the input date/time as being in the specific timeZone
@@ -172,7 +177,7 @@ export const createBooking = async (
     // 2a. Min Notice Check (Only need to check the first/earliest one)
     const minNoticeTime = addMinutes(new Date(), service.minNotice);
     if (datesToBook[0] < minNoticeTime) {
-        return { error: `Booking requires at least ${service.minNotice} minutes notice` };
+        return { error: t("bookingMinNotice", { minutes: service.minNotice }) };
     }
 
     // 3. Availability Check for ALL dates
@@ -201,7 +206,7 @@ export const createBooking = async (
         // If > 1, it's a group class.
         if (service.capacity > 1 && existingCount >= service.capacity) {
             const conflictDate = format(checkStart, "yyyy-MM-dd");
-            return { error: `Slot on ${conflictDate} is fully booked (${service.capacity}/${service.capacity} spots taken).` };
+            return { error: t("slotFullyBooked", { date: conflictDate, count: existingCount, capacity: service.capacity }) };
         }
 
         // --- 2. Concurrency Logic (Staff/Resource Availability) ---
@@ -248,7 +253,7 @@ export const createBooking = async (
         }
 
         if (currentConcurrencyCount >= concurrencyLimit) {
-            return { error: `No staff available at this time (Limit ${concurrencyLimit} reached).` };
+            return { error: t("noStaffAvailable", { limit: concurrencyLimit }) };
         }
     }
 
@@ -300,7 +305,7 @@ export const createBooking = async (
         );
 
         if (paymentResult.error || !paymentResult.paymentIntent) {
-            return { error: paymentResult.error || "Payment initialization failed" };
+            return { error: paymentResult.error || t("paymentFailed") };
         }
 
         // Return the client secret so the frontend can show the payment form
@@ -343,7 +348,7 @@ export const createBooking = async (
         );
     } catch (e) {
         console.error("Booking transaction failed", e);
-        return { error: "Failed to process booking" };
+        return { error: t("bookingTransactionFailed") };
     }
 
     // Handle Calendar Sync and Emails using the helper
@@ -357,16 +362,18 @@ export const createBooking = async (
         time
     );
 
-    return { success: recurrenceId ? "Recurring booking confirmed!" : "Booking confirmed!" };
+    return { success: recurrenceId ? tSuccess("recurringBookingConfirmed") : tSuccess("bookingConfirmed") };
 };
 
 export const cancelBooking = async (bookingId: string) => {
     console.log("[CancelBooking] Attempting to cancel booking:", bookingId);
     const session = await auth();
+    const t = await getTranslations("Errors");
+    const tSuccess = await getTranslations("Success");
 
     if (!session?.user?.id) {
         console.log("[CancelBooking] Unauthorized: No session");
-        return { error: "Unauthorized" };
+        return { error: t("unauthorized") };
     }
 
     const booking = await prisma.booking.findUnique({
@@ -376,7 +383,7 @@ export const cancelBooking = async (bookingId: string) => {
 
     if (!booking) {
         console.log("[CancelBooking] Booking not found");
-        return { error: "Booking not found" };
+        return { error: t("bookingNotFound") };
     }
 
     // Verify ownership
@@ -385,7 +392,7 @@ export const cancelBooking = async (bookingId: string) => {
             ownerId: booking.service.userId,
             currentUserId: session.user.id
         });
-        return { error: "Unauthorized" };
+        return { error: t("unauthorized") };
     }
 
     try {
@@ -396,7 +403,7 @@ export const cancelBooking = async (bookingId: string) => {
         console.log("[CancelBooking] Status updated to CANCELLED");
     } catch (e) {
         console.error("[CancelBooking] DB Update Failed", e);
-        return { error: "Failed to update booking status" };
+        return { error: t("statusUpdateFailed") };
     }
 
     // Send Cancellation Email
@@ -414,7 +421,7 @@ export const cancelBooking = async (bookingId: string) => {
     if (booking.service.user?.username && booking.service.url) {
         revalidatePath(`/${booking.service.user.username}/${booking.service.url}`);
     }
-    return { success: "Booking cancelled" };
+    return { success: tSuccess("bookingCancelled") };
 };
 
 export const rescheduleBooking = async (
@@ -423,7 +430,9 @@ export const rescheduleBooking = async (
     newTime: string
 ) => {
     const session = await auth();
-    if (!session?.user?.id) return { error: "Unauthorized" };
+    const t = await getTranslations("Errors");
+    const tSuccess = await getTranslations("Success");
+    if (!session?.user?.id) return { error: t("unauthorized") };
 
     // 1. Fetch existing booking
     const booking = await prisma.booking.findUnique({
@@ -431,11 +440,11 @@ export const rescheduleBooking = async (
         include: { service: true }
     });
 
-    if (!booking) return { error: "Booking not found" };
+    if (!booking) return { error: t("bookingNotFound") };
 
     // 2. Auth Check (Provider Only for now)
     if (booking.service.userId !== session.user.id) {
-        return { error: "Unauthorized: You do not manage this booking" };
+        return { error: t("unauthorizedBooking") };
     }
 
     const service = booking.service;
@@ -448,7 +457,7 @@ export const rescheduleBooking = async (
     // Min Notice Check
     const minNoticeTime = addMinutes(new Date(), service.minNotice);
     if (newStartTime < minNoticeTime) {
-        return { error: `Rescheduling requires at least ${service.minNotice} minutes notice` };
+        return { error: t("rescheduleMinNotice", { minutes: service.minNotice }) };
     }
 
     // 4. Availability Check (Availability Logic reuse?)
@@ -467,7 +476,7 @@ export const rescheduleBooking = async (
     });
 
     if (conflict) {
-        return { error: "The selected slot is already taken" };
+        return { error: t("slotTaken") };
     }
 
     // Capture old details for email
@@ -485,7 +494,7 @@ export const rescheduleBooking = async (
         });
     } catch (e) {
         console.error("Reschedule update failed", e);
-        return { error: "Failed to update booking" };
+        return { error: t("rescheduleUpdateFailed") };
     }
 
     // 6. Notify Client
@@ -501,7 +510,7 @@ export const rescheduleBooking = async (
     );
 
     revalidatePath("/dashboard/bookings");
-    return { success: "Booking rescheduled successfully" };
+    return { success: tSuccess("bookingRescheduled") };
 };
 
 // Helper to handle calendar sync and email notifications after booking creation
@@ -643,17 +652,19 @@ async function handleBookingFulfillment(
 
 export const confirmPaymentAndBooking = async (paymentIntentId: string) => {
     try {
+        const t = await getTranslations("Errors");
+        const tSuccess = await getTranslations("Success");
         const { getPaymentIntent } = await import("@/lib/stripe");
         const res = await getPaymentIntent(paymentIntentId);
 
         if (res.error || !res.paymentIntent) {
-            return { error: res.error || "Payment not found" };
+            return { error: res.error || t("paymentNotFound") };
         }
 
         const pi = res.paymentIntent;
 
         if (pi.status !== "succeeded") {
-            return { error: `Payment status is ${pi.status}. Please complete the payment.` };
+            return { error: t("paymentStatusError", { status: pi.status }) };
         }
 
         // Check if booking already exists (avoid duplicates)
@@ -662,7 +673,7 @@ export const confirmPaymentAndBooking = async (paymentIntentId: string) => {
         });
 
         if (existing) {
-            return { success: "Booking already confirmed" };
+            return { success: t("bookingConfirmedDuplicate") };
         }
 
         // Extract data from metadata
@@ -673,7 +684,7 @@ export const confirmPaymentAndBooking = async (paymentIntentId: string) => {
             include: { user: true }
         });
 
-        if (!service) return { error: "Service not found" };
+        if (!service) return { error: t("serviceNotFound") };
 
         const initialDate = fromZonedTime(`${dateStr} ${time}:00`, timeZone);
         const datesToBook: Date[] = [initialDate];
@@ -735,7 +746,7 @@ export const confirmPaymentAndBooking = async (paymentIntentId: string) => {
             time
         );
 
-        return { success: "Payment confirmed and booking created!" };
+        return { success: tSuccess("paymentConfirmed") };
     } catch (error: any) {
         console.error("Confirm payment error:", error);
         return { error: error.message };

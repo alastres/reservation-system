@@ -272,7 +272,7 @@ export function CalendarView({ bookings, services }: CalendarViewProps) {
                                                 {format(booking.startTime, "HH:mm")} - {format(booking.endTime, "HH:mm")}
                                             </Badge>
                                             <Badge variant={booking.status === "CONFIRMED" ? "default" : "secondary"} className="text-[10px] py-0 h-5">
-                                                {booking.status}
+                                                {t(`status.${booking.status}` as any)}
                                             </Badge>
                                         </div>
                                         <h4 className="font-medium text-sm mb-1">{booking.clientName}</h4>

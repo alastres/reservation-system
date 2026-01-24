@@ -22,17 +22,20 @@ const profileSchema = z.object({
     maxConcurrentClients: z.number().int().min(1).optional(),
 });
 
+import { getTranslations } from "next-intl/server";
+
 export async function updateProfile(data: z.infer<typeof profileSchema>) {
     const session = await auth();
+    const t = await getTranslations("Profile");
 
     if (!session?.user?.id) {
-        return { error: "Unauthorized" };
+        return { error: t("unauthorized") };
     }
 
     const validated = profileSchema.safeParse(data);
 
     if (!validated.success) {
-        return { error: "Invalid input fields" };
+        return { error: t("invalidInput") };
     }
 
     const { name, username, bio, timeZone, image, address, phone, notificationPreferences, maxConcurrentClients } = validated.data;
@@ -44,7 +47,7 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
         });
 
         if (existingUser && existingUser.id !== session.user.id) {
-            return { error: "Username is already taken" };
+            return { error: t("usernameTaken") };
         }
     }
 
@@ -74,9 +77,9 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
 
         revalidatePath("/dashboard/settings");
         revalidatePath("/dashboard");
-        return { success: "Profile updated successfully" };
+        return { success: t("updateSuccess") };
     } catch (error) {
         console.error("Profile update error:", error);
-        return { error: "Failed to update profile" };
+        return { error: t("updateFailed") };
     }
 }
