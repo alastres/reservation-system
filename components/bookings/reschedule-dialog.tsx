@@ -32,7 +32,7 @@ interface RescheduleDialogProps {
 export function RescheduleDialog({ booking }: RescheduleDialogProps) {
     const [open, setOpen] = useState(false);
     const [date, setDate] = useState<Date | undefined>(undefined);
-    const [slots, setSlots] = useState<string[]>([]);
+    const [slots, setSlots] = useState<{ time: string; spots: number }[]>([]);
     const [loadingSlots, setLoadingSlots] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
@@ -147,13 +147,13 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
                                     )}
                                     {slots.map((slot) => (
                                         <Button
-                                            key={slot}
-                                            variant={selectedSlot === slot ? "default" : "outline"}
+                                            key={slot.time}
+                                            variant={selectedSlot === slot.time ? "default" : "outline"}
                                             className="w-full h-11 text-sm font-medium transition-all hover:scale-105"
-                                            onClick={() => setSelectedSlot(slot)}
+                                            onClick={() => setSelectedSlot(slot.time)}
                                             disabled={isPending}
                                         >
-                                            {slot}
+                                            {slot.time}
                                         </Button>
                                     ))}
                                 </div>

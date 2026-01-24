@@ -1,15 +1,14 @@
+// @ts-nocheck
+const { exec } = require('child_process');
+
 async function main() {
-    console.log("Triggering Cron Job...");
     try {
-        const res = await fetch("http://localhost:3000/api/cron/reminders", {
-            method: "GET",
-            // headers: { "Authorization": "Bearer ..." } // Not needed if CRON_SECRET is valid or check is weak
-        });
-        const json = await res.json();
-        console.log("Status:", res.status);
-        console.log("Result:", JSON.stringify(json, null, 2));
+        const res = await fetch('http://localhost:3000/api/cron/reminders');
+        const data = await res.json();
+        console.log('Cron Triggered:', data);
     } catch (e) {
-        console.error("Failed to fetch:", e);
+        console.error('Error triggering cron:', e);
     }
 }
+
 main();

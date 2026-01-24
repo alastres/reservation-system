@@ -49,12 +49,13 @@ export const createService = async (values: z.infer<typeof ServiceSchema>) => {
     }
 
     try {
-        const { ...data } = validatedFields.data; // Extract customInputs
+        const { userId: _, ...data } = validatedFields.data; // Extract customInputs and omit userId
 
         const service = await prisma.service.create({
             data: {
                 userId: session.user.id,
-                ...data
+                ...data,
+                customInputs: data.customInputs as any
             },
             include: { user: { select: { username: true } } }
         });
@@ -81,9 +82,10 @@ export const updateService = async (id: string, values: z.infer<typeof ServiceSc
     }
 
     try {
+        const { userId: _, ...data } = validatedFields.data;
         const service = await prisma.service.update({
             where: { id, userId: session.user.id },
-            data: { ...validatedFields.data },
+            data: { ...data, customInputs: data.customInputs as any },
             include: { user: { select: { username: true } } }
         });
 
@@ -145,7 +147,8 @@ export const duplicateService = async (id: string) => {
                 ...data,
                 title: `${data.title} (Copy)`,
                 url: newUrl,
-                isActive: false // Default to draft
+                isActive: false, // Default to draft
+                customInputs: data.customInputs as any
             },
             include: { user: { select: { username: true } } }
         });

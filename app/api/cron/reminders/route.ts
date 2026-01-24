@@ -8,20 +8,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
     try {
-        // Authenticate the cron request (Vercel adds this header)
-        const authHeader = req.headers.get('authorization');
-        // In local dev we might skip this or use a manual secret
-        // For Vercel Cron, typically CRON_SECRET env var is used if we want to secure it manually, 
-        // but Vercel protects it automatically if configured via vercel.json for internal invocation.
-        // However, checking for a secret header is good practice if exposing to public.
-        // const { CRON_SECRET } = process.env;
-        // if (authHeader !== `Bearer ${CRON_SECRET}`) { ... }
-
         const now = new Date();
 
         // 1. 24 Hour Reminders
-        // Look for bookings tomorrow (between 24h and 24h + 15m from now)
-        // Adjust window size based on cron frequency (10 mins)
         const start24 = addHours(now, 24);
         const end24 = addMinutes(start24, 15);
 
@@ -34,13 +23,12 @@ export async function GET(req: Request) {
                 status: "CONFIRMED",
             },
             include: {
-                user: true, // The provider
-                service: true,
+                user: true, // The client (optional)
+                service: true, // The service (has userId = provider)
             }
         });
 
         for (const booking of bookings24) {
-            // Check if already sent
             const logs = await prisma.notificationLog.findFirst({
                 where: {
                     metadata: {
@@ -53,16 +41,21 @@ export async function GET(req: Request) {
             });
 
             if (!logs) {
+                const email = booking.clientEmail ?? "";
+                const name = booking.clientName ?? "Client";
+                const location = booking.service.location ?? "Online";
+
+                // Use service.userId as the providerId for logging and context
                 await sendBookingReminder(
-                    booking.clientEmail,
-                    booking.clientName,
+                    email,
+                    name,
                     booking.service.title,
-                    booking.startTime.toISOString().split("T")[0], // Simple date
-                    booking.startTime.toISOString().split("T")[1].substring(0, 5), // Simple time
-                    booking.userId,
+                    booking.startTime.toISOString().split("T")[0],
+                    booking.startTime.toISOString().split("T")[1].substring(0, 5),
+                    booking.service.userId,
                     "24h",
                     booking.id,
-                    booking.service.location
+                    location
                 );
             }
         }
@@ -98,16 +91,20 @@ export async function GET(req: Request) {
             });
 
             if (!logs) {
+                const email = booking.clientEmail ?? "";
+                const name = booking.clientName ?? "Client";
+                const location = booking.service.location ?? "Online";
+
                 await sendBookingReminder(
-                    booking.clientEmail,
-                    booking.clientName,
+                    email,
+                    name,
                     booking.service.title,
                     booking.startTime.toISOString().split("T")[0],
                     booking.startTime.toISOString().split("T")[1].substring(0, 5),
-                    booking.userId,
+                    booking.service.userId,
                     "1h",
                     booking.id,
-                    booking.service.location
+                    location
                 );
             }
         }

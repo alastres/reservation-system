@@ -7,7 +7,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { routing } from '@/i18n/routing'; // We need this, or just hardcode locales for now
 
 const fontSans = Plus_Jakarta_Sans({
     subsets: ["latin"],
@@ -17,7 +16,7 @@ const fontSans = Plus_Jakarta_Sans({
 export async function generateMetadata({
     params
 }: {
-    params: { locale: string };
+    params: Promise<{ locale: string }>;
 }) {
     const { locale } = await params;
     const t = await getTranslations({ locale, namespace: 'Metadata' });
@@ -33,7 +32,7 @@ export default async function LocaleLayout({
     params
 }: {
     children: React.ReactNode;
-    params: { locale: string };
+    params: Promise<{ locale: string }>;
 }) {
     // Await params
     const { locale } = await params;
