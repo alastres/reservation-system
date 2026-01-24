@@ -6,12 +6,15 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
+import { getTranslations } from "next-intl/server";
+
 export const createService = async (values: z.infer<typeof ServiceSchema>) => {
     const session = await auth();
-    if (!session?.user?.id) return { error: "Unauthorized" };
+    const t = await getTranslations("Errors");
+    if (!session?.user?.id) return { error: t("unauthorized") };
 
     const validated = ServiceSchema.safeParse(values);
-    if (!validated.success) return { error: "Invalid fields" };
+    if (!validated.success) return { error: t("invalidFields") };
 
     try {
         const service = await prisma.service.create({
@@ -22,10 +25,10 @@ export const createService = async (values: z.infer<typeof ServiceSchema>) => {
             include: { user: { select: { username: true } } }
         });
         revalidatePath("/dashboard/services");
-        return { success: `Service "${service.title}" created`, service };
+        return { success: t("serviceCreated", { name: service.title }), service };
     } catch (e) {
         console.error(e); // Debugging
-        return { error: "Something went wrong" };
+        return { error: t("somethingWentWrong") };
     }
 }
 
@@ -47,7 +50,8 @@ export const getServices = async () => {
 
 export const deleteService = async (serviceId: string) => {
     const session = await auth();
-    if (!session?.user?.id) return { error: "Unauthorized" };
+    const t = await getTranslations("Errors");
+    if (!session?.user?.id) return { error: t("unauthorized") };
 
     try {
         const service = await prisma.service.delete({
@@ -57,18 +61,19 @@ export const deleteService = async (serviceId: string) => {
             }
         });
         revalidatePath("/dashboard/services");
-        return { success: `Service "${service.title}" deleted` };
+        return { success: t("serviceDeleted", { name: service.title }) };
     } catch {
-        return { error: "Failed to delete service" };
+        return { error: t("failedDelete") };
     }
 }
 
 export const updateService = async (serviceId: string, values: z.infer<typeof ServiceSchema>) => {
     const session = await auth();
-    if (!session?.user?.id) return { error: "Unauthorized" };
+    const t = await getTranslations("Errors");
+    if (!session?.user?.id) return { error: t("unauthorized") };
 
     const validated = ServiceSchema.safeParse(values);
-    if (!validated.success) return { error: "Invalid fields" };
+    if (!validated.success) return { error: t("invalidFields") };
 
     try {
         const service = await prisma.service.update({
@@ -83,15 +88,16 @@ export const updateService = async (serviceId: string, values: z.infer<typeof Se
         });
         revalidatePath("/dashboard/services");
         revalidatePath(`/dashboard/services/${serviceId}`);
-        return { success: `Service "${service.title}" updated`, service };
+        return { success: t("serviceUpdated", { name: service.title }), service };
     } catch {
-        return { error: "Failed to update service" };
+        return { error: t("failedUpdate") };
     }
 }
 
 export const duplicateService = async (serviceId: string) => {
     const session = await auth();
-    if (!session?.user?.id) return { error: "Unauthorized" };
+    const t = await getTranslations("Errors");
+    if (!session?.user?.id) return { error: t("unauthorized") };
 
     try {
         const existingService = await prisma.service.findUnique({

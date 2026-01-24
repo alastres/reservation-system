@@ -5,7 +5,7 @@ import { Providers } from "@/components/providers";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing'; // We need this, or just hardcode locales for now
 
@@ -14,10 +14,19 @@ const fontSans = Plus_Jakarta_Sans({
     variable: "--font-sans",
 });
 
-export const metadata: Metadata = {
-    title: "Scheduler | Premium Booking System",
-    description: "Seamless scheduling for professionals.",
-};
+export async function generateMetadata({
+    params
+}: {
+    params: { locale: string };
+}) {
+    const { locale } = await params;
+    const t = await getTranslations({ locale, namespace: 'Metadata' });
+
+    return {
+        title: t('title'),
+        description: t('description'),
+    };
+}
 
 export default async function LocaleLayout({
     children,
