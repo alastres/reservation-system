@@ -72,7 +72,7 @@ export default async function SystemLogsPage() {
                                         {log.details || '-'}
                                     </TableCell>
                                     <TableCell className="text-right font-mono text-xs text-slate-500">
-                                        {log.ipAddress || '-'}
+                                        {log.ip || '-'}
                                     </TableCell>
                                 </TableRow>
                             ))

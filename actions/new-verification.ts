@@ -4,9 +4,19 @@ import { prisma } from "@/lib/prisma";
 import { prisma as db } from "@/lib/prisma"; // Alias if needed, but standardizing
 // Actually no duplicate
 
-export const newVerification = async (token: string) => {
+export const newVerification = async (token: string, email?: string) => {
+    // If we have email, use it to strict match, otherwise fallback to findFirst (less safe)
+    // But for OTP 6-digits, we MUST rely on email to avoid collision.
+
+    if (!email) {
+        return { error: "Email is required for verification." };
+    }
+
     const existingToken = await prisma.verificationToken.findFirst({
-        where: { token }
+        where: {
+            token,
+            identifier: email
+        }
     });
 
     if (!existingToken) {

@@ -9,12 +9,13 @@ import {
 } from "@/routes";
 
 import { routing } from "@/i18n/routing";
+import { rateLimit } from "@/lib/rate-limit";
 
 const { auth } = NextAuth(authConfig);
 
 const intlMiddleware = createMiddleware(routing);
 
-export default auth((req) => {
+export default auth(async (req) => {
     const { nextUrl } = req;
     const isLoggedIn = !!req.auth;
     const userRole = (req.auth?.user as any)?.role;
@@ -33,6 +34,23 @@ export default auth((req) => {
 
     if (isApiAuthRoute) {
         return undefined;
+    }
+
+    // Rate Limiting for Auth Routes (Login, Register, etc)
+    if (isAuthRoute) {
+        const ip = req.headers.get("x-forwarded-for") || "unknown";
+        const { success, limit, reset, remaining } = await rateLimit(ip);
+
+        if (!success) {
+            return new Response("Too Many Requests", {
+                status: 429,
+                headers: {
+                    "X-RateLimit-Limit": limit.toString(),
+                    "X-RateLimit-Remaining": remaining.toString(),
+                    "X-RateLimit-Reset": reset.toString(),
+                },
+            });
+        }
     }
 
     if (isAuthRoute) {
