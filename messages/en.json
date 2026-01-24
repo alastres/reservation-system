@@ -72,7 +72,13 @@
         "invalidFields": "Invalid fields!",
         "emailInUse": "Email already in use!",
         "confirmationSent": "Confirmation email sent!",
-        "userNotFound": "User not found"
+        "userNotFound": "User not found",
+        "verify_email_header": "Verify Email",
+        "back_to_login": "Back to login",
+        "verify_button": "Verify",
+        "verification_code": "Verification Code",
+        "email_missing": "Email missing",
+        "error_verification_failed": "Verification failed. Code might have expired."
     },
     "Dashboard": {
         "dashboard": "Dashboard",

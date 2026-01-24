@@ -319,13 +319,71 @@ export const createBooking = async (
     }
 
     // 4. Create All Bookings (Only if no payment required or payment already handled)
+    // 4. Create All Bookings (Only if no payment required or payment already handled)
     try {
-        await prisma.$transaction(
-            datesToBook.map(date => {
+        await prisma.$transaction(async (tx) => {
+            // Re-verify availability within the transaction to prevent double booking race conditions
+            for (const date of datesToBook) {
+                const checkStart = date;
+                const checkEnd = addMinutes(checkStart, service.duration);
+                const checkBuffEnd = addMinutes(checkEnd, service.bufferTime || 0);
+
+                // --- 1. Internal Slot Capacity Check (Inside TX) ---
+                const existingCount = await tx.booking.count({
+                    where: {
+                        serviceId: service.id,
+                        startTime: { lt: checkBuffEnd },
+                        endTime: { gt: checkStart },
+                        status: "CONFIRMED"
+                    }
+                });
+
+                if (service.capacity > 1 && existingCount >= service.capacity) {
+                    throw new Error(t("slotFullyBooked", { date: format(checkStart, "yyyy-MM-dd"), count: existingCount, capacity: service.capacity }));
+                }
+
+                // --- 2. Concurrency Check (Inside TX) ---
+                let concurrencyLimit = service.user.maxConcurrentClients || 1;
+                let currentConcurrencyCount = 0;
+
+                if (service.isConcurrencyEnabled) {
+                    // A. Service-Specific Scope
+                    concurrencyLimit = service.maxConcurrency || 1;
+                    currentConcurrencyCount = await tx.booking.count({
+                        where: {
+                            serviceId: service.id,
+                            startTime: { lt: checkBuffEnd },
+                            endTime: { gt: checkStart },
+                            status: "CONFIRMED"
+                        }
+                    });
+                } else {
+                    // B. Global Scope
+                    concurrencyLimit = service.user.maxConcurrentClients || 1;
+                    currentConcurrencyCount = await tx.booking.count({
+                        where: {
+                            service: {
+                                userId: service.userId,
+                                isConcurrencyEnabled: false
+                            },
+                            startTime: { lt: checkBuffEnd },
+                            endTime: { gt: checkStart },
+                            status: "CONFIRMED"
+                        }
+                    });
+                }
+
+                if (currentConcurrencyCount >= concurrencyLimit) {
+                    throw new Error(t("noStaffAvailable", { limit: concurrencyLimit }));
+                }
+            }
+
+            // If we get here, all slots are still valid. Create them.
+            for (const date of datesToBook) {
                 const startTime = date;
                 const endTime = addMinutes(startTime, service.duration);
 
-                return prisma.booking.create({
+                await tx.booking.create({
                     data: {
                         serviceId,
                         startTime,
@@ -344,10 +402,14 @@ export const createBooking = async (
                         currency: "usd",
                     }
                 });
-            })
-        );
-    } catch (e) {
+            }
+        });
+    } catch (e: any) {
         console.error("Booking transaction failed", e);
+        // Return the specific error message if it was one of our capacity checks
+        if (e.message && (e.message.includes(t("slotFullyBooked").substring(0, 10)) || e.message.includes(t("noStaffAvailable").substring(0, 10)) || e.message === "Double Booking")) {
+            return { error: e.message };
+        }
         return { error: t("bookingTransactionFailed") };
     }
 

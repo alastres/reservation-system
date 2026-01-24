@@ -6,7 +6,7 @@ import { RegisterSchema } from "@/schemas";
 import { prisma } from "@/lib/prisma";
 import { getUserByEmail } from "@/data/user";
 import { generateVerificationToken } from "@/lib/tokens";
-import { sendVerificationEmail } from "@/lib/mail";
+import { sendVerificationEmail, sendOtpEmail } from "@/lib/mail";
 
 import { getTranslations } from "next-intl/server";
 
@@ -16,6 +16,13 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
 
     if (!validatedFields.success) {
         return { error: t("invalidFields") };
+    }
+
+    // Honeypot Check
+    if (validatedFields.data.website) {
+        // Silently fail (return success to trick bots)
+        console.log("Spam registration attempt blocked (honeypot filled):", validatedFields.data.email);
+        return { success: t("confirmationSent") };
     }
 
     const { email, password, name, timeZone } = validatedFields.data;
@@ -45,7 +52,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     });
 
     const verificationToken = await generateVerificationToken(email);
-    await sendVerificationEmail(
+    await sendOtpEmail(
         verificationToken.identifier,
         verificationToken.token,
     );

@@ -72,7 +72,13 @@
         "invalidFields": "¡Campos inválidos!",
         "emailInUse": "¡El correo electrónico ya está en uso!",
         "confirmationSent": "¡Correo de confirmación enviado!",
-        "userNotFound": "Usuario no encontrado"
+        "userNotFound": "Usuario no encontrado",
+        "verify_email_header": "Verificar Correo",
+        "back_to_login": "Volver al inicio de sesión",
+        "verify_button": "Verificar",
+        "verification_code": "Código de Verificación",
+        "email_missing": "Correo electrónico faltante",
+        "error_verification_failed": "Verificación fallida. El código puede haber expirado."
     },
     "Dashboard": {
         "dashboard": "Inicio",

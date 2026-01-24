@@ -55,8 +55,19 @@ export const RegisterForm = () => {
 
         startTransition(() => {
             register(values).then((data) => {
-                setError(data.error);
-                setSuccess(data.success);
+                if (data.error) {
+                    setError(data.error);
+                }
+                if (data.success) {
+                    // Redirect to verification page
+                    setSuccess(data.success);
+                    // Small delay to show success message or just redirect immediately
+                    // routing.defaultLocale or just standard window.location or next/navigation
+                    // We are in client component, can use router.push but need to handle locale.
+                    // Assuming current locale is in path.
+                    // Quickest way: 
+                    window.location.href = `/auth/verify-email?email=${encodeURIComponent(values.email)}`;
+                }
             });
         });
     };
@@ -124,6 +135,21 @@ export const RegisterForm = () => {
                                         />
                                     </FormControl>
                                     <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    {/* Honeypot Field - Hidden from humans */}
+                    <div className="absolute opacity-0 -z-50 select-none pointer-events-none" aria-hidden="true">
+                        <FormField
+                            control={form.control}
+                            name="website"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Website</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} tabIndex={-1} autoComplete="off" />
+                                    </FormControl>
                                 </FormItem>
                             )}
                         />
