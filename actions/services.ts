@@ -8,17 +8,29 @@ import { revalidatePath } from "next/cache";
 
 import { getTranslations } from "next-intl/server";
 
+import { unstable_cache } from "next/cache";
+
 export const getServices = async () => {
     const session = await auth();
     if (!session?.user?.id) return [];
 
     try {
-        const services = await prisma.service.findMany({
-            where: { userId: session.user.id },
-            orderBy: { createdAt: "desc" },
-            include: { user: { select: { username: true } } }
-        });
-        return services;
+        const getCachedServices = unstable_cache(
+            async (userId) => {
+                return await prisma.service.findMany({
+                    where: { userId },
+                    orderBy: { createdAt: "desc" },
+                    include: { user: { select: { username: true } } }
+                });
+            },
+            [`services-${session.user.id}`],
+            {
+                tags: [`services-${session.user.id}`],
+                revalidate: 60 // 1 minute cache for dashboard usually fine, or rely on tags
+            }
+        );
+
+        return await getCachedServices(session.user.id);
     } catch {
         return [];
     }

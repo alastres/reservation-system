@@ -18,18 +18,30 @@ export const getUserById = async (id: string) => {
     }
 };
 
+import { unstable_cache } from "next/cache";
+
 export const getUserByUsername = async (username: string) => {
     try {
-        const user = await prisma.user.findUnique({
-            where: { username },
-            include: {
-                services: {
-                    where: { isActive: true },
-                    orderBy: { createdAt: "desc" }
-                }
+        const getCachedUser = unstable_cache(
+            async (uname) => {
+                return await prisma.user.findUnique({
+                    where: { username: uname },
+                    include: {
+                        services: {
+                            where: { isActive: true },
+                            orderBy: { createdAt: "desc" }
+                        }
+                    }
+                });
+            },
+            [`user-profile-${username}`], // Cache key
+            {
+                tags: [`user-profile-${username}`],
+                revalidate: 300 // 5 minutes
             }
-        });
-        return user;
+        );
+
+        return await getCachedUser(username);
     } catch {
         return null;
     }
