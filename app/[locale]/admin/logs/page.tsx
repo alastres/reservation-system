@@ -68,8 +68,8 @@ export default async function SystemLogsPage() {
                                     <TableCell>
                                         <div className="text-sm text-slate-200">{log.user?.email || 'System'}</div>
                                     </TableCell>
-                                    <TableCell className="text-sm text-slate-400 max-w-[400px] truncate" title={log.details || ''}>
-                                        {log.details || '-'}
+                                    <TableCell className="text-sm text-slate-400 max-w-[400px] truncate" title={log.details ? JSON.stringify(log.details) : ''}>
+                                        {log.details ? JSON.stringify(log.details) : '-'}
                                     </TableCell>
                                     <TableCell className="text-right font-mono text-xs text-slate-500">
                                         {log.ip || '-'}

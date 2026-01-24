@@ -55,14 +55,20 @@ export default async function IntegrationsPage() {
                         </div>
 
                         {isConnected ? (
-                            <form action={disconnectGoogle}>
+                            <form action={async () => {
+                                "use server";
+                                await disconnectGoogle();
+                            }}>
                                 <Button variant="outline" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
                                     <XCircle className="w-4 h-4 mr-2" />
                                     {t('disconnect')}
                                 </Button>
                             </form>
                         ) : (
-                            <form action={connectGoogle}>
+                            <form action={async () => {
+                                "use server";
+                                await connectGoogle();
+                            }}>
                                 <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                                     {t('connect')}
                                 </Button>

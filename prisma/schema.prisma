@@ -159,6 +159,7 @@ model Service {
 
 enum LocationType {
   GOOGLE_MEET
+  ZOOM
   PHONE
   IN_PERSON
   CUSTOM
