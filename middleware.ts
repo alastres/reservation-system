@@ -42,14 +42,11 @@ export default auth(async (req) => {
         const { success, limit, reset, remaining } = await rateLimit(ip);
 
         if (!success) {
-            return new Response("Too Many Requests", {
-                status: 429,
-                headers: {
-                    "X-RateLimit-Limit": limit.toString(),
-                    "X-RateLimit-Remaining": remaining.toString(),
-                    "X-RateLimit-Reset": reset.toString(),
-                },
-            });
+            // Redirect to custom 429 page using Next.js rewrite or redirect
+            // Since we want to keep context if possible, but redirect is safer for standard UI
+            const locale = nextUrl.pathname.split('/')[1] || 'es'; // default locale
+            const redirectUrl = new URL(`/${locale}/too-many-requests`, nextUrl);
+            return Response.redirect(redirectUrl);
         }
     }
 

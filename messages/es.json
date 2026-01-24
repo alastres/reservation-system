@@ -1,4 +1,17 @@
 {
+    "ErrorPages": {
+        "NotFound": {
+            "title": "Página No Encontrada",
+            "description": "¡Ups! Parece que la página que buscas no existe o ha sido movida.",
+            "returnHome": "Volver al Inicio"
+        },
+        "TooManyRequests": {
+            "title": "Demasiadas Solicitudes",
+            "description": "Hemos detectado una actividad inusual desde tu conexión.<br />Por favor espera unos minutos e inténtalo de nuevo.",
+            "status": "Protección anti-spam activa",
+            "returnHome": "Volver al Inicio"
+        }
+    },
     "Metadata": {
         "title": "Agendador | Sistema de Reservas Premium",
         "description": "Programación perfecta para profesionales."
