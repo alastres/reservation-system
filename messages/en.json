@@ -1,4 +1,17 @@
 {
+    "ErrorPages": {
+        "NotFound": {
+            "title": "Page Not Found",
+            "description": "Oops! It seems like the page you are looking for doesn't exist or has been moved.",
+            "returnHome": "Return Home"
+        },
+        "TooManyRequests": {
+            "title": "Too Many Requests",
+            "description": "We've detected an unusual amount of activity from your connection.<br />Please take a breather and try again in a few minutes.",
+            "status": "Rate limit protection active",
+            "returnHome": "Return to Homepage"
+        }
+    },
     "Metadata": {
         "title": "Scheduler | Premium Booking System",
         "description": "Seamless scheduling for professionals."
