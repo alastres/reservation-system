@@ -1,137 +1,193 @@
-# Reservation System (Next.js 14 Fullstack)
+# Reservation SaaS Platform (Next.js 14)
 
-A professional, white-label appointment scheduling platform built with Next.js 14, similar to Calendly. It allows users (Owners) to manage services, availability, and payments, while Clients can book appointments seamlessly.
+A professional, white-label appointment scheduling platform built with **Next.js 14**. It empowers professionals (Owners) to manage their services, availability, and payments, while providing Clients with a seamless booking experience. Similar to Calendly, but self-hosted and fully customizable.
 
-![Dashboard Preview](public/dashboard-preview.png) *Add a screenshot here*
+![Dashboard Preview](public/dashboard-preview.png)
 
-## 🚀 Features
+## 🚀 Key Features
 
-### Core Functionality
-- **Authentication**: Secure Login/Register with Magic Links & Google OAuth (NextAuth v5).
-- **Role-Based Access**: 
-  - **Admin**: Full system oversight.
-  - **Owner**: Service providers who manage bookings and services.
-  - **Client**: End-users booking the appointments.
-- **Internationalization (i18n)**: Support for Spanish (ES) and English (EN).
+### 🔐 Authentication & Security
+- **Multi-Method Auth**: Supports Google OAuth, Email/Password, and Magic Links (via **Auth.js / NextAuth v5**).
+- **OTP Verification**: Secure 2-step verification for email registration.
+- **Role-Based Access Control (RBAC)**: Distinct portals for **Admins**, **Owners** (Providers), and **Clients**.
+- **Security Best Practices**:
+  - **Rate Limiting**: Middleware-based protection against abuse.
+  - **Spam Prevention**: Honeypot fields and CAPTCHA implementation.
+  - **Input Validation**: Strict schema validation using **Zod**.
 
-### Service Management (Owners)
-- **Custom Services**: Create unlimited services with:
-  - Custom Title, Description, Duration, and Price.
-  - **Color Coding**: For easy calendar visualization.
-  - **Location Support**: Google Meet (auto-link), Phone, In-Person, or Custom URL (Zoom).
-  - **Custom Intake Forms**: Add required questions for clients (Text, Phone, etc.).
-- **URL Slugs**: professional public links like `app.com/[username]/[service-slug]`.
+### 📅 Booking Engine
+- **Flexible Services**: Configure duration, price, capacity (1-on-1 or Groups), and location (Google Meet, Phone number for calls, In-Person).
+- **Hybrid Availability**:
+  - **Weekly Rules**: Set recurring operating hours (e.g., Mon-Fri 9-5).
+  - **Date Exceptions**: Override specific dates for holidays or time off.
+  - **Google Calendar Sync**: 2-way sync to prevent double bookings.
+- **Smart Logic**:
+  - **Time Zone conversion**: Auto-detects client timezone.
+  - **Concurrency Management**: Global limits (e.g., "max 3 bookings at once") vs Service limits.
+  - **Buffer Times**: Automatic gaps between appointments.
 
-### Availability & Calendar
-- **Hybrid Availability Engine**:
-  - **Weekly Schedule**: Define working hours (e.g., Mon-Fri 9-5).
-  - **Exceptions**: Block specific dates or override hours for holidays.
-  - **Google Calendar Sync**: Two-way sync. Checks for conflicts in your personal calendar and adds new bookings automatically.
-  - **Buffers & Notice**: Set buffer time between appointments and minimum notice periods.
-- **Time Zone Intelligence**: Automatically detects and converts time zones for clients and owners.
+### 💰 Payments & Monetization (Stripe)
+- **Direct Payments**: Clients pay upfront to confirm bookings.
+- **Stripe Connect (Express)**:
+  - **Onboarding**: Owners connect their own Stripe accounts via a dedicated onboarding flow.
+  - **Automatic Payouts**: Funds are routed directly to the Owner's bank account.
+  - **Platform Fees**: (Optional) The platform can take a % cut of every transaction.
+- **SaaS Subscriptions**: Build a business model where Owners pay a monthly/annual fee to use the platform.
+- **Webhooks**: Real-time status updates (Payment Succeeded, Subscription Updated).
 
-### Smart Booking Logic
-- **Concurrency Control**:
-  - **Global Pool**: Limit total simultaneous clients per owner.
-  - **Service-Specific**: Set capacity for group classes (e.g., "Yoga Class" for 10 people).
-- **Recurrence**: Clients can book recurring sessions (Weekly/Biweekly/Monthly) in one flow.
+### 🌍 Internationalization (i18n)
+- **Multilingual Support**: Fully translated into **English (EN)** and **Spanish (ES)**.
+- **Locale Detection**: Middleware automatically redirects users based on browser preference.
+- **Localized Content**: All emails, error messages, and UI elements are adapted.
 
-### Payments & Monetization
-- **Stripe Integration**:
-  - **Upfront Payments**: Require payment to confirm a booking.
-  - **Stripe Connect (Express)**: Owners connect their *own* Stripe accounts to receive payouts directly ("Destination Charges").
-  - **Platform Subscriptions**: (Optional) SaaS model where owners pay a subscription to use the platform.
+### ⚙️ Automation & Analytics
+- **Cron Jobs**: Background tasks for sending **24h and 1h Appointment Reminders** (via Vercel Cron).
+- **Email Notifications**: Transactional emails via **Resend** (Confirmations, Cancellations, Reminders).
+- **Dashboard Analytics**: Interactive charts (Recharts) for Revenue, Booking Volume, and Popular Services.
 
-### Notifications
-- **Automated Emails**: Powered by Resend.
-  - Booking Confirmation (with ICS/Calendar links).
-  - Cancellations & Rescheduling updates.
-  - 24h Reminders (via Cron Jobs).
+---
 
 ## 🛠 Tech Stack
 
-- **Framework**: Next.js 14 (App Router, Server Actions)
-- **Database**: PostgreSQL (via Neon / Supabase)
-- **ORM**: Prisma
-- **Auth**: Auth.js (NextAuth v5)
-- **Payments**: Stripe & Stripe Connect
-- **Email**: Resend
-- **Styling**: TailwindCSS + Shadcn/UI
-- **Validations**: Zod + React Hook Form
-- **Date Handling**: date-fns + date-fns-tz
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Router, Server Actions)
+- **Language**: TypeScript
+- **Database**: PostgreSQL (via [Neon](https://neon.tech) or Supabase)
+- **ORM**: [Prisma](https://www.prisma.io/)
+- **Auth**: [Auth.js (NextAuth v5)](https://authjs.dev/)
+- **Payments**: [Stripe](https://stripe.com/) & Stripe Connect
+- **Email**: [Resend](https://resend.com/) & [Nodemailer](https://nodemailer.com/)
+- **UI/Styling**: [TailwindCSS](https://tailwindcss.com/) & [Shadcn/UI](https://ui.shadcn.com/)
+- **Validation**: [Zod](https://zod.dev/) & [React Hook Form](https://react-hook-form.com/)
+- **Internationalization**: [next-intl](https://next-intl-docs.vercel.app/)
+
+---
 
 ## 📦 Getting Started
 
-### 1. Requirements
+### 1. Prerequisites
 - Node.js 18+
-- PostgreSQL Database
-- Stripe Account
-- Google Cloud Project (for Calendar API)
-- Resend Account (for Emails)
+- PostgreSQL Database URL
+- Stripe Account (with Connect enabled)
+- Google Cloud Project (for Calendar API & Auth)
+- Resend API Key
 
-### 2. Environment Setup
-
-Rename `.env.example` to `.env` and configure:
-
-```env
-# Database
-DATABASE_URL="postgresql://..."
-
-# Auth (NextAuth)
-AUTH_SECRET="openssl rand -base64 32"
-AUTH_GOOGLE_ID=""
-AUTH_GOOGLE_SECRET=""
-
-# App
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-
-# Stripe
-STRIPE_SECRET_KEY="sk_test_..."
-STRIPE_WEBHOOK_SECRET="whsec_..."
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
-
-# Google Calendar
-GOOGLE_CLIENT_ID=""
-GOOGLE_CLIENT_SECRET=""
-
-# Email (Resend)
-RESEND_API_KEY="re_..."
-EMAIL_FROM="onboarding@resend.dev"
-```
-
-### 3. Installation
+### 2. Installation
 
 ```bash
+# Clone repository
+git clone https://github.com/your-username/reservation-system.git
+cd reservation-system
+
 # Install dependencies
 npm install
 
 # Initialize Database
 npx prisma generate
 npx prisma db push
-
-# Run Development Server
-npm run dev
 ```
 
-Visit `http://localhost:3000`.
+### 3. Environment Configuration
 
-## 🚀 Deployment (Vercel)
+Rename `.env.example` to `.env` and configure the following:
 
-This project is optimized for Vercel.
+#### Core
+```env
+DATABASE_URL="postgresql://user:pass@host/db?sslmode=require"
+NEXT_PUBLIC_APP_URL="http://localhost:3000" # Use https://your-domain.com in production
+```
 
-1.  **Push to GitHub**: Ensure your code is in a repository.
-2.  **Create Project on Vercel**: Import your repository.
-3.  **Configure Environment Variables**:
-    - Copy all values from your local `.env` to Vercel's Environment Variables settings.
-    - **Important**: For `NEXT_PUBLIC_APP_URL`, use your production domain (e.g., `https://my-app.vercel.app`).
-4.  **Database**: Ensure your Database provider (e.g., Neon) allows connections from Vercel.
-5.  **Build & Deploy**: Vercel will automatically build and deploy.
+#### Authentication (NextAuth)
+```env
+AUTH_SECRET="generate-with-openssl-rand-base64-32"
+# Google OAuth
+AUTH_GOOGLE_ID="your-client-id"
+AUTH_GOOGLE_SECRET="your-client-secret"
+```
 
-### Post-Deployment Checks
-- **Stripe Webhooks**: Add your Vercel deployment URL (`https://.../api/webhooks/stripe`) to the Stripe Dashboard.
-- **Google OAuth**: Add your production domain to the "Authorized Redirect URIs" in Google Cloud Console (`https://.../api/auth/callback/google`).
-- **Cron Jobs**: If using Vercel Cron, ensure `vercel.json` is configured (included in project).
+#### Payments (Stripe)
+Go to Stripe Dashboard > Developers > API Keys.
+```env
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
 
-## 📜 License
+# Product IDs (Create these in Stripe Dashboard Products)
+STRIPE_PRICE_MONTHLY="price_..."
+STRIPE_PRICE_QUARTERLY="price_..."
+STRIPE_PRICE_ANNUAL="price_..."
+```
+
+#### Google Calendar Integration
+Required for 2-way sync. Enable **Google Calendar API** in Cloud Console.
+```env
+GOOGLE_CLIENT_ID="same-as-auth-id"
+GOOGLE_CLIENT_SECRET="same-as-auth-secret"
+```
+
+#### Email (Resend)
+```env
+RESEND_API_KEY="re_..."
+EMAIL_FROM="onboarding@resend.dev" # Or your verified domain
+EMAIL_SERVER_HOST="smtp.resend.com"
+EMAIL_SERVER_PORT="465"
+EMAIL_SERVER_USER="resend"
+EMAIL_SERVER_PASSWORD="re_..."
+```
+
+---
+
+## 🚀 Configuration Guide
+
+### Google Cloud Setup
+1. Create a project in [Google Cloud Console](https://console.cloud.google.com/).
+2. Enable **Google Calendar API**.
+3. Go to **Credentials** > **Create Credentials** > **OAuth Client ID**.
+4. Set Authorized Redirect URIs:
+   - Local: `http://localhost:3000/api/auth/callback/google`
+   - Production: `https://your-domain.com/api/auth/callback/google`
+5. Copy Client ID and Secret to `.env`.
+
+### Stripe Connect Setup
+1. Go to Stripe Dashboard > **Connect**.
+2. Enable **Express** accounts.
+3. In **Input Settings** > **Redirects**, add:
+   - `http://localhost:3000/api/stripe/connect/refresh`
+   - `http://localhost:3000/api/stripe/connect/return`
+   - (And the comprehensive production equivalents)
+4. Use the `STRIPE_SECRET_KEY` in your `.env`.
+
+### Vercel Deployment & Cron Jobs
+1. **Push to GitHub**.
+2. **Import to Vercel**: Select the repository.
+3. **Environment Variables**: Copy all variables from `.env`.
+4. **Cron Jobs**:
+   - The project includes a `vercel.json` file defining the cron schedule (`/api/cron/reminders`).
+   - Vercel automatically detects this.
+   - You can secure the cron endpoint by adding a `CRON_SECRET` env var (optional implementation).
+
+---
+
+## 🏃‍♂️ Running the Project
+
+### Development
+```bash
+npm run dev
+# Visit http://localhost:3000
+```
+
+### Production Build
+```bash
+npm run build
+npm start
+```
+
+### Utility Scripts
+The `scripts/` folder contains helper scripts for verification (excluded from build):
+- `npm run check-tz`: Verifies timezone handling.
+- `npm run verify-all`: runs a full build verification.
+
+---
+
+## 📄 License
 
 MIT License.
