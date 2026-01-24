@@ -1,4 +1,18 @@
 {
+    "Metadata": {
+        "title": "Scheduler | Premium Booking System",
+        "description": "Seamless scheduling for professionals."
+    },
+    "Errors": {
+        "unauthorized": "Unauthorized",
+        "invalidFields": "Invalid fields",
+        "somethingWentWrong": "Something went wrong",
+        "serviceCreated": "Service \"{name}\" created",
+        "serviceDeleted": "Service \"{name}\" deleted",
+        "serviceUpdated": "Service \"{name}\" updated",
+        "failedDelete": "Failed to delete service",
+        "failedUpdate": "Failed to update service"
+    },
     "Landing": {
         "heroTitle": "Booking Management Simplified",
         "heroSubtitle": "The complete solution to manage your appointments, clients, and payments in one place.",

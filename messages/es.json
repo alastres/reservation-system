@@ -1,4 +1,18 @@
 {
+    "Metadata": {
+        "title": "Agendador | Sistema de Reservas Premium",
+        "description": "Programación perfecta para profesionales."
+    },
+    "Errors": {
+        "unauthorized": "No autorizado",
+        "invalidFields": "Campos inválidos",
+        "somethingWentWrong": "Algo salió mal",
+        "serviceCreated": "Servicio \"{name}\" creado",
+        "serviceDeleted": "Servicio \"{name}\" eliminado",
+        "serviceUpdated": "Servicio \"{name}\" actualizado",
+        "failedDelete": "Error al eliminar el servicio",
+        "failedUpdate": "Error al actualizar el servicio"
+    },
     "Landing": {
         "heroTitle": "Gestión de Reservas Simplificada",
         "heroSubtitle": "La solución completa para gestionar tus citas, clientes y pagos en un solo lugar.",

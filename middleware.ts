@@ -8,13 +8,11 @@ import {
     publicRoutes,
 } from "@/routes";
 
+import { routing } from "@/i18n/routing";
+
 const { auth } = NextAuth(authConfig);
 
-const intlMiddleware = createMiddleware({
-    locales: ["en", "es"],
-    defaultLocale: "es",
-    localePrefix: "always"
-});
+const intlMiddleware = createMiddleware(routing);
 
 export default auth((req) => {
     const { nextUrl } = req;
@@ -54,7 +52,9 @@ export default auth((req) => {
         if (!isLoggedIn) {
             // Redirect to Login (preserving locale if possible, defaulting to es)
             // We can extract locale from path or default.
-            const locale = nextUrl.pathname.split("/")[1] || "es";
+            const segments = nextUrl.pathname.split('/');
+            const possibleLocale = segments[1];
+            const locale = routing.locales.includes(possibleLocale as any) ? possibleLocale : routing.defaultLocale;
             let callbackUrl = nextUrl.pathname;
             if (nextUrl.search) callbackUrl += nextUrl.search;
             const encodedCallbackUrl = encodeURIComponent(callbackUrl);

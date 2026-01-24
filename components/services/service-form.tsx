@@ -174,7 +174,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                         <Input {...field} className="rounded-l-none" disabled={isPending} placeholder="30-min-meeting" />
                                     </div>
                                 </FormControl>
-                                <FormDescription>{t('form.urlSlugDesc')}</FormDescription>
+                                <FormDescription>{t('form.urlSlugDesc', { slug: field.value || 'slug' })}</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
