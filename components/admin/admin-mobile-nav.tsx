@@ -3,28 +3,29 @@
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, LayoutDashboard, Users, FileText } from "lucide-react";
-import Link from "next/link";
+import { Link, usePathname } from "@/i18n/routing";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export function AdminMobileNav() {
     const [open, setOpen] = useState(false);
     const pathname = usePathname();
+    const t = useTranslations("Admin.nav");
 
     const routes = [
         {
-            label: "Overview",
+            label: t("overview"),
             icon: LayoutDashboard,
             href: "/admin"
         },
         {
-            label: "Users",
+            label: t("users"),
             icon: Users,
             href: "/admin/users"
         },
         {
-            label: "Logs",
+            label: t("logs"),
             icon: FileText,
             href: "/admin/logs"
         }

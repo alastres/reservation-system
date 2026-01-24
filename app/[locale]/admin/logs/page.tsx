@@ -9,8 +9,11 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { getTranslations } from "next-intl/server";
 
 export default async function SystemLogsPage() {
+    const t = await getTranslations("Admin.logs");
+
     const logs = await prisma.systemLog.findMany({
         orderBy: { createdAt: 'desc' },
         include: {
@@ -25,8 +28,8 @@ export default async function SystemLogsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">System Logs</h2>
-                    <p className="text-slate-400">Audit trail of system actions.</p>
+                    <h2 className="text-3xl font-bold tracking-tight text-white">{t("title")}</h2>
+                    <p className="text-slate-400">{t("subtitle")}</p>
                 </div>
             </div>
 
@@ -34,11 +37,11 @@ export default async function SystemLogsPage() {
                 <Table>
                     <TableHeader>
                         <TableRow className="border-b border-white/10 hover:bg-white/5">
-                            <TableHead className="w-[180px] text-slate-300">Timestamp</TableHead>
-                            <TableHead className="text-slate-300">Action</TableHead>
-                            <TableHead className="text-slate-300">User</TableHead>
-                            <TableHead className="text-slate-300">Details</TableHead>
-                            <TableHead className="text-right text-slate-300">IP Address</TableHead>
+                            <TableHead className="w-[180px] text-slate-300">{t("table.timestamp")}</TableHead>
+                            <TableHead className="text-slate-300">{t("table.action")}</TableHead>
+                            <TableHead className="text-slate-300">{t("table.user")}</TableHead>
+                            <TableHead className="text-slate-300">{t("table.details")}</TableHead>
+                            <TableHead className="text-right text-slate-300">{t("table.ipAddress")}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -46,8 +49,8 @@ export default async function SystemLogsPage() {
                             <TableRow>
                                 <TableCell colSpan={5} className="h-24 text-center">
                                     <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
-                                        <p className="text-sm font-medium">No system logs found</p>
-                                        <p className="text-xs">Actions performed in the system will appear here.</p>
+                                        <p className="text-sm font-medium">{t("table.noLogs")}</p>
+                                        <p className="text-xs">{t("table.noLogsDesc")}</p>
                                     </div>
                                 </TableCell>
                             </TableRow>

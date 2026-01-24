@@ -354,6 +354,20 @@
         }
     },
     "Settings": {
+        "title": "Settings",
+        "nav": {
+            "profile": "Profile",
+            "integrations": "Integrations"
+        },
+        "integrations": {
+            "googleCalendar": "Google Calendar",
+            "description": "Connect your Google Calendar to automatically block busy times and add new bookings.",
+            "connected": "Connected",
+            "notConnected": "Not Connected",
+            "synced": "Synced for availability checks and event creation.",
+            "disconnect": "Disconnect",
+            "connect": "Connect Calendar"
+        },
         "profile": {
             "title": "Profile Information",
             "description": "Update your public profile details and personal information.",
@@ -486,6 +500,58 @@
                 "of": "of",
                 "page": "Page",
                 "next": "Next"
+            }
+        }
+    },
+    "Admin": {
+        "nav": {
+            "overview": "Overview",
+            "users": "Users",
+            "logs": "Logs",
+            "exit": "Exit"
+        },
+        "overview": {
+            "title": "Dashboard Overview",
+            "subtitle": "Welcome back to the command center.",
+            "stats": {
+                "totalUsers": "Total Users",
+                "totalBookings": "Total Bookings",
+                "confirmed": "Confirmed",
+                "activeToday": "Active Today"
+            },
+            "recentActivity": "Recent Activity",
+            "quickActions": "Quick Actions",
+            "inviteUser": "Invite User",
+            "inviteDesc": "Send an email invitation"
+        },
+        "users": {
+            "title": "User Management",
+            "subtitle": "View and manage system users.",
+            "table": {
+                "user": "User",
+                "role": "Role",
+                "stats": "Stats",
+                "joined": "Joined",
+                "actions": "Actions",
+                "noUsers": "No users found",
+                "noUsersDesc": "Registered users will appear here."
+            },
+            "stats": {
+                "services": "Services:",
+                "bookings": "Bookings:"
+            }
+        },
+        "logs": {
+            "title": "System Logs",
+            "subtitle": "Audit trail of system actions.",
+            "table": {
+                "timestamp": "Timestamp",
+                "action": "Action",
+                "user": "User",
+                "details": "Details",
+                "ipAddress": "IP Address",
+                "noLogs": "No system logs found",
+                "noLogsDesc": "Actions performed in the system will appear here."
             }
         }
     }
