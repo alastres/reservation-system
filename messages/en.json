@@ -43,7 +43,8 @@
         "bookingConfirmedDuplicate": "Booking already confirmed",
         "availabilitySaveFailed": "Failed to save availability",
         "exceptionSaveFailed": "Failed to save exception",
-        "exceptionDeleteFailed": "Failed to remove exception"
+        "exceptionDeleteFailed": "Failed to remove exception",
+        "planLimitReached": "Plan limit reached. Upgrade to Pro for more services."
     },
     "Success": {
         "bookingConfirmed": "Booking confirmed!",
@@ -130,6 +131,7 @@
         "title": "Services",
         "subtitle": "Manage your service offerings and pricing.",
         "searchPlaceholder": "Search...",
+        "usernameRequired": "You must set a username to create services.",
         "createService": "Create Service",
         "updateService": "Update Service",
         "noServicesTitle": "No services created",
@@ -376,7 +378,9 @@
         "title": "Settings",
         "nav": {
             "profile": "Profile",
-            "integrations": "Integrations"
+            "integrations": "Integrations",
+            "billing": "Payment Management",
+            "team": "Team"
         },
         "integrations": {
             "googleCalendar": "Google Calendar",
@@ -435,15 +439,16 @@
                 "TRIALING": "Trialing"
             },
             "plans": {
-                "MONTHLY": "Monthly Plan",
-                "QUARTERLY": "Quarterly Plan",
-                "ANNUAL": "Annual Plan"
+                "FREE": "Free Plan",
+                "PRO": "Professional Plan",
+                "BUSINESS": "Business Plan"
             },
             "prices": {
-                "MONTHLY": "€10/month",
-                "QUARTERLY": "€25.50/3 months",
-                "ANNUAL": "€84/year"
-            }
+                "FREE": "Free",
+                "PRO": "€15/month",
+                "BUSINESS": "€49/month"
+            },
+            "usePortalToDowngrade": "Please use the billing portal to manage your current subscription if you wish to switch to the free plan."
         },
         "stripe": {
             "title": "Payments & Stripe Connect",

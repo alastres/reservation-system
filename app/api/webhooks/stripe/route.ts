@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
+import { SubscriptionPlan } from "@prisma/client";
 
 export async function POST(req: Request) {
     const body = await req.text();
@@ -86,12 +87,11 @@ export async function POST(req: Request) {
                     break;
                 }
 
-                let plan: "MONTHLY" | "QUARTERLY" | "ANNUAL" | null = null;
+                let plan: SubscriptionPlan | null = null;
                 const priceId = subscription.items.data[0]?.price.id;
 
-                if (priceId === process.env.STRIPE_PRICE_MONTHLY) plan = "MONTHLY";
-                else if (priceId === process.env.STRIPE_PRICE_QUARTERLY) plan = "QUARTERLY";
-                else if (priceId === process.env.STRIPE_PRICE_ANNUAL) plan = "ANNUAL";
+                if (priceId === process.env.STRIPE_PRICE_PRO) plan = "PRO";
+                else if (priceId === process.env.STRIPE_PRICE_BUSINESS) plan = "BUSINESS";
 
                 await prisma.user.update({
                     where: { id: userId },
@@ -171,12 +171,19 @@ export async function POST(req: Request) {
                     if (subscriptionId) {
                         const subscription: any = await stripe.subscriptions.retrieve(subscriptionId);
 
-                        let plan: "MONTHLY" | "QUARTERLY" | "ANNUAL" | null = null;
+                        let plan: SubscriptionPlan | null = null;
                         const priceId = subscription.items.data[0]?.price.id;
 
-                        if (priceId === process.env.STRIPE_PRICE_MONTHLY) plan = "MONTHLY";
-                        else if (priceId === process.env.STRIPE_PRICE_QUARTERLY) plan = "QUARTERLY";
-                        else if (priceId === process.env.STRIPE_PRICE_ANNUAL) plan = "ANNUAL";
+                        console.log(`Processing checkout for Price ID: ${priceId}`);
+                        console.log(`Subscription debug: id=${subscription.id}, end=${subscription.current_period_end}`);
+
+                        if (priceId === process.env.STRIPE_PRICE_PRO) plan = "PRO";
+                        else if (priceId === process.env.STRIPE_PRICE_BUSINESS) plan = "BUSINESS";
+
+                        // Safe date conversion
+                        const endsAt = subscription.current_period_end
+                            ? new Date(subscription.current_period_end * 1000)
+                            : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default to 30 days if missing
 
                         await prisma.user.update({
                             where: { id: userId },
@@ -185,11 +192,11 @@ export async function POST(req: Request) {
                                 subscriptionPlan: plan,
                                 stripeCustomerId: session.customer as string,
                                 stripeSubscriptionId: subscriptionId,
-                                subscriptionEndsAt: new Date(subscription.current_period_end * 1000),
+                                subscriptionEndsAt: endsAt,
                             },
                         });
 
-                        console.log(`Checkout completed for user: ${userId}`);
+                        console.log(`Checkout completed for user: ${userId}, plan: ${plan}`);
                     }
                 }
                 break;

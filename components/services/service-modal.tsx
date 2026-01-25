@@ -15,13 +15,17 @@ interface ServiceModalProps {
     onClose: () => void;
     service?: any;
     onServiceSaved?: (service: any) => void;
+    subscriptionPlan?: string | null;
+    role?: string | null;
 }
 
 export const ServiceModal = ({
     isOpen,
     onClose,
     service,
-    onServiceSaved
+    onServiceSaved,
+    subscriptionPlan,
+    role
 }: ServiceModalProps) => {
     const t = useTranslations('Services');
 
@@ -41,6 +45,8 @@ export const ServiceModal = ({
                         service={service}
                         onSuccess={onClose}
                         onServiceSaved={onServiceSaved}
+                        subscriptionPlan={subscriptionPlan}
+                        role={role}
                     />
                 </div>
             </SheetContent>

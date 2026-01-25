@@ -253,7 +253,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">{t('advanced')}</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">
-                    {t('capacityDesc')}
+                    {(!user.role || user.role !== "ADMIN") && (!user.subscriptionPlan || user.subscriptionPlan === "FREE" as any)
+                        ? <span className="text-yellow-600 dark:text-yellow-500 font-medium">Upgrade to Pro to change this limit.</span>
+                        : t('capacityDesc')
+                    }
                 </p>
                 <Input
                     id="maxConcurrentClients"
@@ -262,7 +265,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     className="max-w-[100px]"
                     value={formData.maxConcurrentClients}
                     onChange={(e) => setFormData({ ...formData, maxConcurrentClients: Number(e.target.value) })}
-                    disabled={isPending}
+                    disabled={isPending || ((!user.role || user.role !== "ADMIN") && (!user.subscriptionPlan || user.subscriptionPlan === "FREE" as any))}
                 />
             </div>
 
