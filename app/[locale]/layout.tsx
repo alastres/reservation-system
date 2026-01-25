@@ -4,6 +4,7 @@ import "@/app/globals.css";
 import { Providers } from "@/components/providers";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
+// Force rebuild for translations
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';

@@ -24,16 +24,23 @@ import { AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 
 interface ServicesClientProps {
-    services: any[]; // Using any for now to match strictness level
+    services: any[];
+    subscriptionPlan?: string | null;
+    role?: string | null;
 }
 
-export const ServicesClient = ({ services }: ServicesClientProps) => {
+export const ServicesClient = ({ services, subscriptionPlan, role, username }: ServicesClientProps & { username?: string | null }) => {
     const t = useTranslations('Services');
+    const tErrors = useTranslations('Errors');
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedService, setSelectedService] = useState<any>(null);
     const [localServices, setLocalServices] = useState<any[]>(services);
     const [searchQuery, setSearchQuery] = useState("");
+
+    const isFree = !subscriptionPlan || subscriptionPlan === "FREE";
+    const isAdmin = role === "ADMIN";
+    const canCreate = isAdmin || !isFree || localServices.length < 1;
 
     // Sync specific service changes when props update (to handle deletion or external updates)
     useEffect(() => {
@@ -41,6 +48,17 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
     }, [services]);
 
     const handleCreate = () => {
+        if (!username) {
+            toast.error(t('usernameRequired') || "Debes establecer un nombre de usuario para crear servicios.");
+            router.push("/dashboard/settings");
+            return;
+        }
+
+        if (!canCreate) {
+            toast.error(tErrors("planLimitReached"));
+            router.push("/subscription/select");
+            return;
+        }
         setSelectedService(undefined);
         setIsModalOpen(true);
     };
@@ -95,6 +113,8 @@ export const ServicesClient = ({ services }: ServicesClientProps) => {
                 onClose={handleClose}
                 service={selectedService}
                 onServiceSaved={handleServiceSaved}
+                subscriptionPlan={subscriptionPlan}
+                role={role}
             />
 
             <MotionDiv

@@ -10,50 +10,45 @@ import { toast } from "sonner";
 
 const plans = [
     {
-        id: "MONTHLY",
-        name: "Mensual",
-        price: "€10",
+        id: "FREE",
+        name: "Gratis",
+        price: "€0",
         period: "/mes",
-        description: "Ideal para empezar",
+        description: "Para individuos que empiezan",
         features: [
-            "Panel de control completo",
-            "Servicios ilimitados",
-            "Reservas ilimitadas",
-            "Integración Google Calendar",
+            "1 Servicio",
+            "Gestión de reservas básica",
+            "Página de perfil básica",
             "Notificaciones por email",
-            "Soporte prioritario",
         ],
         popular: false,
     },
     {
-        id: "QUARTERLY",
-        name: "Trimestral",
-        price: "€25.50",
-        period: "/3 meses",
-        originalPrice: "€30",
-        discount: "15% descuento",
-        description: "Mejor valor a corto plazo",
+        id: "PRO",
+        name: "Profesional",
+        price: "€15",
+        period: "/mes",
+        description: "Para profesionales activos",
         features: [
-            "Todo lo de Mensual",
-            "15% de descuento",
-            "€8.50/mes efectivo",
+            "Servicios ilimitados",
+            "Reservas ilimitadas",
+            "Integración Google Calendar",
             "Soporte prioritario",
         ],
         popular: true,
     },
     {
-        id: "ANNUAL",
-        name: "Anual",
-        price: "€84",
-        period: "/año",
-        originalPrice: "€120",
-        discount: "30% descuento",
-        description: "Máximo ahorro",
+        id: "BUSINESS",
+        name: "Empresa",
+        price: "€49",
+        period: "/mes",
+        description: "Para equipos y negocios",
         features: [
-            "Todo lo de Mensual",
-            "30% de descuento",
-            "€7/mes efectivo",
-            "Soporte premium 24/7",
+            "Todo lo de Profesional",
+            "Múltiples empleados (Próximamente)",
+            "Gestión de equipos",
+            "Múltiples centros / ubicaciones",
+            "Administración centralizada",
         ],
         popular: false,
     },
@@ -63,7 +58,7 @@ export default function SelectPlanPage() {
     const [loading, setLoading] = useState<string | null>(null);
     const router = useRouter();
 
-    const handleSelectPlan = async (planId: "MONTHLY" | "QUARTERLY" | "ANNUAL") => {
+    const handleSelectPlan = async (planId: "FREE" | "PRO" | "BUSINESS") => {
         setLoading(planId);
 
         try {
@@ -78,6 +73,7 @@ export default function SelectPlanPage() {
                 window.location.href = result.url;
             }
         } catch (error) {
+            console.error("Subscription flow error:", error);
             toast.error("Error al crear sesión de pago");
         } finally {
             setLoading(null);

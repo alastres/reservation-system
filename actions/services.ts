@@ -4,7 +4,7 @@ import * as z from "zod";
 import { ServiceSchema } from "@/schemas";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { getTranslations } from "next-intl/server";
 
@@ -26,7 +26,7 @@ export const getServices = async () => {
             [`services-${session.user.id}`],
             {
                 tags: [`services-${session.user.id}`],
-                revalidate: 60 // 1 minute cache for dashboard usually fine, or rely on tags
+                revalidate: 60
             }
         );
 
@@ -49,7 +49,7 @@ export const createService = async (values: z.infer<typeof ServiceSchema>) => {
     }
 
     try {
-        const { userId: _, ...data } = validatedFields.data; // Extract customInputs and omit userId
+        const { userId: _, ...data } = validatedFields.data;
 
         const service = await prisma.service.create({
             data: {
@@ -60,8 +60,8 @@ export const createService = async (values: z.infer<typeof ServiceSchema>) => {
             include: { user: { select: { username: true } } }
         });
 
+        revalidateTag(`services-${session.user.id}`);
         revalidatePath("/dashboard/services");
-        // revalidatePath(`/${session.user.username}`);
         return { success: tSuccess("created", { name: service.title }), service };
     } catch (e: any) {
         console.log(e);
@@ -83,12 +83,29 @@ export const updateService = async (id: string, values: z.infer<typeof ServiceSc
 
     try {
         const { userId: _, ...data } = validatedFields.data;
+
+        // Check plan limits for update
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { subscriptionPlan: true, role: true }
+        });
+        const isFree = !user?.subscriptionPlan || user.subscriptionPlan === "FREE";
+        const isAdmin = user?.role === "ADMIN";
+
+        if (isFree && !isAdmin) {
+            data.price = 0;
+            data.requiresPayment = false;
+            data.maxConcurrency = 1;
+            data.isConcurrencyEnabled = false;
+        }
+
         const service = await prisma.service.update({
             where: { id, userId: session.user.id },
             data: { ...data, customInputs: data.customInputs as any },
             include: { user: { select: { username: true } } }
         });
 
+        revalidateTag(`services-${session.user.id}`);
         revalidatePath("/dashboard/services");
         return { success: tSuccess("updated", { name: service.title }), service };
     } catch {
@@ -103,13 +120,19 @@ export const deleteService = async (id: string) => {
     if (!session?.user?.id) return { error: t("unauthorized") };
 
     try {
-        const service = await prisma.service.delete({
+        const { count } = await prisma.service.deleteMany({
             where: { id, userId: session.user.id }
         });
 
+        if (count === 0) {
+            return { error: t("serviceNotFound") };
+        }
+
+        revalidateTag(`services-${session.user.id}`);
         revalidatePath("/dashboard/services");
-        return { success: tSuccess("deleted", { name: service.title }) };
-    } catch {
+        return { success: tSuccess("deleted", { name: "Service" }) };
+    } catch (e) {
+        console.error("Delete Service Error:", e);
         return { error: t("failedDelete") };
     }
 }
@@ -129,7 +152,6 @@ export const duplicateService = async (id: string) => {
 
         const { id: _, createdAt, updatedAt, ...data } = service;
 
-        // Create new slug
         let newUrl = `${data.url}-copy`;
         let counter = 1;
         while (await prisma.service.findFirst({
@@ -147,12 +169,13 @@ export const duplicateService = async (id: string) => {
                 ...data,
                 title: `${data.title} (Copy)`,
                 url: newUrl,
-                isActive: false, // Default to draft
+                isActive: false,
                 customInputs: data.customInputs as any
             },
             include: { user: { select: { username: true } } }
         });
 
+        revalidateTag(`services-${session.user.id}`);
         revalidatePath("/dashboard/services");
         return { success: tSuccess("duplicated"), service: newService };
     } catch (e) {
@@ -173,6 +196,7 @@ export const toggleServiceStatus = async (id: string, isActive: boolean) => {
             data: { isActive }
         });
 
+        revalidateTag(`services-${session.user.id}`);
         revalidatePath("/dashboard/services");
         return { success: tSuccess("toggled") };
     } catch {
