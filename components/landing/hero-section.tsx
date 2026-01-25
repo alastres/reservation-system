@@ -52,7 +52,7 @@ export const HeroSection = () => {
                             </Link>
                         </Button>
                         <Button size="lg" variant="outline" className="h-12 px-8 text-base rounded-full border-white/10 hover:bg-white/5 backdrop-blur-sm" asChild>
-                            <Link href="#demo">
+                            <Link href="/auth/login?action=demo">
                                 {t('ctaSecondary')}
                             </Link>
                         </Button>
