@@ -20,6 +20,16 @@ export const SettingsNav = () => {
             title: t('integrations'),
             href: "/dashboard/settings/integrations",
             isActive: pathname === "/dashboard/settings/integrations"
+        },
+        {
+            title: t('billing'),
+            href: "/dashboard/settings/billing",
+            isActive: pathname === "/dashboard/settings/billing"
+        },
+        {
+            title: t('team'),
+            href: "/dashboard/settings/team",
+            isActive: pathname === "/dashboard/settings/team"
         }
     ];
 

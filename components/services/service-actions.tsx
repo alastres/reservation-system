@@ -21,6 +21,7 @@ export function DeleteServiceButton({ id, onDelete }: { id: string, onDelete?: (
     const t = useTranslations('Services');
     const [isPending, startTransition] = useTransition();
     const [open, setOpen] = useState(false);
+    const router = useRouter();
 
     const handleDelete = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -35,6 +36,7 @@ export function DeleteServiceButton({ id, onDelete }: { id: string, onDelete?: (
                     if (onDelete) {
                         onDelete(id);
                     }
+                    router.refresh();
                 }
             });
         });
@@ -140,6 +142,7 @@ export function ServiceStatusToggle({ id, isActive, onToggle }: { id: string, is
                     if (onToggle) {
                         onToggle(checked);
                     }
+                    router.refresh();
                 }
             });
         });

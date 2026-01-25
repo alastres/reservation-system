@@ -6,10 +6,11 @@ import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 // Price IDs from environment
+// Price IDs from environment
 const PRICE_IDS = {
-    MONTHLY: process.env.STRIPE_PRICE_MONTHLY!,
-    QUARTERLY: process.env.STRIPE_PRICE_QUARTERLY!,
-    ANNUAL: process.env.STRIPE_PRICE_ANNUAL!,
+    // FREE: "FREE", // Handled internally
+    PRO: process.env.STRIPE_PRICE_PRO,
+    BUSINESS: process.env.STRIPE_PRICE_BUSINESS,
 };
 
 /**
@@ -25,7 +26,7 @@ export async function isFirstUser(): Promise<boolean> {
  */
 import { getTranslations } from "next-intl/server";
 
-export async function createSubscriptionCheckout(plan: "MONTHLY" | "QUARTERLY" | "ANNUAL") {
+export async function createSubscriptionCheckout(plan: "FREE" | "PRO" | "BUSINESS") {
     const t = await getTranslations("Subscription");
     try {
         const session = await auth();
@@ -35,14 +36,37 @@ export async function createSubscriptionCheckout(plan: "MONTHLY" | "QUARTERLY" |
 
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
-            select: { email: true, stripeCustomerId: true },
+            select: { email: true, stripeCustomerId: true, subscriptionPlan: true, subscriptionStatus: true },
         });
 
         if (!user?.email) {
             return { error: t("emailNotFound") };
         }
 
-        // Check if user already has active subscription
+        // Handle FREE plan directly (no Stripe)
+        if (plan === "FREE") {
+            // If user is already on a paid plan, they should cancel via portal, not here. 
+            // Or we can treat this as "Downgrade" which might be complex.
+            // For simplicity: If user has no active stripe sub, allow switch to FREE.
+            if (user.stripeCustomerId && user.subscriptionStatus === "ACTIVE" && user.subscriptionPlan !== "FREE") {
+                return { error: t("usePortalToDowngrade") }; // "Please use billing portal to manage current subscription"
+            }
+
+            await prisma.user.update({
+                where: { id: session.user.id },
+                data: {
+                    subscriptionPlan: "FREE",
+                    subscriptionStatus: "ACTIVE",
+                    subscriptionEndsAt: null, // Perpetual
+                }
+            });
+
+            revalidatePath("/dashboard");
+            return { success: true, url: "/dashboard?plan=free_success" };
+        }
+
+
+        // Check if user already has active subscription (for Paid plans)
         if (user.stripeCustomerId) {
             const subscriptions = await stripe.subscriptions.list({
                 customer: user.stripeCustomerId,
@@ -51,12 +75,17 @@ export async function createSubscriptionCheckout(plan: "MONTHLY" | "QUARTERLY" |
             });
 
             if (subscriptions.data.length > 0) {
+                // If already active, maybe redirect to portal or return error
+                // But if they are upgrading, we might want to create a checkout session?
+                // Usually upgrades are handled in Portal or via specific checkout mode.
+                // For now, simple block.
                 return { error: t("alreadyActive") };
             }
         }
 
-        const priceId = PRICE_IDS[plan];
+        const priceId = PRICE_IDS[plan as keyof typeof PRICE_IDS];
         if (!priceId) {
+            // console.error(`Price ID not found for plan: ${plan}`);
             return { error: t("invalidPlan") };
         }
 

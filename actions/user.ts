@@ -40,6 +40,17 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
 
     const { name, username, bio, timeZone, image, address, phone, notificationPreferences, maxConcurrentClients } = validated.data;
 
+    // Fetch current user to check plan
+    const currentUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { subscriptionPlan: true, role: true }
+    });
+    const isFree = !currentUser?.subscriptionPlan || currentUser.subscriptionPlan === "FREE" as any;
+    const isAdmin = currentUser?.role === "ADMIN";
+
+    // Enforce Free plan restriction on global capacity
+    const effectiveMaxConcurrentClients = (isFree && !isAdmin) ? 1 : maxConcurrentClients;
+
     // Check username uniqueness if changing
     if (username) {
         const existingUser = await prisma.user.findUnique({
@@ -69,7 +80,7 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
                 address,
                 phone,
                 notificationPreferences: notificationPreferences || undefined,
-                maxConcurrentClients: maxConcurrentClients || undefined,
+                maxConcurrentClients: effectiveMaxConcurrentClients || undefined,
             },
         });
 
@@ -82,4 +93,16 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
         console.error("Profile update error:", error);
         return { error: t("updateFailed") };
     }
+}
+
+export const getUserPlan = async () => {
+    const session = await auth();
+    if (!session?.user?.id) return null;
+
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { subscriptionPlan: true, role: true, username: true }
+    });
+
+    return { plan: user?.subscriptionPlan, role: user?.role, username: user?.username };
 }

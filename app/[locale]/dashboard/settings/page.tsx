@@ -42,6 +42,7 @@ export default async function SettingsPage() {
             maxConcurrentClients: true,
             stripeConnectAccountId: true,
             stripeConnectStatus: true,
+            stripeCustomerId: true,
         },
     });
 
@@ -74,112 +75,9 @@ export default async function SettingsPage() {
                 </CardContent>
             </Card>
 
-            {/* Stripe Connect Section */}
-            {!isAdmin && (
-                <div className="col-span-1 md:col-span-2">
-                    <StripeConnectCard user={user} />
-                </div>
-            )}
+            {/* Stripe Connect Section Removed - Moved to /billing */}
 
-            {/* Subscription Section */}
-            {!isAdmin && (
-                <Card className="col-span-1 md:col-span-2">
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <div>
-                                    <CardTitle>{t('subscription.title')}</CardTitle>
-                                    <CardDescription>
-                                        {t('subscription.descriptionUser')}
-                                    </CardDescription>
-                                </div>
-                                {hasSubscription && (
-                                    <Badge className={statusColors[user.subscriptionStatus as keyof typeof statusColors]}>
-                                        {t(`subscription.status.${user.subscriptionStatus}`)}
-                                    </Badge>
-                                )}
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {hasSubscription ? (
-                            <>
-                                <div className="grid md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
-                                    <div className="flex items-start gap-3">
-                                        <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                        <div>
-                                            <div>
-                                                <p className="text-sm font-medium">{t('subscription.currentPlan')}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {t(`subscription.plans.${user.subscriptionPlan}`)}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    {t(`subscription.prices.${user.subscriptionPlan}`)}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {user.subscriptionEndsAt && (
-                                            <div className="flex items-start gap-3">
-                                                <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                                <div>
-                                                    <div>
-                                                        <p className="text-sm font-medium">
-                                                            {user.subscriptionStatus === "CANCELLED" ? t('subscription.expires') : t('subscription.renews')}
-                                                        </p>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {format(new Date(user.subscriptionEndsAt), "d 'de' MMMM, yyyy", { locale: dateLocale })}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="flex flex-col sm:flex-row gap-3">
-                                        <form action="/api/subscription/portal" method="POST" className="flex-1">
-                                            <Button type="submit" variant="default" className="w-full">
-                                                <ExternalLink className="h-4 w-4 mr-2" />
-                                                {t('subscription.manage')}
-                                            </Button>
-                                        </form>
-                                    </div>
-                                </div>
-
-                                <p className="text-xs text-muted-foreground text-center">
-                                    {t('subscription.manageDesc')}
-                                </p>
-                            </>
-                        ) : (
-                            <div className="text-center py-8">
-                                <p className="text-muted-foreground mb-4">{t('subscription.noActive')}</p>
-                                <Button asChild>
-                                    <a href="/subscription/select">{t('subscription.viewPlans')}</a>
-                                </Button>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            )}
-
-            {isAdmin && (
-                <Card className="col-span-1 md:col-span-2">
-                    <CardHeader>
-                        <CardTitle>{t('subscription.title')}</CardTitle>
-                        <CardDescription>
-                            {t('subscription.descriptionAdmin')}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center gap-3 p-4 bg-primary/10 rounded-lg border border-primary/20">
-                            <Badge variant="default" className="text-sm">Admin</Badge>
-                            <p className="text-sm text-muted-foreground">
-                                {t('subscription.adminAccess')}
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
+            {/* Subscription Section Removed - Moved to /billing */}
         </div>
     );
 }

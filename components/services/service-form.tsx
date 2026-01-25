@@ -58,9 +58,11 @@ interface ServiceFormProps {
     service?: ServiceProps;
     onSuccess?: () => void;
     onServiceSaved?: (service: any) => void;
+    subscriptionPlan?: string | null;
+    role?: string | null;
 }
 
-export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormProps) => {
+export const ServiceForm = ({ service, onSuccess, onServiceSaved, subscriptionPlan, role }: ServiceFormProps) => {
     const t = useTranslations('Services');
     const user = useCurrentUser();
     const router = useRouter();
@@ -179,189 +181,208 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                             </FormItem>
                         )}
                     />
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="duration"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('form.duration')}</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            type="number"
-                                            disabled={isPending}
-                                            onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="price"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('form.price')}</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            type="number"
-                                            disabled={isPending}
-                                            onChange={e => field.onChange(e.target.value === "" ? 0 : parseFloat(e.target.value))}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
-                        name="color"
+                        name="duration"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>{t('form.colorTheme')}</FormLabel>
+                                <FormLabel>{t('form.duration')}</FormLabel>
                                 <FormControl>
-                                    <div className="flex flex-wrap gap-2">
-                                        {["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#3b82f6"].map((color) => (
-                                            <div
-                                                key={color}
-                                                className={`w-8 h-8 rounded-full cursor-pointer transition-all border-2 ${field.value === color ? "border-white scale-110" : "border-transparent opacity-50 hover:opacity-100"}`}
-                                                style={{ backgroundColor: color }}
-                                                onClick={() => field.onChange(color)}
-                                            />
-                                        ))}
+                                    <Input
+                                        {...field}
+                                        type="number"
+                                        disabled={isPending}
+                                        onChange={e => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value))}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="price"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('form.price')}</FormLabel>
+                                <FormControl>
+                                    <div className="relative">
+                                        <Input
+                                            {...field}
+                                            type="number"
+                                            disabled={isPending || ((!role || role !== "ADMIN") && (!subscriptionPlan || subscriptionPlan === "FREE"))}
+                                            onChange={e => field.onChange(e.target.value === "" ? 0 : parseFloat(e.target.value))}
+                                        />
+                                        {(!role || role !== "ADMIN") && (!subscriptionPlan || subscriptionPlan === "FREE") && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-[1px] rounded-md border border-dashed border-muted-foreground/30">
+                                                <span className="text-xs text-muted-foreground font-medium bg-background px-2 py-1 rounded-full shadow-sm">
+                                                    Free Plan: Always $0
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('form.description')}</FormLabel>
+                </div>
+
+                <FormField
+                    control={form.control}
+                    name="color"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>{t('form.colorTheme')}</FormLabel>
+                            <FormControl>
+                                <div className="flex flex-wrap gap-2">
+                                    {["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#3b82f6"].map((color) => (
+                                        <div
+                                            key={color}
+                                            className={`w-8 h-8 rounded-full cursor-pointer transition-all border-2 ${field.value === color ? "border-white scale-110" : "border-transparent opacity-50 hover:opacity-100"}`}
+                                            style={{ backgroundColor: color }}
+                                            onClick={() => field.onChange(color)}
+                                        />
+                                    ))}
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>{t('form.description')}</FormLabel>
+                            <FormControl>
+                                <Textarea {...field} disabled={isPending} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="locationType"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>{t('form.location')}</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
-                                    <Textarea {...field} disabled={isPending} />
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={t('form.selectLocation')} />
+                                    </SelectTrigger>
                                 </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                                <SelectContent>
+                                    <SelectItem value="GOOGLE_MEET">{t('form.googleMeet')}</SelectItem>
+                                    <SelectItem value="PHONE">{t('form.phoneCall')}</SelectItem>
+                                    <SelectItem value="IN_PERSON">{t('form.inPerson')}</SelectItem>
+                                    <SelectItem value="CUSTOM">{t('form.customLink')}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormDescription>
+                                {field.value === "GOOGLE_MEET" && t('form.googleMeetDesc')}
+                                {field.value === "PHONE" && t('form.phoneCallDesc')}
+                                {field.value === "IN_PERSON" && t('form.inPersonDesc')}
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {form.watch("locationType") === "IN_PERSON" && (
                     <FormField
                         control={form.control}
-                        name="locationType"
+                        name="address"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>{t('form.location')}</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder={t('form.selectLocation')} />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="GOOGLE_MEET">{t('form.googleMeet')}</SelectItem>
-                                        <SelectItem value="PHONE">{t('form.phoneCall')}</SelectItem>
-                                        <SelectItem value="IN_PERSON">{t('form.inPerson')}</SelectItem>
-                                        <SelectItem value="CUSTOM">{t('form.customLink')}</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <FormLabel>{t('form.address')}</FormLabel>
+                                <FormControl>
+                                    <Input {...field} disabled={isPending} placeholder="123 Main St, City" />
+                                </FormControl>
                                 <FormDescription>
-                                    {field.value === "GOOGLE_MEET" && t('form.googleMeetDesc')}
-                                    {field.value === "PHONE" && t('form.phoneCallDesc')}
-                                    {field.value === "IN_PERSON" && t('form.inPersonDesc')}
+                                    {t('form.addressDesc')}
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
+                )}
 
-                    {form.watch("locationType") === "IN_PERSON" && (
-                        <FormField
-                            control={form.control}
-                            name="address"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('form.address')}</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} disabled={isPending} placeholder="123 Main St, City" />
-                                    </FormControl>
-                                    <FormDescription>
-                                        {t('form.addressDesc')}
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    )}
-
-                    {form.watch("locationType") === "CUSTOM" && (
-                        <FormField
-                            control={form.control}
-                            name="locationUrl"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t('form.meetingUrl')}</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} disabled={isPending} placeholder="https://..." />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    )}
+                {form.watch("locationType") === "CUSTOM" && (
                     <FormField
                         control={form.control}
-                        name="isActive"
+                        name="locationUrl"
                         render={({ field }) => (
-                            <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                    <FormLabel className="text-base">{t('form.active')}</FormLabel>
-                                    <FormDescription>{t('form.activeDesc')}</FormDescription>
-                                </div>
+                            <FormItem>
+                                <FormLabel>{t('form.meetingUrl')}</FormLabel>
                                 <FormControl>
-                                    <Switch
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                        disabled={isPending}
-                                    />
+                                    <Input {...field} disabled={isPending} placeholder="https://..." />
                                 </FormControl>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="requiresPayment"
-                        render={({ field }) => (
-                            <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                    <FormLabel className="text-base">{t('form.requirePayment')}</FormLabel>
-                                    <FormDescription>{t('form.requirePaymentDesc')}</FormDescription>
-                                </div>
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                        disabled={isPending}
-                                    />
-                                </FormControl>
-                            </FormItem>
-                        )}
-                    />
-                </div>
+                )}
+                <FormField
+                    control={form.control}
+                    name="isActive"
+                    render={({ field }) => (
+                        <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">{t('form.active')}</FormLabel>
+                                <FormDescription>{t('form.activeDesc')}</FormDescription>
+                            </div>
+                            <FormControl>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    disabled={isPending}
+                                />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="requiresPayment"
+                    render={({ field }) => (
+                        <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">{t('form.requirePayment')}</FormLabel>
+                                <FormDescription>
+                                    {(!role || role !== "ADMIN") && (!subscriptionPlan || subscriptionPlan === "FREE")
+                                        ? <span className="text-yellow-600 dark:text-yellow-500 text-xs">Upgrade to Accept Payments</span>
+                                        : t('form.requirePaymentDesc')
+                                    }
+                                </FormDescription>
+                            </div>
+                            <FormControl>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    disabled={isPending || ((!role || role !== "ADMIN") && (!subscriptionPlan || subscriptionPlan === "FREE"))}
+                                />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                />
+
 
                 {/* Concurrency Settings */}
                 <div className="space-y-4 border border-input/50 rounded-lg p-4 bg-muted/20">
                     <div className="space-y-0.5">
                         <FormLabel className="text-base">{t('form.concurrency')}</FormLabel>
                         <FormDescription>
-                            {t('form.concurrencyDesc')}
+                            {(!role || role !== "ADMIN") && (!subscriptionPlan || subscriptionPlan === "FREE")
+                                ? <span className="text-yellow-600 dark:text-yellow-500 font-medium text-xs">Upgrade to Pro for team/concurrency features.</span>
+                                : t('form.concurrencyDesc')
+                            }
                         </FormDescription>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
@@ -380,7 +401,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                         <Switch
                                             checked={field.value}
                                             onCheckedChange={field.onChange}
-                                            disabled={isPending}
+                                            disabled={isPending || ((!role || role !== "ADMIN") && (!subscriptionPlan || subscriptionPlan === "FREE"))}
                                         />
                                     </FormControl>
                                 </FormItem>
@@ -397,7 +418,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                                             {...field}
                                             type="number"
                                             min={1}
-                                            disabled={isPending || !form.watch("isConcurrencyEnabled")}
+                                            disabled={isPending || !form.watch("isConcurrencyEnabled") || ((!role || role !== "ADMIN") && (!subscriptionPlan || subscriptionPlan === "FREE"))}
                                             onChange={e => field.onChange(parseInt(e.target.value))}
                                         />
                                     </FormControl>
@@ -408,6 +429,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                         />
                     </div>
                 </div>
+
 
                 {/* Recurrence Settings */}
                 <div className="space-y-4 border border-input/50 rounded-lg p-4 bg-muted/20">
@@ -537,7 +559,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved }: ServiceFormP
                 <Button type="submit" disabled={isPending}>
                     {service ? t('updateService') : t('createService')}
                 </Button>
-            </form>
-        </Form>
+            </form >
+        </Form >
     );
 }
