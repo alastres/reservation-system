@@ -4,6 +4,7 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginSchema } from "@/schemas";
+import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import {
     Form,
@@ -24,6 +25,8 @@ import { useTranslations } from "next-intl";
 
 export const LoginForm = () => {
     const t = useTranslations('Auth');
+    const searchParams = useSearchParams();
+    const demoMode = searchParams.get("action") === "demo";
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
@@ -31,8 +34,8 @@ export const LoginForm = () => {
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
-            email: "",
-            password: "",
+            email: demoMode ? "demo@scheduler.com" : "",
+            password: demoMode ? "demo1234" : "",
         },
     });
 
