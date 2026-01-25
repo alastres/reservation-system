@@ -39,7 +39,7 @@ export const PricingSection = () => {
                             >
                                 {isPro && (
                                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
-                                        Most Popular
+                                        {t('badge')}
                                     </div>
                                 )}
 

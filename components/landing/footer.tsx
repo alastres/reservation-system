@@ -44,7 +44,7 @@ export const Footer = () => {
                 </div>
 
                 <div className="pt-8 border-t border-white/5 text-center text-sm text-muted-foreground">
-                    &copy; {new Date().getFullYear()} Scheduler. All rights reserved.
+                    &copy; {new Date().getFullYear()} Scheduler. {t('footer.copyright')}
                 </div>
             </div>
         </footer>
