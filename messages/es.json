@@ -57,12 +57,157 @@
         "paymentConfirmed": "¡Pago confirmado y reserva creada!"
     },
     "Landing": {
-        "heroTitle": "Gestión de Reservas Simplificada",
-        "heroSubtitle": "La solución completa para gestionar tus citas, clientes y pagos en un solo lugar.",
-        "getStarted": "Empezar Gratis",
-        "signIn": "Iniciar Sesión",
-        "features": "Características",
-        "pricing": "Precios"
+        "hero": {
+            "badge": "La plataforma #1 para profesionales",
+            "title": "Tu agenda online automatizada.",
+            "titleHighlight": "Que tus clientes reserven mientras tú trabajas.",
+            "subtitle": "Gestiona reservas, disponibilidad, pagos y recordatorios desde una sola plataforma. Sin llamadas, sin WhatsApp y sin confusiones.",
+            "ctaPrimary": "Crear cuenta gratis",
+            "ctaSecondary": "Ver demo",
+            "signIn": "Iniciar Sesión",
+            "getStarted": "Empezar Gratis",
+            "users": "Utilizado por profesionales individuales, clínicas y centros."
+        },
+        "benefits": {
+            "title": "Todo lo que necesitas para crecer",
+            "items": {
+                "automation": {
+                    "title": "Automatiza tus reservas",
+                    "desc": "Adiós a chats infinitos gestionando citas."
+                },
+                "availability": {
+                    "title": "Evita solapamientos",
+                    "desc": "Disponibilidad inteligente que se bloquea sola."
+                },
+                "reminders": {
+                    "title": "Recordatorios automáticos",
+                    "desc": "Reduce cancelaciones con emails 24h antes."
+                },
+                "payments": {
+                    "title": "Cobros seguros",
+                    "desc": "Cobra antes de la cita y asegura tu tiempo."
+                },
+                "control": {
+                    "title": "Control en tiempo real",
+                    "desc": "Gestiona tu negocio desde cualquier dispositivo."
+                }
+            }
+        },
+        "howItWorks": {
+            "title": "Cómo funciona",
+            "step1": {
+                "title": "Configura tu disponibilidad",
+                "desc": "Define horarios, descansos y vacaciones."
+            },
+            "step2": {
+                "title": "Comparte tu enlace",
+                "desc": "Enlace personalizado o integración web."
+            },
+            "step3": {
+                "title": "Recibe reservas",
+                "desc": "Tus clientes reservan y pagan en 3 clics."
+            }
+        },
+        "useCases": {
+            "title": "Adaptado a tu profesión",
+            "psychologists": {
+                "title": "Psicólogos / Terapeutas",
+                "features": "Reserva semanal fija, sesiones recurrentes."
+            },
+            "trainers": {
+                "title": "Entrenadores Personales",
+                "features": "Servicios presenciales/online, packs."
+            },
+            "teachers": {
+                "title": "Profesores / Academias",
+                "features": "Clases individuales, disponibilidad por materia."
+            },
+            "consultants": {
+                "title": "Consultores",
+                "features": "Reuniones variables, facturación automática."
+            }
+        },
+        "pricing": {
+            "title": "Planes simples y transparentes",
+            "cta": "Empieza ahora",
+            "plans": {
+                "free": {
+                    "title": "Free",
+                    "price": "0€",
+                    "features": [
+                        "1 Servicio",
+                        "Agenda básica",
+                        "Reservas ilimitadas",
+                        "Página pública"
+                    ]
+                },
+                "pro": {
+                    "title": "Pro",
+                    "price": "15€",
+                    "features": [
+                        "Servicios ilimitados",
+                        "Google Calendar",
+                        "Pagos online",
+                        "Recordatorios"
+                    ]
+                },
+                "business": {
+                    "title": "Business",
+                    "price": "49€",
+                    "features": [
+                        "Multicentro / Equipo",
+                        "Roles y permisos",
+                        "Informes avanzados",
+                        "API"
+                    ]
+                }
+            }
+        },
+        "testimonials": {
+            "title": "Lo que dicen nuestros usuarios",
+            "t1": {
+                "quote": "Reduje un 60% los mensajes para agendar sesiones.",
+                "author": "Laura M., Psicóloga"
+            },
+            "t2": {
+                "quote": "Mis clientes reservan sin tener que hablar conmigo. Libertad total.",
+                "author": "Carlos R., Coach"
+            },
+            "t3": {
+                "quote": "Por fin tengo control real sobre mi agenda. Pago justo antes de la clase.",
+                "author": "Academia Lingua"
+            }
+        },
+        "faq": {
+            "title": "Preguntas Frecuentes",
+            "q1": {
+                "q": "¿Necesito tarjeta para el trial?",
+                "a": "No, puedes empezar totalmente gratis."
+            },
+            "q2": {
+                "q": "¿Puedo cancelar en cualquier momento?",
+                "a": "Sí, no hay permanencia."
+            },
+            "q3": {
+                "q": "¿Puedo aceptar pagos online?",
+                "a": "Sí, con el plan Pro puedes conectar Stripe."
+            },
+            "q4": {
+                "q": "¿Qué pasa si dos clientes reservan a la vez?",
+                "a": "El sistema bloquea el horario en tiempo real para evitar duplicados."
+            }
+        },
+        "about": {
+            "title": "Sobre Nosotros",
+            "desc": "Somos un equipo que conoce los problemas reales de gestionar citas. Creamos esta plataforma para profesionales que quieren automatizar su agenda."
+        },
+        "footer": {
+            "legal": "Legal",
+            "privacy": "Privacidad",
+            "terms": "Términos",
+            "cookies": "Cookies",
+            "contact": "Contacto"
+        }
     },
     "Common": {
         "dashboard": "Panel de Control",
