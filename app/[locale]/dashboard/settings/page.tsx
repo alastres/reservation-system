@@ -43,6 +43,9 @@ export default async function SettingsPage() {
             stripeConnectAccountId: true,
             stripeConnectStatus: true,
             stripeCustomerId: true,
+            phone: true,
+            address: true,
+            notificationPreferences: true,
         },
     });
 
