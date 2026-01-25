@@ -18,7 +18,7 @@ const PublicProfilePage = async ({ params }: PublicProfileProps) => {
     if (!user) return notFound();
 
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center pb-16 relative overflow-hidden text-white">
+        <div className="min-h-screen bg-slate-950 flex flex-col pb-16 relative overflow-hidden text-white">
             {/* Decorative background blobs - vivid colors for dark mode */}
             <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-blob"></div>
             <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-blob animation-delay-2000"></div>

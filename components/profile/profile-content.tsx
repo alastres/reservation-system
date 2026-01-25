@@ -120,13 +120,13 @@ export function ProfileContent({ user }: ProfileContentProps) {
             <div className="w-full flex justify-center relative isolate">
                 {/* Gradient background with dominant color */}
                 <div
-                    className="absolute top-0 left-0 right-0 h-[350px] -z-10"
+                    className="absolute top-0 left-0 right-0 h-[250px] -z-10"
                     style={{
                         background: `linear-gradient(to bottom, ${dominantColor.replace('rgb', 'rgba').replace(')', ', 0.6)')} 0%, ${dominantColor.replace('rgb', 'rgba').replace(')', ', 0.3)')} 50%, transparent 100%)`
                     }}
                 ></div>
 
-                <div className="relative w-full max-w-5xl h-[350px] bg-slate-900/50 overflow-hidden rounded-b-xl">
+                <div className="relative w-full max-w-5xl h-[250px] bg-slate-900/50 overflow-hidden rounded-b-xl">
                     {(user as any).coverImage ? (
                         <img
                             src={(user as any).coverImage}
@@ -144,17 +144,17 @@ export function ProfileContent({ user }: ProfileContentProps) {
             </div>
 
             {/* Profile Section - Facebook style: overlapping avatar */}
-            <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative max-w-5xl w-full mx-auto px-4 sm:px-6">
                 <div className="relative -mt-16 sm:-mt-20 mb-6">
-                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                    <div className="flex flex-row items-end gap-6">
                         {/* Avatar with white ring like Facebook - positioned to the left */}
-                        <Avatar className="h-36 w-36 sm:h-40 sm:w-40 ring-8 ring-slate-950 shadow-2xl shadow-black/50 bg-slate-800 sm:ml-0">
+                        <Avatar className="h-32 w-32 sm:h-40 sm:w-40 ring-8 ring-slate-950 shadow-2xl shadow-black/50 bg-slate-800">
                             <AvatarImage src={user.image || ""} className="object-cover" />
                             <AvatarFallback className="text-5xl font-bold bg-slate-800 text-indigo-400">{user.name?.[0]}</AvatarFallback>
                         </Avatar>
 
                         {/* Name and username section - positioned lower */}
-                        <div className="flex-1 text-center sm:text-left sm:mt-auto sm:pb-2">
+                        <div className="pb-2">
                             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-1 drop-shadow-lg">
                                 {user.name}
                             </h1>
@@ -167,13 +167,15 @@ export function ProfileContent({ user }: ProfileContentProps) {
 
                 {/* Bio */}
                 {user.bio && (
-                    <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        <h2 className="text-xs font-semibold tracking-widest uppercase text-slate-500 mb-3">
-                            {t("aboutMe")}
-                        </h2>
-                        <p className="max-w-2xl text-slate-300 leading-relaxed bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-xl">
-                            {user.bio}
-                        </p>
+                    <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 flex flex-col items-center">
+                        <div className="w-full max-w-2xl text-left">
+                            <h2 className="text-xs font-semibold tracking-widest uppercase text-slate-500 mb-3 ml-1">
+                                {t("aboutMe")}
+                            </h2>
+                            <p className="text-slate-300 leading-relaxed bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-white/10 shadow-xl">
+                                {user.bio}
+                            </p>
+                        </div>
                     </div>
                 )}
             </div>
@@ -198,7 +200,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
             {/* Services Section */}
             <div className="relative max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 mt-12">
                 <div className="mb-8 text-center">
-                    <h2 className="text-xs font-semibold tracking-widest uppercase text-slate-500 mb-2">
+                    <h2 className="text-2xl font-bold tracking-tight text-slate-100 mb-2">
                         {t("services")}
                     </h2>
                     <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-indigo-500 to-transparent mx-auto"></div>
@@ -232,17 +234,28 @@ export function ProfileContent({ user }: ProfileContentProps) {
                                     {/* Hover glow effect */}
                                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 via-purple-500/0 to-blue-500/0 group-hover:from-indigo-500/5 group-hover:via-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500 pointer-events-none" />
 
-                                    <CardHeader className="relative pb-3">
-                                        {/* Service icon */}
-                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                            <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
+                                    {/* Free Tag - Ribon Style */}
+                                    {service.price === 0 && (
+                                        <div className="absolute -top-[2px] -right-[2px] w-24 h-24 overflow-hidden z-20 pointer-events-none">
+                                            <div className="absolute top-[18px] -right-[32px] w-[120px] bg-gradient-to-r from-emerald-500 to-green-500 text-white text-[10px] font-bold tracking-wider uppercase text-center py-1 transform rotate-45 shadow-lg shadow-emerald-900/50 border-y border-white/20">
+                                                {t("free") || "FREE"}
+                                            </div>
                                         </div>
+                                    )}
 
-                                        <CardTitle className="text-2xl font-bold text-slate-100 group-hover:text-indigo-300 transition-colors mb-2">
-                                            {service.title}
-                                        </CardTitle>
+                                    <CardHeader className="relative pb-3">
+                                        <div className="flex items-center gap-4 mb-2">
+                                            {/* Service icon */}
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                                                <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+
+                                            <CardTitle className="text-xl font-bold text-slate-100 group-hover:text-indigo-300 transition-colors">
+                                                {service.title}
+                                            </CardTitle>
+                                        </div>
 
                                         <CardDescription className="flex items-center gap-3 text-slate-400 font-medium">
                                             <span className="flex items-center gap-1.5">
