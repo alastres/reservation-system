@@ -30,8 +30,8 @@ export const LandingNavbar = () => {
                 <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
                     <a href="#features" className="hover:text-primary transition-colors">{t('hero.ctaSecondary') === "Ver demo" ? "Características" : "Features"}</a>
                     <a href="#pricing" className="hover:text-primary transition-colors">{t('hero.ctaSecondary') === "Ver demo" ? "Precios" : "Pricing"}</a>
-                    <a href="#about" className="hover:text-primary transition-colors">{t('hero.ctaSecondary') === "Ver demo" ? "Sobre Nosotros" : "About Us"}</a>
                     <a href="#faq" className="hover:text-primary transition-colors">FAQ</a>
+                    <a href="#about" className="hover:text-primary transition-colors">{t('hero.ctaSecondary') === "Ver demo" ? "Sobre Nosotros" : "About Us"}</a>
                 </div>
 
                 <div className="flex items-center gap-4">
