@@ -479,7 +479,8 @@
         "noServicesDesc": "Este usuario aún no ha publicado servicios. Por favor revise más tarde.",
         "bookNow": "Reservar",
         "available": "Disponible",
-        "poweredBy": "Impulsado por"
+        "poweredBy": "Impulsado por",
+        "free": "Gratis"
     },
     "Booking": {
         "backToProfile": "Volver al Perfil",

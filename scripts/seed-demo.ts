@@ -1,14 +1,19 @@
-"use server";
 
-import { prisma } from "@/lib/prisma";
+import { PrismaClient, Role, SubscriptionPlan, SubscriptionStatus, LocationType } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { Role, SubscriptionPlan, SubscriptionStatus, LocationType } from "@prisma/client";
+import * as dotenv from "dotenv";
+
+dotenv.config();
+
+const prisma = new PrismaClient();
 
 const DEMO_EMAIL = "demo@scheduler.com";
 const DEMO_PASSWORD = "demo1234";
 
-export const resetDemoAccount = async () => {
+const resetDemoAccount = async () => {
     try {
+        console.log("Starting demo account reset...");
+
         // 1. Check if demo user exists
         const existingUser = await prisma.user.findUnique({
             where: { email: DEMO_EMAIL }
@@ -19,10 +24,6 @@ export const resetDemoAccount = async () => {
 
         if (existingUser) {
             // Delete all data associated with demo user
-            // Delete bookings where user is the provider
-            // We need to find services first
-
-            // Transaction to clean up
             await prisma.$transaction(async (tx) => {
                 // Delete all bookings for this user's services
                 await tx.booking.deleteMany({
@@ -39,7 +40,7 @@ export const resetDemoAccount = async () => {
                     where: { userId: existingUser.id }
                 });
 
-                // Clean up other related data to ensure fresh state
+                // Clean up other related data
                 await tx.availabilityRule.deleteMany({
                     where: { userId: existingUser.id }
                 });
@@ -70,28 +71,24 @@ export const resetDemoAccount = async () => {
                         subscriptionStatus: SubscriptionStatus.ACTIVE,
                         timeZone: "Europe/Madrid",
                         address: "Gran Vía 1, Madrid, España",
-                        phone: "+34614567890",
                         notificationPreferences: { email: false },
+                        phone: "+34614567890",
                     }
                 });
             });
 
             console.log("Demo user cleaned.");
         } else {
-            // Create new if doesn't exist (handled below in recreation)
             console.log("Demo user not found, will create.");
         }
 
         // 3. Re-create Demo Data (User & Services)
-        // If user exists, we just update/upsert. If not, create.
-        // Actually simpler to just upsert the user and then create services.
-
         const user = await prisma.user.upsert({
             where: { email: DEMO_EMAIL },
             update: {
                 name: "Demo User",
                 username: "demo_user",
-                password: hashedPassword, // Ensure password is correct
+                password: hashedPassword,
                 emailVerified: new Date(),
                 role: Role.OWNER,
                 image: "https://cdn.pixabay.com/photo/2024/06/22/23/01/boy-8847075_1280.jpg",
@@ -101,6 +98,7 @@ export const resetDemoAccount = async () => {
                 timeZone: "Europe/Madrid",
                 address: "Gran Vía 1, Madrid, España",
                 notificationPreferences: { email: false },
+                phone: "+34614567890",
             },
             create: {
                 email: DEMO_EMAIL,
@@ -116,10 +114,15 @@ export const resetDemoAccount = async () => {
                 timeZone: "Europe/Madrid",
                 address: "Gran Vía 1, Madrid, España",
                 notificationPreferences: { email: false },
+                phone: "+34614567890",
+
             }
         });
 
-        // Create Default Services
+        // Create Default Services (only if they don't exist, but we deleted them above so we should create them)
+        // Check if services exist specifically for this user to be safe (though we deleted them)
+        // Or just createMany.
+
         await prisma.service.createMany({
             data: [
                 {
@@ -147,7 +150,7 @@ export const resetDemoAccount = async () => {
             ]
         });
 
-        // Create Default Availability (Mon-Fri, 9-17)
+        // Create Default Availability
         await prisma.availabilityRule.createMany({
             data: [1, 2, 3, 4, 5].map((day) => ({
                 userId: user.id,
@@ -158,10 +161,12 @@ export const resetDemoAccount = async () => {
         });
 
         console.log("Demo account reset successfully.");
-        return { success: true };
 
     } catch (error) {
         console.error("Error resetting demo account:", error);
-        return { error: "Failed to reset demo account" };
+    } finally {
+        await prisma.$disconnect();
     }
 };
+
+resetDemoAccount();
