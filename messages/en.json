@@ -57,12 +57,157 @@
         "paymentConfirmed": "Payment confirmed and booking created!"
     },
     "Landing": {
-        "heroTitle": "Booking Management Simplified",
-        "heroSubtitle": "The complete solution to manage your appointments, clients, and payments in one place.",
-        "getStarted": "Get Started",
-        "signIn": "Sign In",
-        "features": "Features",
-        "pricing": "Pricing"
+        "hero": {
+            "badge": "The #1 platform for professionals",
+            "title": "Your automated online agenda.",
+            "titleHighlight": "Let your clients book while you work.",
+            "subtitle": "Manage bookings, availability, payments, and reminders from a single platform. No calls, no WhatsApp, no confusion.",
+            "ctaPrimary": "Create free account",
+            "ctaSecondary": "Watch demo",
+            "signIn": "Sign In",
+            "getStarted": "Get Started",
+            "users": "Used by individual professionals, clinics, and centers."
+        },
+        "benefits": {
+            "title": "Everything you need to grow",
+            "items": {
+                "automation": {
+                    "title": "Automate your bookings",
+                    "desc": "Goodbye to endless scheduling chats."
+                },
+                "availability": {
+                    "title": "Avoid overlaps",
+                    "desc": "Smart availability that manages itself."
+                },
+                "reminders": {
+                    "title": "Automatic reminders",
+                    "desc": "Reduce cancellations with 24h reminder emails."
+                },
+                "payments": {
+                    "title": "Secure payments",
+                    "desc": "Charge before appointment and secure your time."
+                },
+                "control": {
+                    "title": "Real-time control",
+                    "desc": "Manage your business from any device."
+                }
+            }
+        },
+        "howItWorks": {
+            "title": "How it works",
+            "step1": {
+                "title": "Set up your availability",
+                "desc": "Define hours, breaks, and holidays."
+            },
+            "step2": {
+                "title": "Share your link",
+                "desc": "Personalized link or web integration."
+            },
+            "step3": {
+                "title": "Receive bookings",
+                "desc": "Your clients book and pay in 3 clicks."
+            }
+        },
+        "useCases": {
+            "title": "Tailored to your profession",
+            "psychologists": {
+                "title": "Psychologists / Therapists",
+                "features": "Fixed weekly slots, recurring sessions."
+            },
+            "trainers": {
+                "title": "Personal Trainers",
+                "features": "In-person/online services, packages."
+            },
+            "teachers": {
+                "title": "Teachers / Academies",
+                "features": "1-on-1 classes, subject-based availability."
+            },
+            "consultants": {
+                "title": "Consultants",
+                "features": "Variable meetings, automatic invoicing."
+            }
+        },
+        "pricing": {
+            "title": "Simple and transparent plans",
+            "cta": "Start now",
+            "plans": {
+                "free": {
+                    "title": "Free",
+                    "price": "$0",
+                    "features": [
+                        "1 Service",
+                        "Basic Agenda",
+                        "Unlimited Bookings",
+                        "Public Page"
+                    ]
+                },
+                "pro": {
+                    "title": "Pro",
+                    "price": "$15",
+                    "features": [
+                        "Unlimited Services",
+                        "Google Calendar",
+                        "Online Payments",
+                        "Reminders"
+                    ]
+                },
+                "business": {
+                    "title": "Business",
+                    "price": "$49",
+                    "features": [
+                        "Multi-center / Team",
+                        "Roles & Permissions",
+                        "Advanced Reports",
+                        "API"
+                    ]
+                }
+            }
+        },
+        "testimonials": {
+            "title": "What our users say",
+            "t1": {
+                "quote": "I reduced scheduling messages by 60%.",
+                "author": "Laura M., Psychologist"
+            },
+            "t2": {
+                "quote": "My clients book without talking to me. Total freedom.",
+                "author": "Carlos R., Coach"
+            },
+            "t3": {
+                "quote": "Finally I have real control over my agenda. Payment right before class.",
+                "author": "Lingua Academy"
+            }
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "q1": {
+                "q": "Do I need a card for the trial?",
+                "a": "No, you can start strictly for free."
+            },
+            "q2": {
+                "q": "Can I cancel anytime?",
+                "a": "Yes, there is no lock-in contract."
+            },
+            "q3": {
+                "q": "Can I accept online payments?",
+                "a": "Yes, with the Pro plan you can connect Stripe."
+            },
+            "q4": {
+                "q": "What happens if two clients book at once?",
+                "a": "The system locks the slot in real-time to prevent duplicates."
+            }
+        },
+        "about": {
+            "title": "About Us",
+            "desc": "We are a team that understands the real struggles of scheduling. We created this platform for professionals who want to automate their agenda."
+        },
+        "footer": {
+            "legal": "Legal",
+            "privacy": "Privacy",
+            "terms": "Terms",
+            "cookies": "Cookies",
+            "contact": "Contact"
+        }
     },
     "Common": {
         "dashboard": "Dashboard",

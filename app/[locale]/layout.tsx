@@ -5,9 +5,9 @@ import { Providers } from "@/components/providers";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 // Force rebuild for translations
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, getTranslations } from 'next-intl/server';
-import { notFound } from 'next/navigation';
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 
 const fontSans = Plus_Jakarta_Sans({
     subsets: ["latin"],
