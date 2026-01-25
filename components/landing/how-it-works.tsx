@@ -27,7 +27,7 @@ export const HowItWorks = () => {
             <div className="container mx-auto px-6">
                 <div className="text-center mb-20">
                     <span className="text-primary font-semibold tracking-wider uppercase text-sm mb-4 block">
-                        Simple process
+                        {t('subtitle')}
                     </span>
                     <h2 className="text-3xl md:text-5xl font-bold">{t('title')}</h2>
                 </div>

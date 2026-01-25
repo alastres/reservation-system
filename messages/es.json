@@ -95,6 +95,7 @@
         },
         "howItWorks": {
             "title": "Cómo funciona",
+            "subtitle": "Proceso Simple",
             "step1": {
                 "title": "Configura tu disponibilidad",
                 "desc": "Define horarios, descansos y vacaciones."
@@ -130,6 +131,7 @@
         "pricing": {
             "title": "Planes simples y transparentes",
             "cta": "Empieza ahora",
+            "badge": "Más Popular",
             "plans": {
                 "free": {
                     "title": "Free",
@@ -206,7 +208,8 @@
             "privacy": "Privacidad",
             "terms": "Términos",
             "cookies": "Cookies",
-            "contact": "Contacto"
+            "contact": "Contacto",
+            "copyright": "Todos los derechos reservados."
         }
     },
     "Common": {

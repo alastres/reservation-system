@@ -95,6 +95,7 @@
         },
         "howItWorks": {
             "title": "How it works",
+            "subtitle": "Simple Process",
             "step1": {
                 "title": "Set up your availability",
                 "desc": "Define hours, breaks, and holidays."
@@ -130,6 +131,7 @@
         "pricing": {
             "title": "Simple and transparent plans",
             "cta": "Start now",
+            "badge": "Most Popular",
             "plans": {
                 "free": {
                     "title": "Free",
@@ -206,7 +208,8 @@
             "privacy": "Privacy",
             "terms": "Terms",
             "cookies": "Cookies",
-            "contact": "Contact"
+            "contact": "Contact",
+            "copyright": "All rights reserved."
         }
     },
     "Common": {
