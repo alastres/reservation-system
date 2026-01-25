@@ -30,6 +30,7 @@ export const LandingNavbar = () => {
                 <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
                     <a href="#features" className="hover:text-primary transition-colors">{t('hero.ctaSecondary') === "Ver demo" ? "Características" : "Features"}</a>
                     <a href="#pricing" className="hover:text-primary transition-colors">{t('hero.ctaSecondary') === "Ver demo" ? "Precios" : "Pricing"}</a>
+                    <a href="#about" className="hover:text-primary transition-colors">{t('hero.ctaSecondary') === "Ver demo" ? "Sobre Nosotros" : "About Us"}</a>
                     <a href="#faq" className="hover:text-primary transition-colors">FAQ</a>
                 </div>
 
@@ -90,6 +91,7 @@ export const LandingNavbar = () => {
                                     <div className="flex flex-col gap-4 text-lg font-medium">
                                         <a href="#features" className="hover:text-primary transition-colors">Features</a>
                                         <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
+                                        <a href="#about" className="hover:text-primary transition-colors">About Us</a>
                                         <a href="#faq" className="hover:text-primary transition-colors">FAQ</a>
                                     </div>
 

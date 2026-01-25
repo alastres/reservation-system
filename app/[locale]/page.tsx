@@ -10,6 +10,8 @@ import { Testimonials } from "@/components/landing/testimonials";
 import { FAQSection } from "@/components/landing/faq-section";
 import { Footer } from "@/components/landing/footer";
 
+import { AboutSection } from "@/components/landing/about-section";
+
 export default function Home() {
     return (
         <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20 font-sans">
@@ -23,6 +25,7 @@ export default function Home() {
                 <PricingSection />
                 <Testimonials />
                 <FAQSection />
+                <AboutSection />
             </main>
 
             <Footer />
