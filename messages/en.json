@@ -479,7 +479,8 @@
         "noServicesDesc": "This user hasn't listed any services yet. Please check back later.",
         "bookNow": "Book Now",
         "available": "Available",
-        "poweredBy": "Powered by"
+        "poweredBy": "Powered by",
+        "free": "Free"
     },
     "Booking": {
         "backToProfile": "Back to Profile",

@@ -163,125 +163,99 @@ export const ServicesClient = ({ services, subscriptionPlan, role, username }: S
                 </MotionDiv>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <AnimatePresence mode="popLayout" initial={false}>
-                        {localServices.length === 0 ? (
-                            <MotionDiv
-                                key="no-services"
-                                variants={fadeIn}
-                                initial="initial"
-                                animate="animate"
-                                exit="exit"
-                                className="col-span-full"
-                            >
-                                <Card className="col-span-full border-dashed border-white/10 bg-white/5 p-8">
-                                    <div className="flex flex-col items-center justify-center text-center space-y-4">
-                                        <div className="p-4 rounded-full bg-primary/10 text-primary">
-                                            <Plus className="w-8 h-8" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <h3 className="font-semibold text-lg">{t('noServicesTitle')}</h3>
-                                            <p className="text-muted-foreground max-w-sm">
-                                                {t('noServicesDesc')}
-                                            </p>
-                                        </div>
-                                        <Button onClick={handleCreate} className="bg-primary">
-                                            {t('createService')}
-                                        </Button>
-                                    </div>
-                                </Card>
-                            </MotionDiv>
-                        ) : filteredServices.length === 0 ? (
-                            <MotionDiv
-                                key="no-results"
-                                variants={fadeIn}
-                                initial="initial"
-                                animate="animate"
-                                exit="exit"
-                                className="col-span-full"
-                            >
-                                <div className="flex flex-col items-center justify-center text-center space-y-4 py-12">
-                                    <div className="p-4 rounded-full bg-white/5 text-muted-foreground">
-                                        <Search className="w-8 h-8" />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h3 className="font-semibold text-lg">{t('noResultsTitle')}</h3>
-                                        <p className="text-muted-foreground">
-                                            {t('noResultsDesc', { query: searchQuery })}
-                                        </p>
-                                    </div>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => setSearchQuery("")}
-                                        className="border-white/10 hover:bg-white/5"
-                                    >
-                                        {t('clearSearch')}
-                                    </Button>
+                    {localServices.length === 0 ? (
+                        <Card className="col-span-full border-dashed border-white/10 bg-white/5 p-8">
+                            <div className="flex flex-col items-center justify-center text-center space-y-4">
+                                <div className="p-4 rounded-full bg-primary/10 text-primary">
+                                    <Plus className="w-8 h-8" />
                                 </div>
-                            </MotionDiv>
-                        ) : (
-                            filteredServices.map((service: any) => (
-                                <MotionDiv
-                                    key={service.id}
-                                    layout
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    transition={{ duration: 0.2 }}
+                                <div className="space-y-1">
+                                    <h3 className="font-semibold text-lg">{t('noServicesTitle')}</h3>
+                                    <p className="text-muted-foreground max-w-sm">
+                                        {t('noServicesDesc')}
+                                    </p>
+                                </div>
+                                <Button onClick={handleCreate} className="bg-primary">
+                                    {t('createService')}
+                                </Button>
+                            </div>
+                        </Card>
+                    ) : filteredServices.length === 0 ? (
+                        <div className="col-span-full">
+                            <div className="flex flex-col items-center justify-center text-center space-y-4 py-12">
+                                <div className="p-4 rounded-full bg-white/5 text-muted-foreground">
+                                    <Search className="w-8 h-8" />
+                                </div>
+                                <div className="space-y-1">
+                                    <h3 className="font-semibold text-lg">{t('noResultsTitle')}</h3>
+                                    <p className="text-muted-foreground">
+                                        {t('noResultsDesc', { query: searchQuery })}
+                                    </p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setSearchQuery("")}
+                                    className="border-white/10 hover:bg-white/5"
                                 >
-                                    <Card
-                                        onClick={() => {
-                                            if (service.user?.username) {
-                                                window.open(`/${service.user.username}/${service.url}`, '_blank');
-                                            } else {
-                                                console.warn("Service owner has no username set", service);
-                                            }
+                                    {t('clearSearch')}
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        filteredServices.map((service: any) => (
+                            <Card
+                                key={service.id}
+                                onClick={() => {
+                                    if (service.user?.username) {
+                                        window.open(`/${service.user.username}/${service.url}`, '_blank');
+                                    } else {
+                                        console.warn("Service owner has no username set", service);
+                                    }
+                                }}
+                                className="group relative overflow-hidden transition-all hover:shadow-xl hover:bg-white/5 border-white/10 bg-card/40 backdrop-blur-md h-full cursor-pointer"
+                            >
+                                <CardHeader>
+                                    <div className="flex justify-between items-start">
+                                        <CardTitle className="text-xl font-semibold mb-1 group-hover:text-primary transition-colors">{service.title}</CardTitle>
+                                        <ServiceStatusToggle
+                                            id={service.id}
+                                            isActive={service.isActive}
+                                            onToggle={(status) => handleStatusChange(service.id, status)}
+                                        />
+                                    </div>
+                                    <CardDescription className="flex items-center gap-2">
+                                        <span className="font-medium text-foreground">${service.price}</span>
+                                        <span>•</span>
+                                        <span>{service.duration} {t('minutes')}</span>
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
+                                        {service.description || t('noDescription')}
+                                    </p>
+                                    <div className="mt-4 flex items-center text-xs text-muted-foreground bg-black/20 p-2 rounded-md font-mono border border-white/5">
+                                        /{service.url}
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="flex justify-end gap-2 border-t border-white/5 bg-white/5 p-4">
+                                    <DuplicateServiceButton id={service.id} onDuplicate={handleDuplicate} />
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleEdit(service);
                                         }}
-                                        className="group relative overflow-hidden transition-all hover:shadow-xl hover:bg-white/5 border-white/10 bg-card/40 backdrop-blur-md h-full cursor-pointer"
+                                        className="h-8 hover:bg-white/10 hover:text-primary"
                                     >
-                                        <CardHeader>
-                                            <div className="flex justify-between items-start">
-                                                <CardTitle className="text-xl font-semibold mb-1 group-hover:text-primary transition-colors">{service.title}</CardTitle>
-                                                <ServiceStatusToggle
-                                                    id={service.id}
-                                                    isActive={service.isActive}
-                                                    onToggle={(status) => handleStatusChange(service.id, status)}
-                                                />
-                                            </div>
-                                            <CardDescription className="flex items-center gap-2">
-                                                <span className="font-medium text-foreground">${service.price}</span>
-                                                <span>•</span>
-                                                <span>{service.duration} {t('minutes')}</span>
-                                            </CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
-                                                {service.description || t('noDescription')}
-                                            </p>
-                                            <div className="mt-4 flex items-center text-xs text-muted-foreground bg-black/20 p-2 rounded-md font-mono border border-white/5">
-                                                /{service.url}
-                                            </div>
-                                        </CardContent>
-                                        <CardFooter className="flex justify-end gap-2 border-t border-white/5 bg-white/5 p-4">
-                                            <DuplicateServiceButton id={service.id} onDuplicate={handleDuplicate} />
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleEdit(service);
-                                                }}
-                                                className="h-8 hover:bg-white/10 hover:text-primary"
-                                            >
-                                                <Edit2 className="w-4 h-4 mr-2" />
-                                                {t('edit')}
-                                            </Button>
-                                            <DeleteServiceButton id={service.id} onDelete={handleDelete} />
-                                        </CardFooter>
-                                    </Card>
-                                </MotionDiv>
-                            ))
-                        )}
-                    </AnimatePresence>
+                                        <Edit2 className="w-4 h-4 mr-2" />
+                                        {t('edit')}
+                                    </Button>
+                                    <DeleteServiceButton id={service.id} onDelete={handleDelete} />
+                                </CardFooter>
+                            </Card>
+                        ))
+                    )}
                 </div>
             </MotionDiv>
         </>
