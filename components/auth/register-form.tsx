@@ -15,6 +15,9 @@ import {
 } from "@/components/ui/form";
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { TermsModal, PrivacyModal } from "@/components/legal/legal-modals";
+import { Link } from "@/i18n/routing";
 import { useState, useTransition, useEffect } from "react";
 import { register } from "@/actions/register";
 import { FormError } from "@/components/form-error";
@@ -33,6 +36,7 @@ export const RegisterForm = () => {
             email: "",
             password: "",
             name: "",
+            termsAccepted: false,
             timeZone: "UTC", // Default fallback
         },
     });
@@ -139,6 +143,39 @@ export const RegisterForm = () => {
                             )}
                         />
                     </div>
+
+                    <FormField
+                        control={form.control}
+                        name="termsAccepted"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-2">
+                                <FormControl>
+                                    <Checkbox
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                        className="mt-0.5"
+                                    />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                    <FormLabel className="font-normal text-muted-foreground block text-sm">
+                                        {t('acceptTerms')}{" "}
+                                        <TermsModal>
+                                            <span className="text-primary hover:underline cursor-pointer">
+                                                {t('termsLink')}
+                                            </span>
+                                        </TermsModal>
+                                        {" "}{t('and')}{" "}
+                                        <PrivacyModal>
+                                            <span className="text-primary hover:underline cursor-pointer">
+                                                {t('privacyLink')}
+                                            </span>
+                                        </PrivacyModal>
+                                    </FormLabel>
+                                    <FormMessage />
+                                </div>
+                            </FormItem>
+                        )}
+                    />
                     {/* Honeypot Field - Hidden from humans */}
                     <div className="absolute opacity-0 -z-50 select-none pointer-events-none" aria-hidden="true">
                         <FormField

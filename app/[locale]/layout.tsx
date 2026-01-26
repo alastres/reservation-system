@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { CookieConsent } from "@/components/ui/cookie-consent";
 
 const fontSans = Plus_Jakarta_Sans({
     subsets: ["latin"],
@@ -53,6 +54,7 @@ export default async function LocaleLayout({
                 <NextIntlClientProvider messages={messages}>
                     <Providers>
                         {children}
+                        <CookieConsent />
                         <Toaster />
                     </Providers>
                 </NextIntlClientProvider>
