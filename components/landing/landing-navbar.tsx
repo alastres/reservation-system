@@ -53,6 +53,9 @@ export const LandingNavbar = () => {
                                 <Button variant="default" size="sm" asChild>
                                     <Link href="/dashboard">{common('dashboard')}</Link>
                                 </Button>
+                                <LogoutButton variant="ghost" size="sm">
+                                    <LogOut className="h-4 w-4" />
+                                </LogoutButton>
                                 <ThemeToggle />
                             </div>
                         ) : (

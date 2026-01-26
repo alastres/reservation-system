@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { TermsModal, PrivacyModal, CookiesModal } from "@/components/legal/legal-modals";
 
 export const Footer = () => {
     const t = useTranslations("Landing");
@@ -36,9 +37,21 @@ export const Footer = () => {
                     <div>
                         <h4 className="font-bold mb-4">{t('footer.legal')}</h4>
                         <ul className="space-y-2 text-muted-foreground text-sm">
-                            <li><Link href="/privacy" className="hover:text-primary transition-colors">{t('footer.privacy')}</Link></li>
-                            <li><Link href="/terms" className="hover:text-primary transition-colors">{t('footer.terms')}</Link></li>
-                            <li><Link href="/cookies" className="hover:text-primary transition-colors">{t('footer.cookies')}</Link></li>
+                            <li>
+                                <PrivacyModal>
+                                    <span className="hover:text-primary transition-colors cursor-pointer">{t('footer.privacy')}</span>
+                                </PrivacyModal>
+                            </li>
+                            <li>
+                                <TermsModal>
+                                    <span className="hover:text-primary transition-colors cursor-pointer">{t('footer.terms')}</span>
+                                </TermsModal>
+                            </li>
+                            <li>
+                                <CookiesModal>
+                                    <span className="hover:text-primary transition-colors cursor-pointer">{t('footer.cookies')}</span>
+                                </CookiesModal>
+                            </li>
                         </ul>
                     </div>
                 </div>
