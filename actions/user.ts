@@ -63,10 +63,6 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
     }
 
     try {
-        console.log("Updating user in DB:", session.user.id, {
-            name, username, timeZone: timeZone || "UTC", image
-        });
-
         const updatedUser = await prisma.user.update({
             where: { id: session.user.id },
             data: {
@@ -83,8 +79,6 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
                 maxConcurrentClients: effectiveMaxConcurrentClients || undefined,
             },
         });
-
-        console.log("User updated successfully:", updatedUser);
 
         revalidatePath("/dashboard/settings");
         revalidatePath("/dashboard");

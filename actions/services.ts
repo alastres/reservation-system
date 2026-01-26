@@ -64,7 +64,7 @@ export const createService = async (values: z.infer<typeof ServiceSchema>) => {
         revalidatePath("/dashboard/services");
         return { success: tSuccess("created", { name: service.title }), service };
     } catch (e: any) {
-        console.log(e);
+        console.error("Create Service Error:", e);
         return { error: t("somethingWentWrong") };
     }
 }
@@ -178,8 +178,8 @@ export const duplicateService = async (id: string) => {
         // revalidateTag(`services-${session.user.id}`);
         revalidatePath("/dashboard/services");
         return { success: tSuccess("duplicated"), service: newService };
-    } catch (e) {
-        console.log(e)
+    } catch (e: any) {
+        console.error("Duplicate Service Error:", e);
         return { error: t("somethingWentWrong") };
     }
 }
