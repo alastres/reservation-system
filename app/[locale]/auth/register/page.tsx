@@ -7,7 +7,7 @@ const RegisterPage = () => {
             initial="initial"
             animate="animate"
             variants={fadeIn}
-            className="flex h-full items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 to-black"
+            className="flex h-full items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-100 via-background to-background dark:from-slate-900 dark:to-black"
         >
             <RegisterForm />
         </MotionDiv>

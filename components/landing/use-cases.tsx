@@ -26,7 +26,7 @@ export const UseCases = () => {
     ];
 
     return (
-        <section className="py-24 bg-gradient-to-b from-black/0 via-black/20 to-black/0">
+        <section className="py-24 bg-gradient-to-b from-transparent via-muted/50 to-transparent dark:via-black/20">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold">{t('title')}</h2>
@@ -34,7 +34,7 @@ export const UseCases = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {cases.map((item) => (
-                        <div key={item.key} className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all hover:-translate-y-1">
+                        <div key={item.key} className="p-6 rounded-2xl bg-card border border-border/50 hover:bg-muted/50 transition-all hover:-translate-y-1 shadow-sm dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10">
                             <div className="mb-4 bg-background/50 w-14 h-14 rounded-xl flex items-center justify-center border border-white/10">
                                 {item.icon}
                             </div>

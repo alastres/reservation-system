@@ -7,7 +7,7 @@ export const Footer = () => {
     const t = useTranslations("Landing");
 
     return (
-        <footer className="py-12 border-t border-white/10 bg-black/40">
+        <footer className="py-12 border-t border-border/40 bg-muted/30 dark:bg-black/40 dark:border-white/10">
             <div className="container mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     <div className="col-span-1 md:col-span-2">
@@ -15,7 +15,7 @@ export const Footer = () => {
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold">
                                 S
                             </div>
-                            <span className="text-xl font-bold">Scheduler</span>
+                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400">Scheduler</span>
                         </div>
                         <p className="text-muted-foreground max-w-sm">
                             {t('about.desc')}
@@ -43,7 +43,7 @@ export const Footer = () => {
                     </div>
                 </div>
 
-                <div className="pt-8 border-t border-white/5 text-center text-sm text-muted-foreground">
+                <div className="pt-8 border-t border-border/40 dark:border-white/5 text-center text-sm text-muted-foreground">
                     &copy; {new Date().getFullYear()} Scheduler. {t('footer.copyright')}
                 </div>
             </div>
