@@ -64,6 +64,13 @@ async function getDashboardStats(userId: string) {
         }
     });
 
+    const activeServices = await prisma.service.count({
+        where: {
+            userId: userId,
+            isActive: true,
+        },
+    });
+
     const revenue = bookings.reduce((acc: number, booking: any) => acc + (booking.amountPaid || 0), 0);
 
     // Chart Data: Revenue over last 30 days
@@ -113,6 +120,7 @@ async function getDashboardStats(userId: string) {
         recentBookings,
         revenueChartData,
         bookingsChartData,
+        activeServices,
     };
 }
 
@@ -197,7 +205,7 @@ export default async function DashboardPage() {
                             <Activity className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">--</div>
+                            <div className="text-2xl font-bold">{sections.activeServices}</div>
                             <p className="text-xs text-muted-foreground border-l-2 border-indigo-500 pl-2 mt-1">
                                 <span className="text-indigo-500 font-medium font-mono">{t('active')}</span>
                             </p>

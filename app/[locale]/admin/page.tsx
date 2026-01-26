@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Users, CalendarCheck, Clock, TrendingUp } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
+import { MonthlyBookingsChart } from "@/components/admin/monthly-bookings-chart";
 
 export default async function AdminDashboardPage() {
     const userCount = await prisma.user.count();
@@ -9,6 +10,74 @@ export default async function AdminDashboardPage() {
         where: { status: 'CONFIRMED' }
     });
     const t = await getTranslations("Admin.overview");
+    const currentLocale = await getLocale();
+
+    // Chart Data: Monthly Bookings for the last 6 months
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5); // Go back 5 months + current = 6
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const monthlyBookings = await prisma.booking.findMany({
+        where: {
+            startTime: {
+                gte: sixMonthsAgo
+            }
+        },
+        select: {
+            startTime: true
+        },
+        orderBy: {
+            startTime: 'asc'
+        }
+    });
+
+    // Process data
+    const bookingsByMonth: Record<string, number> = {};
+
+    // Initialize last 6 months with 0
+    for (let i = 0; i < 6; i++) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - (5 - i));
+        const monthKey = d.toLocaleString('default', { month: 'short' });
+        bookingsByMonth[monthKey] = 0;
+        // Note: 'default' locale might result in mixed languages on server. 
+        // Ideally pass locale, but for simplicity assuming server locale or 'en-US' formatted consistent keys.
+        // Actually, let's use a fixed format or ISO for sorting if needed, but for display simple is okay.
+        // Better implementation: Use 'en-US' for keys to ensure uniqueness/sorting or just array map.
+    }
+
+    // Since we want to display correct month names, let's just map the dates to the format.
+    // However, to fill gaps we need a stable key.
+
+    // Alternative: Generate the array of months first.
+    const last6Months = Array.from({ length: 6 }, (_, i) => {
+        const d = new Date();
+        d.setMonth(d.getMonth() - (5 - i));
+        return {
+            date: d,
+            key: d.toISOString().slice(0, 7), // YYYY-MM
+            label: d.toLocaleString(currentLocale, { month: 'short' }), // Localized label
+        };
+    });
+
+    const chartDataMap = last6Months.reduce((acc, item) => {
+        acc[item.key] = 0;
+        return acc;
+    }, {} as Record<string, number>);
+
+    monthlyBookings.forEach(booking => {
+        const key = booking.startTime.toISOString().slice(0, 7);
+        if (chartDataMap[key] !== undefined) {
+            chartDataMap[key]++;
+        }
+    });
+
+    const chartData = last6Months.map(item => ({
+        month: item.label,
+        bookings: chartDataMap[item.key]
+    }));
+
 
     const stats = [
         {
@@ -76,12 +145,12 @@ export default async function AdminDashboardPage() {
                 ))}
             </div>
 
-            {/* Placeholder for Chart */}
+            {/* Chart Section */}
             <div className="grid gap-6 md:grid-cols-7">
                 <div className="col-span-4 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
                     <h3 className="text-lg font-medium text-white mb-4">{t("recentActivity")}</h3>
-                    <div className="h-[300px] flex items-center justify-center text-slate-500 border border-dashed border-white/10 rounded-lg">
-                        Chart: Monthly Bookings (Coming Soon)
+                    <div className="h-[300px] w-full">
+                        <MonthlyBookingsChart data={chartData} />
                     </div>
                 </div>
                 <div className="col-span-3 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">

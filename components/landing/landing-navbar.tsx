@@ -41,7 +41,7 @@ export const LandingNavbar = () => {
                             <div className="flex items-center gap-4 animate-in fade-in slide-in-from-right-4 duration-500">
                                 <div className="flex items-center gap-3">
                                     <Avatar className="h-9 w-9 ring-2 ring-primary/20">
-                                        <AvatarImage src={session.user.image || ""} />
+                                        <AvatarImage src={session.user.image || ""} className="object-cover" />
                                         <AvatarFallback className="bg-primary/10 text-primary font-bold">
                                             {session.user.name?.[0]?.toUpperCase() || "U"}
                                         </AvatarFallback>
@@ -101,7 +101,7 @@ export const LandingNavbar = () => {
                                         <div className="flex flex-col gap-4">
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-                                                    <AvatarImage src={session.user.image || ""} />
+                                                    <AvatarImage src={session.user.image || ""} className="object-cover" />
                                                     <AvatarFallback className="bg-primary/10 text-primary font-bold">
                                                         {session.user.name?.[0]?.toUpperCase() || "U"}
                                                     </AvatarFallback>
