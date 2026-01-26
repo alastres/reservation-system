@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Users, CalendarCheck, Clock, TrendingUp } from "lucide-react";
 import { getTranslations, getLocale } from "next-intl/server";
 import { MonthlyBookingsChart } from "@/components/admin/monthly-bookings-chart";
+import { InviteUserModal } from "@/components/admin/invite-user-modal";
 
 export default async function AdminDashboardPage() {
     const userCount = await prisma.user.count();
@@ -79,6 +80,43 @@ export default async function AdminDashboardPage() {
     }));
 
 
+    // Active Today Implementation
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const startOfYesterday = new Date(startOfToday);
+    startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+    const endOfYesterday = new Date(endOfToday);
+    endOfYesterday.setDate(endOfYesterday.getDate() - 1);
+
+    const activeTodayCount = await prisma.booking.count({
+        where: {
+            startTime: {
+                gte: startOfToday,
+                lte: endOfToday
+            }
+        }
+    });
+
+    const activeYesterdayCount = await prisma.booking.count({
+        where: {
+            startTime: {
+                gte: startOfYesterday,
+                lte: endOfYesterday
+            }
+        }
+    });
+
+    const activeTrend = activeYesterdayCount === 0
+        ? activeTodayCount > 0 ? "+100%" : "0%"
+        : `${((activeTodayCount - activeYesterdayCount) / activeYesterdayCount * 100).toFixed(0)}%`;
+
+    const activeTrendText = activeTodayCount >= activeYesterdayCount
+        ? `+${activeTrend} vs ${t("stats.yesterday") || "yesterday"}`
+        : `${activeTrend} vs ${t("stats.yesterday") || "yesterday"}`;
+
     const stats = [
         {
             title: t("stats.totalUsers"),
@@ -104,42 +142,41 @@ export default async function AdminDashboardPage() {
             bg: "bg-emerald-500/10",
             trend: "98% completion rate"
         },
-        // Placeholder for revenue or other metric
         {
             title: t("stats.activeToday"),
-            value: "24",
+            value: activeTodayCount,
             icon: TrendingUp,
             color: "text-amber-500",
             bg: "bg-amber-500/10",
-            trend: "Currently online"
+            trend: activeTrendText
         }
     ];
 
     return (
         <div className="space-y-8">
             <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight text-white">{t("title")}</h2>
-                <p className="text-slate-400">{t("subtitle")}</p>
+                <h2 className="text-3xl font-bold tracking-tight text-foreground">{t("title")}</h2>
+                <p className="text-muted-foreground">{t("subtitle")}</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {stats.map((stat, i) => (
                     <div
                         key={stat.title}
-                        className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm hover:bg-white/10 transition-colors group"
+                        className="relative overflow-hidden rounded-xl border border-border bg-card p-6 shadow-sm transition-colors group"
                     >
                         <div className="flex items-center justify-between pb-2">
-                            <p className="text-sm font-medium text-slate-400">{stat.title}</p>
+                            <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                             <div className={`p-2 rounded-lg ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
                                 <stat.icon className="h-4 w-4" />
                             </div>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-2xl font-bold text-white">{stat.value}</p>
-                            <p className="text-xs text-slate-500">{stat.trend}</p>
+                            <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                            <p className="text-xs text-muted-foreground">{stat.trend}</p>
                         </div>
 
-                        {/* Decorative glow */}
+                        {/* Decorative glow - visible in dark mode primarily or subtle in light */}
                         <div className={`absolute -right-6 -bottom-6 h-24 w-24 rounded-full ${stat.bg} blur-2xl opacity-50 group-hover:opacity-100 transition-opacity`} />
                     </div>
                 ))}
@@ -147,24 +184,16 @@ export default async function AdminDashboardPage() {
 
             {/* Chart Section */}
             <div className="grid gap-6 md:grid-cols-7">
-                <div className="col-span-4 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-                    <h3 className="text-lg font-medium text-white mb-4">{t("recentActivity")}</h3>
+                <div className="col-span-4 rounded-xl border border-border bg-card p-6 shadow-sm">
+                    <h3 className="text-lg font-medium text-foreground mb-4">{t("recentActivity")}</h3>
                     <div className="h-[300px] w-full">
                         <MonthlyBookingsChart data={chartData} />
                     </div>
                 </div>
-                <div className="col-span-3 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-                    <h3 className="text-lg font-medium text-white mb-4">{t("quickActions")}</h3>
+                <div className="col-span-3 rounded-xl border border-border bg-card p-6 shadow-sm">
+                    <h3 className="text-lg font-medium text-foreground mb-4">{t("quickActions")}</h3>
                     <div className="space-y-4">
-                        <button className="w-full text-left p-3 rounded-lg hover:bg-white/5 flex items-center gap-3 transition-colors border border-white/5">
-                            <div className="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
-                                <Users className="h-4 w-4" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-slate-200">{t("inviteUser")}</p>
-                                <p className="text-xs text-slate-500">{t("inviteDesc")}</p>
-                            </div>
-                        </button>
+                        <InviteUserModal />
                         {/* More quick actions... */}
                     </div>
                 </div>

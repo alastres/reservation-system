@@ -690,12 +690,18 @@
                 "totalUsers": "Usuarios Totales",
                 "totalBookings": "Reservas Totales",
                 "confirmed": "Confirmadas",
-                "activeToday": "Activos Hoy"
+                "activeToday": "Activos Hoy (Reservas)",
+                "yesterday": " ayer"
             },
             "recentActivity": "Actividad Reciente",
             "quickActions": "Acciones Rápidas",
             "inviteUser": "Invitar Usuario",
-            "inviteDesc": "Enviar invitación por correo"
+            "inviteDesc": "Enviar invitación por correo",
+            "inviteModalDesc": "Ingresa el correo electrónico de la persona que deseas invitar a la plataforma. Recibirán un email con instrucciones.",
+            "emailLabel": "Correo Electrónico",
+            "sendInvitation": "Enviar Invitación",
+            "sending": "Enviando...",
+            "inviteSuccess": "Invitación enviada exitosamente"
         },
         "users": {
             "title": "Gestión de Usuarios",
