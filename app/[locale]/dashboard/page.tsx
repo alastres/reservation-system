@@ -108,7 +108,7 @@ async function getDashboardStats(userId: string) {
 
     const bookingsChartData = Object.entries(bookingsByService)
         .map(([service, count]) => ({
-            service: service.length > 15 ? service.substring(0, 15) + '...' : service,
+            service: service,
             bookings: count as number,
         }))
         .slice(0, 5); // Top 5 services
