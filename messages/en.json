@@ -57,6 +57,12 @@
         "paymentConfirmed": "Payment confirmed and booking created!"
     },
     "Landing": {
+        "nav": {
+            "features": "Features",
+            "pricing": "Pricing",
+            "faq": "FAQ",
+            "about": "About Me"
+        },
         "hero": {
             "badge": "The #1 platform for professionals",
             "title": "Your automated online agenda.",
@@ -200,8 +206,14 @@
             }
         },
         "about": {
-            "title": "About Us",
-            "desc": "We are a team that understands the real struggles of scheduling. We created this platform for professionals who want to automate their agenda."
+            "title": "About Me",
+            "intro": "I am an independent developer specialized in creating tools that solve real problems. After working with professionals who manage their appointments manually—WhatsApp, calls, notes, messy calendars—I understood that most waste time every day on repetitive tasks that could be automated.",
+            "mission": "That's why I built this platform: a simple, modern, and professional solution for freelancers and small businesses to manage bookings without friction, chaos, or complicated costs.",
+            "beliefsTitle": "I believe in:",
+            "beliefs": "simplicity|smart automation|price transparency|clear and user-centric design",
+            "goal": "My goal is for this tool to save you time, reduce your cancellations, and let you focus on what's important: your work and your clients.",
+            "closing": "If you have suggestions, I would be happy to improve the product with you.",
+            "desc": "Created by an independent developer with the mission to simplify appointment management for professionals."
         },
         "footer": {
             "legal": "Legal",

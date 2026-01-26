@@ -57,6 +57,12 @@
         "paymentConfirmed": "¡Pago confirmado y reserva creada!"
     },
     "Landing": {
+        "nav": {
+            "features": "Características",
+            "pricing": "Precios",
+            "faq": "FAQ",
+            "about": "Quién soy"
+        },
         "hero": {
             "badge": "La plataforma #1 para profesionales",
             "title": "Tu agenda online automatizada.",
@@ -200,8 +206,14 @@
             }
         },
         "about": {
-            "title": "Sobre Nosotros",
-            "desc": "Somos un equipo que conoce los problemas reales de gestionar citas. Creamos esta plataforma para profesionales que quieren automatizar su agenda."
+            "title": "Quién soy",
+            "intro": "Soy un desarrollador independiente especializado en crear herramientas que resuelvan problemas reales. Después de trabajar con profesionales que gestionan sus citas de forma manual —WhatsApp, llamadas, notas, calendarios desordenados— entendí que la mayoría pierde tiempo cada día en tareas repetitivas que podrían automatizarse.",
+            "mission": "Por eso construí esta plataforma: una solución simple, moderna y profesional para que autónomos y pequeños negocios puedan gestionar reservas sin fricción, sin caos y sin costes complicados.",
+            "beliefsTitle": "Creo en:",
+            "beliefs": "la simplicidad|la automatización inteligente|la transparencia en los precios|el diseño claro y centrado en el usuario",
+            "goal": "Mi meta es que esta herramienta te ahorre tiempo, reduzca tus cancelaciones y te deje centrarte en lo importante: tu trabajo y tus clientes.",
+            "closing": "Si tienes sugerencias, estaré encantado de mejorar el producto contigo.",
+            "desc": "Creado por un desarrollador independiente con la misión de simplificar la gestión de reservas para profesionales."
         },
         "footer": {
             "legal": "Legal",
