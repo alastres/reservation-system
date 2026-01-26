@@ -681,7 +681,8 @@
             "overview": "Overview",
             "users": "Users",
             "logs": "Logs",
-            "exit": "Exit"
+            "exit": "Exit",
+            "backToDashboard": "Back to Dashboard"
         },
         "overview": {
             "title": "Dashboard Overview",

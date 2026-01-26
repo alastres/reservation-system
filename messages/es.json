@@ -681,7 +681,8 @@
             "overview": "Resumen",
             "users": "Usuarios",
             "logs": "Registros",
-            "exit": "Salir"
+            "exit": "Salir",
+            "backToDashboard": "Volver al Dashboard"
         },
         "overview": {
             "title": "Panel de Control",

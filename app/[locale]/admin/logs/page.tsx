@@ -28,27 +28,27 @@ export default async function SystemLogsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">{t("title")}</h2>
-                    <p className="text-slate-400">{t("subtitle")}</p>
+                    <h2 className="text-3xl font-bold tracking-tight text-foreground">{t("title")}</h2>
+                    <p className="text-muted-foreground">{t("subtitle")}</p>
                 </div>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
+            <div className="rounded-xl border border-border bg-card overflow-hidden">
                 <Table>
                     <TableHeader>
-                        <TableRow className="border-b border-white/10 hover:bg-white/5">
-                            <TableHead className="w-[180px] text-slate-300">{t("table.timestamp")}</TableHead>
-                            <TableHead className="text-slate-300">{t("table.action")}</TableHead>
-                            <TableHead className="text-slate-300">{t("table.user")}</TableHead>
-                            <TableHead className="text-slate-300">{t("table.details")}</TableHead>
-                            <TableHead className="text-right text-slate-300">{t("table.ipAddress")}</TableHead>
+                        <TableRow className="border-b border-border hover:bg-muted/50">
+                            <TableHead className="w-[180px] text-muted-foreground">{t("table.timestamp")}</TableHead>
+                            <TableHead className="text-muted-foreground">{t("table.action")}</TableHead>
+                            <TableHead className="text-muted-foreground">{t("table.user")}</TableHead>
+                            <TableHead className="text-muted-foreground">{t("table.details")}</TableHead>
+                            <TableHead className="text-right text-muted-foreground">{t("table.ipAddress")}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {logs.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="h-24 text-center">
-                                    <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
+                                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                                         <p className="text-sm font-medium">{t("table.noLogs")}</p>
                                         <p className="text-xs">{t("table.noLogsDesc")}</p>
                                     </div>
@@ -56,23 +56,23 @@ export default async function SystemLogsPage() {
                             </TableRow>
                         ) : (
                             logs.map((log) => (
-                                <TableRow key={log.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                    <TableCell className="font-mono text-xs text-slate-400">
+                                <TableRow key={log.id} className="border-b border-border hover:bg-muted/50 transition-colors">
+                                    <TableCell className="font-mono text-xs text-muted-foreground">
                                         {format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}
                                     </TableCell>
                                     <TableCell>
-                                        <span className="inline-flex items-center rounded-md bg-indigo-500/10 px-2 py-1 text-xs font-medium text-indigo-400 ring-1 ring-inset ring-indigo-500/20">
+                                        <span className="inline-flex items-center rounded-md bg-indigo-500/10 px-2 py-1 text-xs font-medium text-indigo-500 ring-1 ring-inset ring-indigo-500/20">
                                             {log.action}
                                         </span>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="text-sm text-slate-200">{log.user?.email || 'System'}</div>
+                                        <div className="text-sm text-foreground">{log.user?.email || 'System'}</div>
                                     </TableCell>
-                                    <TableCell className="text-sm text-slate-400 max-w-[400px] truncate" title={log.details ? JSON.stringify(log.details) : ''}>
+                                    <TableCell className="text-sm text-muted-foreground max-w-[400px] truncate" title={log.details ? JSON.stringify(log.details) : ''}>
                                         {log.details ? JSON.stringify(log.details) : '-'}
                                     </TableCell>
-                                    <TableCell className="text-right font-mono text-xs text-slate-500">
-                                        {log.ip || '-'}
+                                    <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                                        {log.ipAddress || '-'}
                                     </TableCell>
                                 </TableRow>
                             ))
