@@ -7,10 +7,10 @@ export const AboutSection = () => {
     const t = useTranslations("Landing.about");
 
     return (
-        <section id="about" className="py-24 bg-gradient-to-t from-background to-black/20 relative overflow-hidden">
+        <section id="about" className="py-24 bg-gradient-to-t from-muted/50 via-background to-background dark:from-background dark:to-black/20 relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10 pointer-events-none">
-                <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+                <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,black,transparent)] dark:[mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
             </div>
 
             <div className="container mx-auto px-6 relative z-10 text-center max-w-4xl">

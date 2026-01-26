@@ -18,10 +18,10 @@ export const FAQSection = () => {
 
                 <div className="space-y-4">
                     {questions.map((q, i) => (
-                        <div key={q} className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+                        <div key={q} className="border border-border/50 rounded-xl bg-card overflow-hidden shadow-sm dark:bg-white/5 dark:border-white/10">
                             <button
                                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                                className="w-full flex items-center justify-between p-6 text-left hover:bg-white/5 transition-colors"
+                                className="w-full flex items-center justify-between p-6 text-left hover:bg-muted/50 transition-colors dark:hover:bg-white/5"
                             >
                                 <span className="font-medium text-lg">{t(`${q}.q`)}</span>
                                 {openIndex === i ? (

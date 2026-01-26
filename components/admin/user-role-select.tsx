@@ -52,10 +52,10 @@ export function UserRoleSelect({ userId, currentRole, currentUserEmail }: UserRo
             onValueChange={handleValueChange}
             disabled={loading}
         >
-            <SelectTrigger className="w-[110px] h-8 text-xs bg-white/5 border-white/10 text-slate-200 focus:ring-indigo-500/50">
+            <SelectTrigger className="w-[110px] h-8 text-xs bg-muted/50 border-input text-foreground focus:ring-primary/50">
                 <SelectValue placeholder="Role" />
             </SelectTrigger>
-            <SelectContent className="bg-slate-900 border-white/10 text-slate-200">
+            <SelectContent className="bg-popover border-border text-popover-foreground">
                 <SelectItem value="ADMIN">Admin</SelectItem>
                 <SelectItem value="OWNER">Owner</SelectItem>
                 <SelectItem value="CLIENT">Client</SelectItem>

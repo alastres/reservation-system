@@ -37,27 +37,27 @@ export default async function AdminUsersPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">{t("title")}</h2>
-                    <p className="text-slate-400">{t("subtitle")}</p>
+                    <h2 className="text-3xl font-bold tracking-tight text-foreground">{t("title")}</h2>
+                    <p className="text-muted-foreground">{t("subtitle")}</p>
                 </div>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
+            <div className="rounded-xl border border-border bg-card overflow-hidden">
                 <Table>
                     <TableHeader>
-                        <TableRow className="border-b border-white/10 hover:bg-white/5">
-                            <TableHead className="text-slate-300">{t("table.user")}</TableHead>
-                            <TableHead className="text-slate-300">{t("table.role")}</TableHead>
-                            <TableHead className="text-slate-300">{t("table.stats")}</TableHead>
-                            <TableHead className="text-slate-300">{t("table.joined")}</TableHead>
-                            <TableHead className="text-right text-slate-300">{t("table.actions")}</TableHead>
+                        <TableRow className="border-b border-border hover:bg-muted/50">
+                            <TableHead className="text-muted-foreground">{t("table.user")}</TableHead>
+                            <TableHead className="text-muted-foreground">{t("table.role")}</TableHead>
+                            <TableHead className="text-muted-foreground">{t("table.stats")}</TableHead>
+                            <TableHead className="text-muted-foreground">{t("table.joined")}</TableHead>
+                            <TableHead className="text-right text-muted-foreground">{t("table.actions")}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {users.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="h-24 text-center">
-                                    <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
+                                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                                         <p className="text-sm font-medium">{t("table.noUsers")}</p>
                                         <p className="text-xs">{t("table.noUsersDesc")}</p>
                                     </div>
@@ -65,11 +65,11 @@ export default async function AdminUsersPage() {
                             </TableRow>
                         ) : (
                             users.map((user) => (
-                                <TableRow key={user.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                <TableRow key={user.id} className="border-b border-border hover:bg-muted/50 transition-colors">
                                     <TableCell>
-                                        <div className="font-medium text-slate-200">{user.name || "No Name"}</div>
-                                        <div className="text-xs text-slate-500">{user.email}</div>
-                                        {user.username && <div className="text-xs text-indigo-400">@{user.username}</div>}
+                                        <div className="font-medium text-foreground">{user.name || "No Name"}</div>
+                                        <div className="text-xs text-muted-foreground">{user.email}</div>
+                                        {user.username && <div className="text-xs text-indigo-500 font-medium">@{user.username}</div>}
                                     </TableCell>
                                     <TableCell>
                                         <UserRoleSelect
@@ -78,18 +78,18 @@ export default async function AdminUsersPage() {
                                         />
                                     </TableCell>
                                     <TableCell>
-                                        <div className="text-xs space-y-1 text-slate-400">
+                                        <div className="text-xs space-y-1 text-muted-foreground">
                                             <div className="flex items-center gap-2">
                                                 <span className="w-16">{t("stats.services")}</span>
-                                                <span className="text-slate-200 font-medium">{user._count.services}</span>
+                                                <span className="text-foreground font-medium">{user._count.services}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <span className="w-16">{t("stats.bookings")}</span>
-                                                <span className="text-slate-200 font-medium">{user._count.bookings}</span>
+                                                <span className="text-foreground font-medium">{user._count.bookings}</span>
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-sm text-slate-500">
+                                    <TableCell className="text-sm text-muted-foreground">
                                         {format(user.createdAt, 'MMM d, yyyy')}
                                     </TableCell>
                                     <TableCell className="text-right">

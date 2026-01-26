@@ -25,7 +25,7 @@ export const HeroSection = () => {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.1 }}
-                        className="inline-flex items-center gap-2 py-1 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-primary mb-8 backdrop-blur-sm"
+                        className="inline-flex items-center gap-2 py-1 px-3 rounded-full bg-primary/5 border border-primary/10 text-xs font-medium text-primary mb-8 backdrop-blur-sm"
                     >
                         <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -51,7 +51,7 @@ export const HeroSection = () => {
                                 {t('ctaPrimary')} <ArrowRight className="ml-2 w-4 h-4" />
                             </Link>
                         </Button>
-                        <Button size="lg" variant="outline" className="h-12 px-8 text-base rounded-full border-white/10 hover:bg-white/5 backdrop-blur-sm" asChild>
+                        <Button size="lg" variant="outline" className="h-12 px-8 text-base rounded-full border-border hover:bg-muted/50 backdrop-blur-sm" asChild>
                             <Link href="/auth/login?action=demo">
                                 {t('ctaSecondary')}
                             </Link>
@@ -77,8 +77,8 @@ export const HeroSection = () => {
                     transition={{ duration: 0.8, delay: 0.3 }}
                     className="mt-20 relative mx-auto max-w-6xl perspective-1000"
                 >
-                    <div className="relative rounded-xl border border-white/10 bg-black/40 backdrop-blur-md shadow-2xl p-2 md:p-4 rotate-x-12 transform-gpu hover:rotate-x-0 transition-transform duration-700 ease-out">
-                        <div className="rounded-lg overflow-hidden bg-background aspect-[16/10] relative border border-white/5 shadow-inner">
+                    <div className="relative rounded-xl border border-border/50 bg-card/40 dark:bg-black/40 backdrop-blur-md shadow-2xl p-2 md:p-4 rotate-x-12 transform-gpu hover:rotate-x-0 transition-transform duration-700 ease-out">
+                        <div className="rounded-lg overflow-hidden bg-background aspect-[16/10] relative border border-border/50 shadow-inner">
                             {/* Detailed Mockup Placeholder - In a real app, use an image here */}
                             <div className="absolute inset-0 bg-muted/20 flex flex-col">
                                 {/* Mock Header */}

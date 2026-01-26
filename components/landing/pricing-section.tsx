@@ -31,8 +31,8 @@ export const PricingSection = () => {
                                 className={`
                                     relative p-8 rounded-3xl border 
                                     ${isPro
-                                        ? "bg-black/40 border-primary/50 shadow-2xl shadow-primary/10 ring-1 ring-primary/50"
-                                        : "bg-white/5 border-white/10"
+                                        ? "bg-card/90 border-primary/50 shadow-2xl shadow-primary/10 ring-1 ring-primary/50 dark:bg-black/40"
+                                        : "bg-card border-border/50 dark:bg-white/5 dark:border-white/10"
                                     } 
                                     flex flex-col
                                 `}
@@ -56,7 +56,7 @@ export const PricingSection = () => {
                                 <ul className="space-y-4 mb-8 flex-1">
                                     {(t.raw(`plans.${plan}.features`) as string[]).map((feature, j) => (
                                         <li key={j} className="flex items-center gap-3">
-                                            <div className={`p-1 rounded-full ${isPro ? 'bg-primary/20 text-primary' : 'bg-white/10 text-muted-foreground'}`}>
+                                            <div className={`p-1 rounded-full ${isPro ? 'bg-primary/20 text-primary' : 'bg-muted dark:bg-white/10 text-muted-foreground'}`}>
                                                 <Check className="w-3 h-3" />
                                             </div>
                                             <span className="text-sm">{feature}</span>
@@ -65,7 +65,7 @@ export const PricingSection = () => {
                                 </ul>
 
                                 <Button
-                                    className={`w-full py-6 text-base ${isPro ? 'bg-primary hover:bg-primary/90' : 'bg-white/10 hover:bg-white/20'}`}
+                                    className={`w-full py-6 text-base ${isPro ? 'bg-primary hover:bg-primary/90' : 'bg-muted hover:bg-muted/80 dark:bg-white/10 dark:hover:bg-white/20'}`}
                                     variant={isPro ? "default" : "secondary"}
                                     asChild
                                 >

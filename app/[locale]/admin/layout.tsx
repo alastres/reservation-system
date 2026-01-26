@@ -6,6 +6,7 @@ import { Link } from "@/i18n/routing";
 import { LayoutDashboard, Users, FileText, LogOut, ChartPie } from "lucide-react";
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
 import { getTranslations } from "next-intl/server";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function AdminLayout({
     children,
@@ -20,16 +21,16 @@ export default async function AdminLayout({
     }
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans">
-            <nav className="border-b border-border bg-background/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div className="min-h-screen bg-muted/40 text-foreground font-sans">
+            <nav className="border-b border-border/40 bg-background/80 supports-[backdrop-filter]:bg-background/60 backdrop-blur-xl px-6 py-4 flex items-center justify-between sticky top-0 z-50">
                 <div className="flex items-center gap-4 md:gap-8">
                     <AdminMobileNav />
 
                     <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                            <span className="font-bold text-primary-foreground">S</span>
+                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
+                            <span className="font-bold text-white">S</span>
                         </div>
-                        <h1 className="text-xl font-bold text-foreground">
+                        <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400">
                             Scheduler
                         </h1>
                     </div>
@@ -60,10 +61,18 @@ export default async function AdminLayout({
                 </div>
 
                 <div className="flex items-center gap-4">
+                    <ThemeToggle />
                     <div className="text-right hidden sm:block">
                         <p className="text-sm font-medium text-foreground">{session.user.name}</p>
-                        <p className="text-xs text-muted-foreground">{session.user.email}</p>
+                        <p className="text-xs text-muted-foreground">{session.user.role}</p>
                     </div>
+                    <Link
+                        href="/dashboard"
+                        className="flex items-center gap-2 text-xs bg-muted/50 hover:bg-muted border border-border px-4 py-2 rounded-full transition-all text-muted-foreground hover:text-foreground group"
+                    >
+                        <LayoutDashboard className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
+                        {t('backToDashboard') || "Volver al Dashboard"}
+                    </Link>
                     <Link
                         href="/"
                         className="flex items-center gap-2 text-xs bg-muted/50 hover:bg-muted border border-border px-4 py-2 rounded-full transition-all text-muted-foreground hover:text-foreground group"

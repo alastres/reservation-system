@@ -23,7 +23,7 @@ export const HowItWorks = () => {
     ];
 
     return (
-        <section className="py-24 bg-black/20 relative">
+        <section className="py-24 bg-muted/30 dark:bg-black/20 relative">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-20">
                     <span className="text-primary font-semibold tracking-wider uppercase text-sm mb-4 block">
