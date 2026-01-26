@@ -708,11 +708,19 @@
                 "joined": "Joined",
                 "actions": "Actions",
                 "noUsers": "No users found",
-                "noUsersDesc": "Registered users will appear here."
+                "noUsersDesc": "Registered users will appear here.",
+                "searchPlaceholder": "Search users..."
             },
             "stats": {
                 "services": "Services:",
                 "bookings": "Bookings:"
+            },
+            "pagination": {
+                "showing": "Showing {count} of {total}",
+                "previous": "Previous",
+                "next": "Next",
+                "page": "Page",
+                "of": "of"
             }
         },
         "logs": {
@@ -725,7 +733,15 @@
                 "details": "Details",
                 "ipAddress": "IP Address",
                 "noLogs": "No system logs found",
-                "noLogsDesc": "Actions performed in the system will appear here."
+                "noLogsDesc": "Actions performed in the system will appear here.",
+                "searchPlaceholder": "Search logs..."
+            },
+            "pagination": {
+                "showing": "Showing {count} of {total}",
+                "previous": "Previous",
+                "next": "Next",
+                "page": "Page",
+                "of": "of"
             }
         }
     }

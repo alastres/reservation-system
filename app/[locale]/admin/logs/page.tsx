@@ -1,28 +1,49 @@
 import { prisma } from "@/lib/prisma";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { getTranslations } from "next-intl/server";
+import { SystemLogsTable } from "@/components/admin/system-logs-table";
+import { SearchInput } from "@/components/ui/search-input";
+import { Prisma } from "@prisma/client";
 
-export default async function SystemLogsPage() {
+interface Props {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function SystemLogsPage({ searchParams }: Props) {
+    const resolvedSearchParams = await searchParams;
     const t = await getTranslations("Admin.logs");
 
-    const logs = await prisma.systemLog.findMany({
-        orderBy: { createdAt: 'desc' },
-        include: {
-            user: {
-                select: { name: true, email: true }
+    // Pagination logic
+    const page = Number(resolvedSearchParams.page) || 1;
+    const pageSize = 20; // Logs usually have higher density, so 20 is good
+    const skip = (page - 1) * pageSize;
+
+    // ... inside component ...
+    const query = resolvedSearchParams.search as string;
+
+    const whereClause: Prisma.SystemLogWhereInput = query ? {
+        OR: [
+            { action: { contains: query, mode: "insensitive" } },
+            { user: { email: { contains: query, mode: "insensitive" } } },
+            { user: { name: { contains: query, mode: "insensitive" } } }
+        ]
+    } : {};
+
+    const [logs, totalLogs] = await Promise.all([
+        prisma.systemLog.findMany({
+            where: whereClause,
+            orderBy: { createdAt: 'desc' },
+            take: pageSize,
+            skip: skip,
+            include: {
+                user: {
+                    select: { name: true, email: true }
+                }
             }
-        },
-        take: 100 // Limit to recent 100 logs
-    });
+        }),
+        prisma.systemLog.count({ where: whereClause })
+    ]);
+
+    const totalPages = Math.ceil(totalLogs / pageSize);
 
     return (
         <div className="space-y-6">
@@ -31,55 +52,15 @@ export default async function SystemLogsPage() {
                     <h2 className="text-3xl font-bold tracking-tight text-foreground">{t("title")}</h2>
                     <p className="text-muted-foreground">{t("subtitle")}</p>
                 </div>
+                <SearchInput placeholder={t("table.searchPlaceholder") || "Buscar en registros..."} className="w-[300px]" />
             </div>
 
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
-                <Table>
-                    <TableHeader>
-                        <TableRow className="border-b border-border hover:bg-muted/50">
-                            <TableHead className="w-[180px] text-muted-foreground">{t("table.timestamp")}</TableHead>
-                            <TableHead className="text-muted-foreground">{t("table.action")}</TableHead>
-                            <TableHead className="text-muted-foreground">{t("table.user")}</TableHead>
-                            <TableHead className="text-muted-foreground">{t("table.details")}</TableHead>
-                            <TableHead className="text-right text-muted-foreground">{t("table.ipAddress")}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {logs.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center">
-                                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                                        <p className="text-sm font-medium">{t("table.noLogs")}</p>
-                                        <p className="text-xs">{t("table.noLogsDesc")}</p>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            logs.map((log) => (
-                                <TableRow key={log.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                                    <TableCell className="font-mono text-xs text-muted-foreground">
-                                        {format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className="inline-flex items-center rounded-md bg-indigo-500/10 px-2 py-1 text-xs font-medium text-indigo-500 ring-1 ring-inset ring-indigo-500/20">
-                                            {log.action}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="text-sm text-foreground">{log.user?.email || 'System'}</div>
-                                    </TableCell>
-                                    <TableCell className="text-sm text-muted-foreground max-w-[400px] truncate" title={log.details ? JSON.stringify(log.details) : ''}>
-                                        {log.details ? JSON.stringify(log.details) : '-'}
-                                    </TableCell>
-                                    <TableCell className="text-right font-mono text-xs text-muted-foreground">
-                                        {log.ipAddress || '-'}
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+            <SystemLogsTable
+                logs={logs}
+                page={page}
+                totalPages={totalPages}
+                totalLogs={totalLogs}
+            />
         </div>
     );
 }
