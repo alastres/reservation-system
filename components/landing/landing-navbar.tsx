@@ -28,10 +28,10 @@ export const LandingNavbar = () => {
                 </Link>
 
                 <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-                    <a href="#features" className="hover:text-primary transition-colors">{t('hero.ctaSecondary') === "Ver demo" ? "Características" : "Features"}</a>
-                    <a href="#pricing" className="hover:text-primary transition-colors">{t('hero.ctaSecondary') === "Ver demo" ? "Precios" : "Pricing"}</a>
-                    <a href="#faq" className="hover:text-primary transition-colors">FAQ</a>
-                    <a href="#about" className="hover:text-primary transition-colors">{t('hero.ctaSecondary') === "Ver demo" ? "Sobre Nosotros" : "About Us"}</a>
+                    <a href="#features" className="hover:text-primary transition-colors">{t('nav.features')}</a>
+                    <a href="#pricing" className="hover:text-primary transition-colors">{t('nav.pricing')}</a>
+                    <a href="#faq" className="hover:text-primary transition-colors">{t('nav.faq')}</a>
+                    <a href="#about" className="hover:text-primary transition-colors">{t('nav.about')}</a>
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -92,10 +92,10 @@ export const LandingNavbar = () => {
                                     </Link>
 
                                     <div className="flex flex-col gap-4 text-lg font-medium">
-                                        <a href="#features" className="hover:text-primary transition-colors">Features</a>
-                                        <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
-                                        <a href="#about" className="hover:text-primary transition-colors">About Us</a>
-                                        <a href="#faq" className="hover:text-primary transition-colors">FAQ</a>
+                                        <a href="#features" className="hover:text-primary transition-colors">{t('nav.features')}</a>
+                                        <a href="#pricing" className="hover:text-primary transition-colors">{t('nav.pricing')}</a>
+                                        <a href="#about" className="hover:text-primary transition-colors">{t('nav.about')}</a>
+                                        <a href="#faq" className="hover:text-primary transition-colors">{t('nav.faq')}</a>
                                     </div>
 
                                     <div className="h-px bg-white/10 my-2" />

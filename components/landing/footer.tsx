@@ -27,8 +27,8 @@ export const Footer = () => {
                         <h4 className="font-bold mb-4">{t('footer.contact')}</h4>
                         <ul className="space-y-2 text-muted-foreground">
                             <li>
-                                <a href="mailto:support@scheduler.com" className="hover:text-primary transition-colors">
-                                    support@scheduler.com
+                                <a href="mailto:adrian47388@gmail.com" className="hover:text-primary transition-colors">
+                                    adrian47388@gmail.com
                                 </a>
                             </li>
                         </ul>
