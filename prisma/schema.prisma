@@ -14,7 +14,11 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
+<<<<<<< HEAD
   password      String? // Added for Credentials Auth
+=======
+  password      String? // For credential-based auth (bcrypt hashed)
+>>>>>>> master
 
   accounts Account[]
   sessions Session[]
@@ -39,6 +43,7 @@ model User {
   stripeSubscriptionId  String?            @unique
   subscriptionEndsAt    DateTime?
 
+<<<<<<< HEAD
   // Organization (Business Plan)
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
@@ -47,6 +52,11 @@ model User {
   // Stripe Connect (for owners receiving payments)
   stripeConnectAccountId String?           @unique
   stripeConnectStatus    String?           @default("INACTIVE")
+=======
+  // Stripe Connect (for owners to receive payments)
+  stripeConnectedAccountId      String? @unique
+  stripeConnectedAccountStatus  String? // "pending", "active", etc.
+>>>>>>> master
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -99,6 +109,7 @@ model Service {
   description String?
   duration    Int // in minutes
   price       Float   @default(0)
+  currency    String  @default("usd") // ISO currency code for Stripe
   location    String? // e.g. "Zoom", "Google Meet"
   url         String // slug for public url
 
@@ -147,6 +158,7 @@ enum LocationType {
   PHONE
   IN_PERSON
   CUSTOM
+  ZOOM
 }
 
 model Booking {

@@ -72,6 +72,10 @@ export function RevenueChart({ data }: RevenueChartProps) {
                         }
                         return null;
                     }}
+<<<<<<< HEAD
+=======
+                    formatter={(value: any) => [`$${Number(value).toFixed(2)}`, "Revenue"]}
+>>>>>>> master
                 />
                 <Area
                     type="monotone"

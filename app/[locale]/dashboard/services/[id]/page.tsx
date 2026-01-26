@@ -32,11 +32,22 @@ export default async function ServiceEditPage({ params }: ServiceEditPageProps) 
     return (
         <div className="flex-1 space-y-4 p-8 pt-6 max-w-3xl mx-auto">
             <h1 className="text-3xl font-bold tracking-tight mb-6">Edit Service</h1>
+<<<<<<< HEAD:app/[locale]/dashboard/services/[id]/page.tsx
             <ServiceForm key={service.id} service={{
                 ...service,
                 customInputs: service.customInputs as any[],
                 maxRecurrenceCount: service.maxRecurrenceCount || 4
             }} />
+=======
+            <ServiceForm
+                key={service.id}
+                service={{
+                    ...service,
+                    customInputs: service.customInputs === null ? undefined : (service.customInputs as any[]),
+                    maxRecurrenceCount: service.maxRecurrenceCount ?? 4
+                }}
+            />
+>>>>>>> master:app/dashboard/services/[id]/page.tsx
         </div>
     );
 }
