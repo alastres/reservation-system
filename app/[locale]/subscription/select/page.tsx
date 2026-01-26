@@ -8,7 +8,19 @@ import { createSubscriptionCheckout } from "@/actions/subscription";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const plans = [
+interface Plan {
+    id: "FREE" | "PRO" | "BUSINESS";
+    name: string;
+    price: string; // Display price
+    period: string;
+    description: string;
+    features: string[];
+    popular: boolean;
+    originalPrice?: string;
+    discount?: string;
+}
+
+const plans: Plan[] = [
     {
         id: "FREE",
         name: "Gratis",
@@ -36,6 +48,8 @@ const plans = [
             "Soporte prioritario",
         ],
         popular: true,
+        originalPrice: "€20",
+        discount: "-25%"
     },
     {
         id: "BUSINESS",

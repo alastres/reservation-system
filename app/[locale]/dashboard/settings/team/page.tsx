@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 
 export default async function TeamSettingsPage() {
     // Basic server-side protection
-    const plan = await getUserPlan();
+    const planData = await getUserPlan();
+    const plan = planData?.plan;
     if (plan !== "BUSINESS") {
         // Option A: Redirect
         // redirect("/dashboard/settings");
