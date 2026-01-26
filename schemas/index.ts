@@ -20,6 +20,9 @@ export const RegisterSchema = z.object({
         message: "name_required",
     }),
     timeZone: z.string().optional(),
+    termsAccepted: z.boolean().default(false).refine((val) => val === true, {
+        message: "terms_required",
+    }),
     website: z.string().optional(), // Honeypot field
 });
 

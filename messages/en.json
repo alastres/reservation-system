@@ -240,7 +240,11 @@
         "verify_button": "Verify",
         "verification_code": "Verification Code",
         "email_missing": "Email missing",
-        "error_verification_failed": "Verification failed. Code might have expired."
+        "error_verification_failed": "Verification failed. Code might have expired.",
+        "acceptTerms": "I accept the",
+        "termsLink": "Terms & Conditions",
+        "and": "and",
+        "privacyLink": "Privacy Policy"
     },
     "Dashboard": {
         "dashboard": "Dashboard",
@@ -444,7 +448,8 @@
         "label_required": "Label is required",
         "name_required": "Name is required",
         "title_required": "Title is required",
-        "price_min": "Price must be positive"
+        "price_min": "Price must be positive",
+        "terms_required": "You must accept the terms to continue"
     },
     "Subscription": {
         "unauthorized": "Unauthorized",
