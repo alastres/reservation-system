@@ -102,7 +102,7 @@ export async function POST(req: Request) {
                         subscriptionPlan: plan,
                         stripeCustomerId: subscription.customer as string,
                         stripeSubscriptionId: subscription.id,
-                        subscriptionEndsAt: new Date(subscription.current_period_end * 1000),
+                        subscriptionEndsAt: new Date((subscription as any).current_period_end * 1000),
                     },
                 });
 
@@ -127,8 +127,14 @@ export async function POST(req: Request) {
             case "invoice.payment_succeeded": {
                 const invoice = event.data.object as Stripe.Invoice;
 
+<<<<<<< HEAD
                 if ((invoice as any).subscription) {
                     const subscription: any = await stripe.subscriptions.retrieve(
+=======
+                // Update subscription end date when payment succeeds
+                if ((invoice as any).subscription) {
+                    const subscription = await stripe.subscriptions.retrieve(
+>>>>>>> master
                         (invoice as any).subscription as string
                     );
 
@@ -136,7 +142,7 @@ export async function POST(req: Request) {
                         where: { stripeSubscriptionId: subscription.id },
                         data: {
                             subscriptionStatus: "ACTIVE",
-                            subscriptionEndsAt: new Date(subscription.current_period_end * 1000),
+                            subscriptionEndsAt: new Date((subscription as any).current_period_end * 1000),
                         },
                     });
 
@@ -192,7 +198,11 @@ export async function POST(req: Request) {
                                 subscriptionPlan: plan,
                                 stripeCustomerId: session.customer as string,
                                 stripeSubscriptionId: subscriptionId,
+<<<<<<< HEAD
                                 subscriptionEndsAt: endsAt,
+=======
+                                subscriptionEndsAt: new Date((subscription as any).current_period_end * 1000),
+>>>>>>> master
                             },
                         });
 

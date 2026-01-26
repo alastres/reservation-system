@@ -4,8 +4,12 @@ import { useState, useEffect, useTransition } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+<<<<<<< HEAD
 import { es, enUS } from "date-fns/locale";
 import { getSlotsAction, createBooking, confirmPaymentAndBooking } from "@/actions/booking";
+=======
+import { getSlotsAction, createBooking } from "@/actions/booking";
+>>>>>>> master
 import { Loader2, Check, CreditCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -153,12 +157,18 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
     };
 
     const handlePaymentSuccess = async (paymentIntentId: string) => {
+<<<<<<< HEAD
         const res = await confirmPaymentAndBooking(paymentIntentId);
         if (res.success) {
             setBookingStage("SUCCESS");
         } else {
             setBookingError(res.error || t("errors.paymentFailed"));
         }
+=======
+        // Booking is already created with PENDING status
+        // Webhook will update to PAID when payment is confirmed
+        setBookingStage("SUCCESS");
+>>>>>>> master
     };
 
     // Auto-fill form if session exists

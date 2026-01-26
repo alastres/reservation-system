@@ -10,7 +10,7 @@ export const connectGoogle = async () => {
 
 export const disconnectGoogle = async () => {
     const session = await auth();
-    if (!session?.user?.id) return { error: "Unauthorized" };
+    if (!session?.user?.id) return;
 
     try {
         await prisma.account.deleteMany({
@@ -20,8 +20,7 @@ export const disconnectGoogle = async () => {
             }
         });
         revalidatePath("/dashboard/settings/integrations");
-        return { success: "Disconnected from Google Calendar" };
     } catch (error) {
-        return { error: "Failed to disconnect" };
+        console.error("Failed to disconnect Google:", error);
     }
 }

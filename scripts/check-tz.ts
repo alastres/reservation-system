@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 // @ts-nocheck
 import { prisma } from "./lib/prisma";
+=======
+
+import { prisma } from "../lib/prisma";
+>>>>>>> master
 
 async function main() {
     const users = await prisma.user.findMany({

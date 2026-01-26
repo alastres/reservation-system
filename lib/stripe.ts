@@ -5,7 +5,11 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+<<<<<<< HEAD
     apiVersion: "2025-12-15.clover",
+=======
+    apiVersion: "2025-12-15.clover" as any,
+>>>>>>> master
     typescript: true,
 });
 
@@ -16,7 +20,12 @@ export async function createPaymentIntent(
     amount: number,
     currency: string = "usd",
     metadata: Record<string, string>,
+<<<<<<< HEAD
     connectedAccountId?: string
+=======
+    connectedAccountId?: string,
+    applicationFeeAmount?: number
+>>>>>>> master
 ) {
     try {
         const params: Stripe.PaymentIntentCreateParams = {
@@ -32,6 +41,12 @@ export async function createPaymentIntent(
             params.transfer_data = {
                 destination: connectedAccountId,
             };
+<<<<<<< HEAD
+=======
+            if (applicationFeeAmount) {
+                params.application_fee_amount = Math.round(applicationFeeAmount * 100);
+            }
+>>>>>>> master
         }
 
         const paymentIntent = await stripe.paymentIntents.create(params);

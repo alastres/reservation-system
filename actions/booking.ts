@@ -274,24 +274,30 @@ export const createBooking = async (
     }
 
     // 3.7 Handle Payment if Required
+    let paymentIntent: any = null;
     if (service.requiresPayment && service.price > 0) {
         const { createPaymentIntent } = await import("@/lib/stripe");
 
+<<<<<<< HEAD
         // Determine destination account
         let connectedAccountId: string | undefined = undefined;
         if (service.user.stripeConnectAccountId && service.user.stripeConnectStatus === "ACTIVE") {
             connectedAccountId = service.user.stripeConnectAccountId;
         }
+=======
+        // Determine if we should route payment to a connected account
+        const connectedAccountId = service.user.stripeConnectedAccountId;
+        const applicationFeeAmount = connectedAccountId ? Math.round(service.price * 0.1) : undefined; // Optional 10% platform fee, in cents
+>>>>>>> master
 
         const paymentResult = await createPaymentIntent(
             service.price,
-            "usd",
+            service.currency || "usd",
             {
                 serviceId: service.id,
                 serviceName: service.title,
                 clientEmail: clientData.email,
                 clientName: clientData.name,
-                // Add more metadata as needed
                 dateStr,
                 time,
                 timeZone,
@@ -301,25 +307,27 @@ export const createBooking = async (
                 answers: JSON.stringify(clientData.answers || {}),
                 recurrence: clientData.recurrence || "none"
             },
+<<<<<<< HEAD
             connectedAccountId
+=======
+            connectedAccountId || undefined,
+            applicationFeeAmount
+>>>>>>> master
         );
 
         if (paymentResult.error || !paymentResult.paymentIntent) {
             return { error: paymentResult.error || t("paymentFailed") };
         }
 
-        // Return the client secret so the frontend can show the payment form
-        // We do NOT create the booking in the DB yet to avoid cluttering with unpaid sessions
-        // unless we use a "PENDING_PAYMENT" status and a cleanup job.
-        return {
-            requiresPayment: true,
-            clientSecret: paymentResult.paymentIntent.client_secret,
-            paymentIntentId: paymentResult.paymentIntent.id
-        };
+        paymentIntent = paymentResult.paymentIntent;
     }
 
+<<<<<<< HEAD
     // 4. Create All Bookings (Only if no payment required or payment already handled)
     // 4. Create All Bookings (Only if no payment required or payment already handled)
+=======
+    // 4. Create All Bookings
+>>>>>>> master
     try {
         await prisma.$transaction(async (tx) => {
             // Re-verify availability within the transaction to prevent double booking race conditions
@@ -395,10 +403,11 @@ export const createBooking = async (
                         answers: clientData.answers,
                         recurrenceId,
                         clientTimeZone,
-                        status: "CONFIRMED",
-                        userId: existingUser?.id,
-                        paymentStatus: "PENDING",
-                        amountPaid: service.price,
+                        status: paymentIntent ? "PENDING" : "CONFIRMED",
+                        userId: existingUser?.id, // Link to user if found
+                        paymentIntentId: paymentIntent?.id,
+                        paymentStatus: paymentIntent ? "PROCESSING" : "PENDING",
+                        amountPaid: paymentIntent ? service.price : undefined,
                         currency: "usd",
                     }
                 });
@@ -413,18 +422,148 @@ export const createBooking = async (
         return { error: t("bookingTransactionFailed") };
     }
 
-    // Handle Calendar Sync and Emails using the helper
-    await handleBookingFulfillment(
-        service,
-        datesToBook,
-        clientData,
-        clientTimeZone,
-        initialDate,
+    // Sync with Google Calendar
+    // We execute this asynchronously/independently so it doesn't block the UI response if it's slow
+    // But we await it here to ensure it's done before returning (Vercel serverless might kill otherwise)
+    // In a real message queue system, this would be a job.
+    for (const date of datesToBook) {
+        const start = date;
+        const end = addMinutes(start, service.duration);
+
+        let description = `Client: ${clientData.name}\nEmail: ${clientData.email}\nNotes: ${clientData.notes || "None"}`;
+
+        if (clientData.clientPhone) {
+            description += `\nPhone: ${clientData.clientPhone}`;
+        }
+
+        if (clientData.answers) {
+            description += "\n\nAnswers:\n" + Object.entries(clientData.answers).map(([q, a]) => `- ${q}: ${a}`).join("\n");
+        }
+
+        // Determine Final Address (Service specific OR Profile default)
+        const finalAddress = service.locationType === "IN_PERSON"
+            ? (service.address || service.user.address)
+            : undefined;
+
+        const eventResult = await createGoogleEvent(service.userId, {
+            summary: `Booking: ${service.title} with ${clientData.name}`,
+            description,
+            start,
+            end,
+            attendees: [clientData.email],
+            location: finalAddress || undefined
+        }, {
+            withMeet: service.locationType === "GOOGLE_MEET"
+        });
+
+        if (eventResult && typeof eventResult === 'object') {
+            // Find the specific booking for this date interval
+            const createdBooking = await prisma.booking.findFirst({
+                where: {
+                    serviceId: service.id,
+                    startTime: start,
+                    status: "CONFIRMED",
+                    clientEmail: clientData.email
+                }
+            });
+
+            if (createdBooking) {
+                await prisma.booking.update({
+                    where: { id: createdBooking.id },
+                    data: {
+                        googleEventId: eventResult.id,
+                        joinUrl: eventResult.meetLink // Will be null if not generated
+                    }
+                });
+            }
+        }
+    }
+
+    // Determine Location Details for Email
+    let locationDetails = "";
+    const finalAddress = service.address || service.user.address; // Re-calculate or reuse if scope allows
+
+    switch (service.locationType) {
+        case "GOOGLE_MEET":
+            locationDetails = "Google Meet (Link in Calendar)";
+            break;
+        case "PHONE":
+            locationDetails = clientData.clientPhone
+                ? `Phone Call (Provider will call you at ${clientData.clientPhone})`
+                : "Phone Call";
+            break;
+        case "IN_PERSON":
+            locationDetails = finalAddress ? `In Person at ${finalAddress}` : "In Person";
+            break;
+        case "CUSTOM":
+            locationDetails = service.locationUrl ? `Link: ${service.locationUrl}` : "Online";
+            break;
+    }
+
+    // Determine Client Time Display
+    let clientTimeDisplay: string | undefined = undefined;
+    if (clientTimeZone) {
+        try {
+            // initialDate is the start time in UTC (Date object)
+            // We want to format it in the Client's Time Zone
+            const clientZonedDate = toZonedTime(initialDate, clientTimeZone);
+            const clientDateStr = format(clientZonedDate, "yyyy-MM-dd");
+            const clientTimeStr = format(clientZonedDate, "HH:mm");
+            clientTimeDisplay = `${clientTimeStr} (${clientTimeZone})`;
+
+            // If the date is different, we should probably mention it
+            if (clientDateStr !== dateStr) {
+                clientTimeDisplay += ` on ${clientDateStr}`;
+            }
+        } catch (e) {
+            console.error("Error formatting client time", e);
+        }
+    }
+
+    // Send Email to Client (Summary)
+    await sendBookingConfirmation(
+        clientData.email,
+        clientData.name,
+        service.title,
         dateStr,
-        time
+        time,
+        service.userId, // Pass providerId for logging
+        locationDetails,
+        clientTimeDisplay
     );
 
+<<<<<<< HEAD
     return { success: recurrenceId ? tSuccess("recurringBookingConfirmed") : tSuccess("bookingConfirmed") };
+=======
+    // Send Notification to Provider (Summary)
+    try {
+        interface NotificationPreferences {
+            email?: boolean;
+            sms?: boolean;
+        }
+
+        const prefs = service.user.notificationPreferences as unknown as NotificationPreferences | null;
+        const shouldSend = !prefs || prefs.email !== false;
+
+        if (shouldSend) {
+            await sendNewBookingNotification(
+                service.user.email,
+                service.user.id,
+                clientData.name,
+                service.title,
+                dateStr,
+                time,
+                clientData.answers,
+                clientData.clientPhone, // Pass phone number
+                locationDetails // Pass location details
+            );
+        }
+    } catch (emailError: unknown) {
+        console.error("[Booking] Failed to send provider notification.", emailError);
+    }
+
+    return { success: recurrenceId ? "Recurring booking confirmed!" : "Booking confirmed!" };
+>>>>>>> master
 };
 
 export const cancelBooking = async (bookingId: string) => {
@@ -574,6 +713,7 @@ export const rescheduleBooking = async (
     revalidatePath("/dashboard/bookings");
     return { success: tSuccess("bookingRescheduled") };
 };
+<<<<<<< HEAD
 
 // Helper to handle calendar sync and email notifications after booking creation
 async function handleBookingFulfillment(
@@ -814,3 +954,5 @@ export const confirmPaymentAndBooking = async (paymentIntentId: string) => {
         return { error: error.message };
     }
 }
+=======
+>>>>>>> master
