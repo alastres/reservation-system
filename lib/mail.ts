@@ -185,9 +185,31 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     const html = getHtmlTemplate("Confirm your email", body, { text: "Confirm Email", url: confirmLink });
 
     try {
-        await transporter.sendMail({ from: process.env.EMAIL_FROM, to: email, subject: "Confirm your email", html });
+        await transporter.sendMail({ from: process.env.EMAIL_FROM, to: email, subject: "Your Confirmation Code", html });
     } catch (error) {
-        console.log(error);
+        console.log("Error sending OTP:", error);
+    }
+}
+
+export const sendOtpEmail = async (
+    email: string,
+    token: string,
+) => {
+    const body = `
+        <p>Use the following code to verify your identity and confirm your booking:</p>
+        <div style="text-align: center; margin: 32px 0;">
+            <div style="background-color: #f3f4f6; padding: 16px 32px; border-radius: 8px; display: inline-block; border: 1px solid #e5e7eb;">
+                <span style="letter-spacing: 8px; color: #111827; font-size: 32px; font-weight: 700;">${token}</span>
+            </div>
+        </div>
+        <p style="font-size: 14px; text-align: center;">This code will expire in 15 minutes.</p>
+    `;
+    const html = getHtmlTemplate("Confirm your Booking", body);
+
+    try {
+        await transporter.sendMail({ from: process.env.EMAIL_FROM, to: email, subject: "Your Confirmation Code", html });
+    } catch (error) {
+        console.log("Error sending OTP:", error);
     }
 }
 
@@ -290,24 +312,40 @@ export const sendBookingReminder = async (
     }
 };
 
-export const sendOtpEmail = async (
-    email: string,
-    token: string,
-) => {
+
+
+export const sendInvitationEmail = async (email: string) => {
+    const registerLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/register`;
+
     const body = `
-        <p>Use the following code to verify your identity and confirm your booking:</p>
-        <div style="text-align: center; margin: 32px 0;">
-            <div style="background-color: #f3f4f6; padding: 16px 32px; border-radius: 8px; display: inline-block; border: 1px solid #e5e7eb;">
-                <span style="letter-spacing: 8px; color: #111827; font-size: 32px; font-weight: 700;">${token}</span>
-            </div>
+        <p>You have been invited to join <strong>Scheduler Platform</strong>.</p>
+        <p>We are excited to have you on board! Click the button below to create your account and get started:</p>
+        
+        <div class="highlight-box">
+             <div style="font-weight: 600; color: #4338ca; margin-bottom: 8px;">Why join us?</div>
+             <ul style="margin: 0; padding-left: 20px; color: #4b5563;">
+                <li>Manage your bookings automatically</li>
+                <li>Accept payments online</li>
+                <li>Sync with Google Calendar</li>
+             </ul>
         </div>
-        <p style="font-size: 14px; text-align: center;">This code will expire in 15 minutes.</p>
+
+        <p>If you did not expect this invitation, you can ignore this email.</p>
     `;
-    const html = getHtmlTemplate("Confirm your Booking", body);
+
+    const html = getHtmlTemplate("You're Invited!", body, { text: "Create Account", url: registerLink });
 
     try {
-        await transporter.sendMail({ from: process.env.EMAIL_FROM, to: email, subject: "Your Confirmation Code", html });
+        await transporter.sendMail({
+            from: process.env.EMAIL_FROM,
+            to: email,
+            subject: "You've been invited to Scheduler Platform",
+            html
+        });
+        // We log it as a system action, maybe with a specific user ID or 'SYSTEM'
+        // For now let's just log it if we can, or skip logging since we might not have a userId here easily passed down without context
+        // await logNotification("SYSTEM", "INVITATION_SENT", "SENT", { email });
     } catch (error) {
-        console.log("Error sending OTP:", error);
+        console.error("Error sending invitation email:", error);
     }
-}
+};
