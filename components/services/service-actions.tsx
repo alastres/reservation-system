@@ -131,6 +131,7 @@ export function DuplicateServiceButton({ id, onDuplicate }: { id: string, onDupl
 export function ServiceStatusToggle({ id, isActive, onToggle }: { id: string, isActive: boolean, onToggle?: (isActive: boolean) => void }) {
     const t = useTranslations('Services');
     const [isPending, startTransition] = useTransition();
+    const router = useRouter();
 
     const handleToggle = (checked: boolean) => {
         startTransition(() => {

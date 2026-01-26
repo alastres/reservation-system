@@ -16,12 +16,14 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { Role } from "@prisma/client";
+
 interface User {
     id: string;
     name: string | null;
     email: string | null;
     username: string | null;
-    role: "USER" | "ADMIN";
+    role: Role;
     createdAt: Date;
     _count: {
         bookings: number;
