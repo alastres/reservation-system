@@ -714,11 +714,19 @@
                 "joined": "Se unió",
                 "actions": "Acciones",
                 "noUsers": "No se encontraron usuarios",
-                "noUsersDesc": "Los usuarios registrados aparecerán aquí."
+                "noUsersDesc": "Los usuarios registrados aparecerán aquí.",
+                "searchPlaceholder": "Buscar usuarios..."
             },
             "stats": {
                 "services": "Servicios:",
                 "bookings": "Reservas:"
+            },
+            "pagination": {
+                "showing": "Mostrando {count} de {total}",
+                "previous": "Anterior",
+                "next": "Siguiente",
+                "page": "Página",
+                "of": "de"
             }
         },
         "logs": {
@@ -731,7 +739,15 @@
                 "details": "Detalles",
                 "ipAddress": "Dirección IP",
                 "noLogs": "No se encontraron registros del sistema",
-                "noLogsDesc": "Las acciones realizadas en el sistema aparecerán aquí."
+                "noLogsDesc": "Las acciones realizadas en el sistema aparecerán aquí.",
+                "searchPlaceholder": "Buscar en registros..."
+            },
+            "pagination": {
+                "showing": "Mostrando {count} de {total}",
+                "previous": "Anterior",
+                "next": "Siguiente",
+                "page": "Página",
+                "of": "de"
             }
         }
     }
