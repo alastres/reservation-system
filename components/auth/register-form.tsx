@@ -30,7 +30,7 @@ export const RegisterForm = () => {
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
 
-    const form = useForm<z.infer<typeof RegisterSchema>>({
+    const form = useForm({
         resolver: zodResolver(RegisterSchema),
         defaultValues: {
             email: "",
@@ -38,6 +38,7 @@ export const RegisterForm = () => {
             name: "",
             termsAccepted: false,
             timeZone: "UTC", // Default fallback
+            website: "",
         },
     });
 

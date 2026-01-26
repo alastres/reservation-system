@@ -35,16 +35,16 @@ export default async function ManageSubscriptionPage() {
         redirect("/subscription/select");
     }
 
-    const planNames = {
-        MONTHLY: "Plan Mensual",
-        QUARTERLY: "Plan Trimestral",
-        ANNUAL: "Plan Anual",
+    const planNames: Record<string, string> = {
+        FREE: "Plan Gratuito",
+        PRO: "Plan Profesional",
+        BUSINESS: "Plan Empresa",
     };
 
-    const planPrices = {
-        MONTHLY: "€10/mes",
-        QUARTERLY: "€25.50/3 meses (€8.50/mes)",
-        ANNUAL: "€84/año (€7/mes)",
+    const planPrices: Record<string, string> = {
+        FREE: "Gratis",
+        PRO: "€15/mes",
+        BUSINESS: "€49/mes",
     };
 
     const statusColors = {
