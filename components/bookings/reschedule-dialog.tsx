@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { format } from "date-fns";
+import { es, enUS } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Loader2, CalendarClock } from "lucide-react";
@@ -16,7 +17,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { getSlotsAction, rescheduleBooking } from "@/actions/booking";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface RescheduleDialogProps {
     booking: {
@@ -39,6 +40,9 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
 
     const router = useRouter();
     const t = useTranslations("Bookings.reschedule");
+    const locale = useLocale();
+    const locales = { es, en: enUS };
+    const tBooking = useTranslations("Booking");
     const tToast = useTranslations("Bookings.reschedule"); // Use generic bookings or specific for success
 
     // Reset state when dialog opens
@@ -106,6 +110,27 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
                     </DialogDescription>
                 </DialogHeader>
 
+                {date && (
+                    <div className="flex items-center justify-between py-4 border-b">
+                        <h3 className="font-semibold text-lg capitalize">
+                            {format(date, locale === 'es' ? "EEEE, d 'de' MMMM" : "EEEE, MMMM do", {
+                                locale: locales[locale as keyof typeof locales] ?? enUS
+                            })}
+                        </h3>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                                setDate(undefined);
+                                setSlots([]);
+                                setSelectedSlot(null);
+                            }}
+                        >
+                            {t('changeDate')}
+                        </Button>
+                    </div>
+                )}
+
                 <div className="flex-1 min-h-0 pt-4 overflow-y-auto">
                     {!date ? (
                         <div className="flex justify-center items-center h-full">
@@ -119,23 +144,6 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
                         </div>
                     ) : (
                         <div className="flex flex-col h-full space-y-4">
-                            <div className="flex items-center justify-between sticky top-0 bg-background z-10 py-2 border-b">
-                                <h3 className="font-semibold text-lg">
-                                    {format(date, "EEEE, MMMM do")}
-                                </h3>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                        setDate(undefined);
-                                        setSlots([]);
-                                        setSelectedSlot(null);
-                                    }}
-                                >
-                                    {t('changeDate')}
-                                </Button>
-                            </div>
-
                             {loadingSlots ? (
                                 <div className="flex items-center justify-center flex-1">
                                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -149,11 +157,14 @@ export function RescheduleDialog({ booking }: RescheduleDialogProps) {
                                         <Button
                                             key={slot.time}
                                             variant={selectedSlot === slot.time ? "default" : "outline"}
-                                            className="w-full h-11 text-sm font-medium transition-all hover:scale-105"
+                                            className="w-full h-auto py-3 flex flex-col items-center gap-1 transition-all hover:scale-105"
                                             onClick={() => setSelectedSlot(slot.time)}
                                             disabled={isPending}
                                         >
-                                            {slot.time}
+                                            <span className="text-base font-medium">{slot.time}</span>
+                                            <span className="text-xs opacity-70">
+                                                {tBooking('spotsLeft', { count: slot.spots })}
+                                            </span>
                                         </Button>
                                     ))}
                                 </div>
