@@ -41,21 +41,26 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     const userCount = await prisma.user.count();
     const role = userCount === 0 ? "ADMIN" : "OWNER";
 
-    await prisma.user.create({
-        data: {
-            name,
-            email,
-            password: hashedPassword,
-            role: role as any,
-            timeZone: timeZone || "UTC",
-        },
-    });
+    try {
+        await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role: role as any,
+                timeZone: timeZone || "UTC",
+            },
+        });
 
-    const verificationToken = await generateVerificationToken(email);
-    await sendOtpEmail(
-        verificationToken.identifier,
-        verificationToken.token,
-    );
+        const verificationToken = await generateVerificationToken(email);
+        await sendOtpEmail(
+            verificationToken.identifier,
+            verificationToken.token,
+        );
 
-    return { success: t("confirmationSent") };
+        return { success: t("confirmationSent") };
+    } catch (error) {
+        console.error("Registration Error:", error);
+        return { error: t("somethingWentWrong") };
+    }
 };
