@@ -24,7 +24,7 @@ A professional, white-label appointment scheduling platform built with **Next.js
 - **Smart Logic**:
   - **Time Zone conversion**: Auto-detects client timezone.
   - **Concurrency Management**: Global limits (e.g., "max 3 bookings at once") vs Service limits.
-  - **Buffer Times**: Automatic gaps between appointments.
+  - **Buffer Times**: Automatic gaps between appointments .
 
 ### 💰 Payments & Monetization (Stripe)
 - **Direct Payments**: Clients pay upfront to confirm bookings.
