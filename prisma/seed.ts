@@ -33,9 +33,11 @@ async function main() {
             username: 'demo_user',
             image: "https://cdn.pixabay.com/photo/2021/07/19/04/36/woman-6477171_1280.jpg",
             coverImage: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            phone: "+43614123456",
+            phone: "+34614123456",
             address: "Calle de la Paz, 123",
             subscriptionPlan: 'PRO',
+            subscriptionStatus: 'ACTIVE',
+            orgRole: 'OWNER',
             timeZone: 'Europe/Madrid',
             bio: "Psicólogo Clínico con más de 10 años de experiencia ayudando a personas a superar la ansiedad y encontrar el equilibrio emocional. Especialista en Terapia Cognitivo-Conductual y Mindfulness."
         },
