@@ -70,7 +70,7 @@ export function DateOverride({ initialExceptions }: DateOverrideProps) {
                 <CardTitle>{t('title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="flex flex-col md:flex-row gap-4 items-end border p-4 rounded-lg bg-muted/20">
+                <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-end border p-4 rounded-lg bg-muted/20">
                     <div className="space-y-2 flex-1">
                         <Label>{t('selectDate')}</Label>
                         <Popover>

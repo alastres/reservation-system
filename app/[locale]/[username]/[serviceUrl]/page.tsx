@@ -46,7 +46,7 @@ const ServiceBookingPage = async ({ params }: ServicePageProps) => {
                     <div className="flex items-center gap-3 mb-8">
 
                         <Avatar className="h-12 w-12 ring-2 ring-indigo-500/50 shadow-lg">
-                            <AvatarImage src={user.image || ""} className="object-cover" />
+                            <AvatarImage src={user.image || ""} className="object-cover aspect-square" />
                             <AvatarFallback className="bg-indigo-500/10 text-indigo-400 font-bold">{user.name?.[0]}</AvatarFallback>
                         </Avatar>
                         <div>

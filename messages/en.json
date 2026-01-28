@@ -506,7 +506,7 @@
         "aboutService": "About this service",
         "selectDate": "Select a date",
         "noSlots": "No slots available for this day.",
-        "spotsLeft": "{count, plural, one {spot left} other {spots left}}",
+        "spotsLeft": "{count, plural, one {# spot} other {# spots}}",
         "timeZoneWarning": "Time Zone Difference",
         "providerTimeZone": "Times shown are in",
         "clientTimeZone": "Your time zone",
@@ -538,7 +538,9 @@
             "fieldRequired": "{field} is required",
             "generic": "An unexpected error occurred.",
             "paymentFailed": "Failed to confirm booking after payment"
-        }
+        },
+        "loggedInAs": "Logged in as",
+        "logout": "Logout"
     },
     "Settings": {
         "title": "Settings",

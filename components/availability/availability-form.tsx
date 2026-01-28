@@ -88,7 +88,7 @@ export const AvailabilityForm = ({ initialData }: AvailabilityFormProps) => {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         {fields.map((field, index) => (
-                            <div key={field.id} className="flex items-center justify-between border p-3 rounded-lg">
+                            <div key={field.id} className="flex flex-col sm:flex-row sm:items-center justify-between border p-3 rounded-lg gap-y-3 sm:gap-y-0">
                                 <div className="flex items-center gap-x-4">
                                     <FormField
                                         control={form.control}

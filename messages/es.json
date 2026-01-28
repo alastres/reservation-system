@@ -227,7 +227,7 @@
     "Common": {
         "dashboard": "Panel de Control",
         "settings": "Configuración",
-        "logout": "Cerrar Sesión"
+        "logout": "Salir"
     },
     "Auth": {
         "welcomeBack": "Bienvenido de nuevo",
@@ -538,7 +538,9 @@
             "fieldRequired": "{field} es obligatorio",
             "generic": "Ocurrió un error inesperado.",
             "paymentFailed": "Error al confirmar reserva después del pago"
-        }
+        },
+        "loggedInAs": "Conectado como",
+        "logout": "Salir"
     },
     "Settings": {
         "title": "Configuración",

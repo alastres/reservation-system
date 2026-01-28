@@ -6,14 +6,15 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { getSlotsAction, createBooking, confirmPaymentAndBooking } from "@/actions/booking";
-import { Loader2, Check, CreditCard } from "lucide-react";
+import { Loader2, Check, CreditCard, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FormError } from "@/components/form-error";
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { ClientAuthDialog } from "@/components/auth/client-auth-dialog";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
@@ -302,6 +303,29 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
 
                         {bookingStage === "FORM" && (
                             <div className="max-w-md space-y-4 animate-in fade-in slide-in-from-right-4">
+                                {session?.user && (
+                                    <div className="mb-2 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-8 w-8 ring-2 ring-indigo-500/30">
+                                                <AvatarImage src={session.user.image || ""} className="object-cover aspect-square" />
+                                                <AvatarFallback className="bg-indigo-500 text-white text-xs">{session.user.name?.[0]}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="text-sm">
+                                                <p className="font-medium text-foreground">{t("loggedInAs")}</p>
+                                                <p className="text-muted-foreground text-xs">{session.user.name || session.user.email}</p>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => signOut()}
+                                            className="w-full sm:w-auto h-8 text-xs hover:bg-red-500/10 hover:text-red-500"
+                                        >
+                                            <LogOut className="h-3 w-3 mr-2" />
+                                            {t("logout")}
+                                        </Button>
+                                    </div>
+                                )}
                                 <div className="mb-4 p-3 bg-muted/50 border rounded text-sm space-y-2">
                                     <div>
                                         <span className="font-semibold text-gray-700">{t("selectedTime")}:</span> {date && format(date, "MMM d", { locale: dateLocale })} @ {selectedSlot}
