@@ -369,6 +369,45 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                         <Label>{t("notes")}</Label>
                                         <Textarea placeholder={t("notesPlaceholder")} value={notes} onChange={e => setNotes(e.target.value)} disabled={isBooking} />
                                     </div>
+
+                                    {/* Render Custom Questions */}
+                                    {service.customInputs && (service.customInputs as any[]).map((field: any) => (
+                                        <div key={field.id} className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <Label>
+                                                    {field.label} {field.required && <span className="text-red-500">*</span>}
+                                                </Label>
+                                            </div>
+
+                                            {field.type === 'textarea' ? (
+                                                <Textarea
+                                                    disabled={isBooking}
+                                                    placeholder={t("enterAnswer")}
+                                                    value={answers[field.label] || ""}
+                                                    onChange={(e) => setAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
+                                                />
+                                            ) : field.type === 'checkbox' ? (
+                                                <div className="flex items-center space-x-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        disabled={isBooking}
+                                                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                                        checked={answers[field.label] === "yes"}
+                                                        onChange={(e) => setAnswers(prev => ({ ...prev, [field.label]: e.target.checked ? "yes" : "no" }))}
+                                                    />
+                                                    <span className="text-sm text-muted-foreground">{t("yes")}</span>
+                                                </div>
+                                            ) : (
+                                                <Input
+                                                    disabled={isBooking}
+                                                    type="text"
+                                                    placeholder={t("enterAnswer")}
+                                                    value={answers[field.label] || ""}
+                                                    onChange={(e) => setAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
+                                                />
+                                            )}
+                                        </div>
+                                    ))}
                                 </div>
 
                                 <FormError message={bookingError} />

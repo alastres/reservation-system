@@ -501,15 +501,15 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved, subscriptionPl
 
                     <div className="space-y-4 mt-4">
                         {fieldsReturn.fields.map((fieldItem, index) => (
-                            <div key={fieldItem.id} className="grid grid-cols-12 gap-3 items-end border p-3 rounded-md bg-card shadow-sm">
-                                <FormItem className="col-span-4">
+                            <div key={fieldItem.id} className="flex flex-col md:grid md:grid-cols-12 gap-3 items-stretch md:items-end border p-3 rounded-md bg-card shadow-sm">
+                                <FormItem className="w-full md:col-span-4">
                                     <FormLabel>{t('form.label')}</FormLabel>
                                     <FormControl>
                                         <Input {...form.register(`customInputs.${index}.label`)} placeholder={t('form.titlePlaceholder')} disabled={isPending} />
                                     </FormControl>
                                 </FormItem>
 
-                                <FormItem className="col-span-3">
+                                <FormItem className="w-full md:col-span-3">
                                     <FormLabel>{t('form.type')}</FormLabel>
                                     {/* Using Controller or Register for Select is tricky, simplified select */}
                                     <FormControl>
@@ -525,7 +525,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved, subscriptionPl
                                     </FormControl>
                                 </FormItem>
 
-                                <FormItem className="col-span-3 flex flex-row items-center space-x-2 space-y-0 h-10">
+                                <FormItem className="w-full md:col-span-3 flex flex-row items-center space-x-2 space-y-0 h-10 mt-2 md:mt-0">
                                     <FormControl>
                                         <input
                                             type="checkbox"
@@ -537,7 +537,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved, subscriptionPl
                                     <FormLabel className="font-normal cursor-pointer">{t('form.required')}</FormLabel>
                                 </FormItem>
 
-                                <div className="col-span-2 flex justify-end">
+                                <div className="w-full md:col-span-2 flex justify-end mt-2 md:mt-0">
                                     <Button
                                         type="button"
                                         variant="ghost"
