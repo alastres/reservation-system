@@ -60,7 +60,7 @@ export const createService = async (values: z.infer<typeof ServiceSchema>) => {
             include: { user: { select: { username: true } } }
         });
 
-        revalidateTag(`services-${session.user.id}`);
+        revalidateTag(`services-${session.user.id}`, 'default');
         revalidatePath("/dashboard/services");
         return { success: tSuccess("created", { name: service.title }), service };
     } catch (e: any) {
@@ -105,7 +105,7 @@ export const updateService = async (id: string, values: z.infer<typeof ServiceSc
             include: { user: { select: { username: true } } }
         });
 
-        revalidateTag(`services-${session.user.id}`);
+        revalidateTag(`services-${session.user.id}`, 'default');
         revalidatePath("/dashboard/services");
         return { success: tSuccess("updated", { name: service.title }), service };
     } catch {
@@ -128,7 +128,7 @@ export const deleteService = async (id: string) => {
             return { error: t("serviceNotFound") };
         }
 
-        revalidateTag(`services-${session.user.id}`);
+        revalidateTag(`services-${session.user.id}`, 'default');
         revalidatePath("/dashboard/services");
         return { success: tSuccess("deleted", { name: "Service" }) };
     } catch (e) {
@@ -175,7 +175,7 @@ export const duplicateService = async (id: string) => {
             include: { user: { select: { username: true } } }
         });
 
-        revalidateTag(`services-${session.user.id}`);
+        revalidateTag(`services-${session.user.id}`, 'default');
         revalidatePath("/dashboard/services");
         return { success: tSuccess("duplicated"), service: newService };
     } catch (e: any) {
@@ -196,7 +196,7 @@ export const toggleServiceStatus = async (id: string, isActive: boolean) => {
             data: { isActive }
         });
 
-        revalidateTag(`services-${session.user.id}`);
+        revalidateTag(`services-${session.user.id}`, 'default');
         revalidatePath("/dashboard/services");
         return { success: tSuccess("toggled") };
     } catch {
