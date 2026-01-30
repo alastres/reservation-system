@@ -265,7 +265,7 @@ export const BookingCalendar = ({ service, user }: BookingCalendarProps) => {
                                     const clientTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                                     const providerTimeZone = user.timeZone || "UTC";
 
-                                    console.log("[TimeZone Debug]", { client: clientTimeZone, provider: providerTimeZone, mismatch: clientTimeZone !== providerTimeZone });
+
 
                                     if (date && clientTimeZone !== providerTimeZone) {
                                         return (

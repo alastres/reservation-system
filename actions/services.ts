@@ -61,6 +61,7 @@ export const createService = async (values: z.infer<typeof ServiceSchema>) => {
         });
 
         revalidateTag(`services-${session.user.id}`, 'default');
+        revalidateTag(`user-profile-${session.user.username}`, 'default');
         revalidatePath("/dashboard/services");
         return { success: tSuccess("created", { name: service.title }), service };
     } catch (e: any) {
@@ -106,6 +107,7 @@ export const updateService = async (id: string, values: z.infer<typeof ServiceSc
         });
 
         revalidateTag(`services-${session.user.id}`, 'default');
+        revalidateTag(`user-profile-${session.user.username}`, 'default');
         revalidatePath("/dashboard/services");
         return { success: tSuccess("updated", { name: service.title }), service };
     } catch {
@@ -129,6 +131,7 @@ export const deleteService = async (id: string) => {
         }
 
         revalidateTag(`services-${session.user.id}`, 'default');
+        revalidateTag(`user-profile-${session.user.username}`, 'default');
         revalidatePath("/dashboard/services");
         return { success: tSuccess("deleted", { name: "Service" }) };
     } catch (e) {
@@ -176,6 +179,7 @@ export const duplicateService = async (id: string) => {
         });
 
         revalidateTag(`services-${session.user.id}`, 'default');
+        revalidateTag(`user-profile-${session.user.username}`, 'default');
         revalidatePath("/dashboard/services");
         return { success: tSuccess("duplicated"), service: newService };
     } catch (e: any) {
@@ -197,6 +201,7 @@ export const toggleServiceStatus = async (id: string, isActive: boolean) => {
         });
 
         revalidateTag(`services-${session.user.id}`, 'default');
+        revalidateTag(`user-profile-${session.user.username}`, 'default');
         revalidatePath("/dashboard/services");
         return { success: tSuccess("toggled") };
     } catch {
