@@ -598,6 +598,12 @@
                 "selectLanguage": "Select a language"
             }
         },
+        "team": {
+            "title": "Team Management",
+            "description": "Manage your organization members and roles. (Available on Business Plan)",
+            "comingSoon": "Team management features coming soon!",
+            "upgradeRequired": "Upgrade to Business plan to access team features."
+        },
         "subscription": {
             "title": "Subscription",
             "descriptionAdmin": "Information about your administrative account",

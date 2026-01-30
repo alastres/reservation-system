@@ -598,6 +598,12 @@
                 "selectLanguage": "Selecciona un idioma"
             }
         },
+        "team": {
+            "title": "Gestión de Equipos",
+            "description": "Gestiona los miembros y roles de tu organización. (Disponible en Plan Business)",
+            "comingSoon": "¡Funciones de gestión de equipos próximamente!",
+            "upgradeRequired": "Mejora al plan Business para acceder a las funciones de equipo."
+        },
         "subscription": {
             "title": "Suscripción",
             "descriptionAdmin": "Información de tu cuenta administrativa",

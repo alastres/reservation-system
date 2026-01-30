@@ -1,37 +1,36 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getUserPlan } from "@/actions/user";
-import { redirect } from "next/navigation";
 
-export default async function TeamSettingsPage() {
+export default async function TeamSettingsPage({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
+    const t = await getTranslations({ locale, namespace: 'Settings.team' });
+
     // Basic server-side protection
     const planData = await getUserPlan();
     const plan = planData?.plan;
-    if (plan !== "BUSINESS") {
-        // Option A: Redirect
-        // redirect("/dashboard/settings");
-        // Option B: Show upgrade message
-    }
 
-    // Client component for translations would be better, but server component is fine for structure
+    // If redirection was needed:
+    // if (plan !== "BUSINESS") { ... }
+
     return (
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>Team Management</CardTitle>
+                    <CardTitle>{t('title')}</CardTitle>
                     <CardDescription>
-                        Manage your organization members and roles. (Available on Business Plan)
+                        {t('description')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     {plan === "BUSINESS" ? (
                         <div className="p-4 bg-muted rounded-md border text-center">
-                            <p>Team management features coming soon!</p>
+                            <p>{t('comingSoon')}</p>
                             {/* Placeholder for member list */}
                         </div>
                     ) : (
                         <div className="p-4 bg-yellow-50/10 border border-yellow-500/20 rounded-md text-yellow-500">
-                            Upgrade to Business plan to access team features.
+                            {t('upgradeRequired')}
                         </div>
                     )}
                 </CardContent>
