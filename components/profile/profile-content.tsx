@@ -274,7 +274,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
 
                                     <CardContent className="relative pb-4">
                                         <p className="text-sm text-slate-400 line-clamp-3 leading-relaxed">
-                                            {service.description || "No description provided."}
+                                            {service.description || t('noDescription')}
                                         </p>
                                     </CardContent>
 

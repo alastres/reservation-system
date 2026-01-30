@@ -219,7 +219,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved, subscriptionPl
                                         {(!role || role !== "ADMIN") && (!subscriptionPlan || subscriptionPlan === "FREE") && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-[1px] rounded-md border border-dashed border-muted-foreground/30">
                                                 <span className="text-xs text-muted-foreground font-medium bg-background px-2 py-1 rounded-full shadow-sm">
-                                                    Free Plan: Always $0
+                                                    {t('form.freePlanAlwaysZero')}
                                                 </span>
                                             </div>
                                         )}
@@ -357,7 +357,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved, subscriptionPl
                                 <FormLabel className="text-base">{t('form.requirePayment')}</FormLabel>
                                 <FormDescription>
                                     {(!role || role !== "ADMIN") && (!subscriptionPlan || subscriptionPlan === "FREE")
-                                        ? <span className="text-yellow-600 dark:text-yellow-500 text-xs">Upgrade to Accept Payments</span>
+                                        ? <span className="text-yellow-600 dark:text-yellow-500 text-xs">{t('form.upgradeToAcceptPayments')}</span>
                                         : t('form.requirePaymentDesc')
                                     }
                                 </FormDescription>
@@ -380,7 +380,7 @@ export const ServiceForm = ({ service, onSuccess, onServiceSaved, subscriptionPl
                         <FormLabel className="text-base">{t('form.concurrency')}</FormLabel>
                         <FormDescription>
                             {(!role || role !== "ADMIN") && (!subscriptionPlan || subscriptionPlan === "FREE")
-                                ? <span className="text-yellow-600 dark:text-yellow-500 font-medium text-xs">Upgrade to Pro for team/concurrency features.</span>
+                                ? <span className="text-yellow-600 dark:text-yellow-500 font-medium text-xs">{t('form.upgradeToProConcurrency')}</span>
                                 : t('form.concurrencyDesc')
                             }
                         </FormDescription>

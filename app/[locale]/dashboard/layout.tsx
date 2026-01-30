@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { TimezoneSync } from "@/components/auth/timezone-sync";
 
 const font = Plus_Jakarta_Sans({ weight: "600", subsets: ["latin"] });
 
@@ -26,6 +27,7 @@ const DashboardLayout = async ({
             role: true,
             subscriptionStatus: true,
             id: true,
+            timeZone: true, // Select timezone explicitly
         },
     });
 
@@ -46,6 +48,7 @@ const DashboardLayout = async ({
 
     return (
         <div className="h-full relative bg-background">
+            <TimezoneSync serverTimeZone={user.timeZone || "UTC"} />
             <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-[80]">
                 <SideNav role={(user as any).role} />
             </div>

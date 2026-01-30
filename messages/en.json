@@ -359,7 +359,11 @@
                 "text": "Short Text",
                 "textarea": "Long Text",
                 "checkbox": "Checkbox (Yes/No)"
-            }
+            },
+            "freePlanAlwaysZero": "Free Plan: Always $0",
+            "upgradeToAcceptPayments": "Upgrade to Accept Payments",
+            "upgradeToProConcurrency": "Upgrade to Pro for team/concurrency features.",
+            "selectLanguage": "Select a language"
         },
         "status": {
             "created": "Service created!",
@@ -497,7 +501,8 @@
         "bookNow": "Book Now",
         "available": "Available",
         "poweredBy": "Powered by",
-        "free": "Free"
+        "free": "Free",
+        "noDescription": "No description provided."
     },
     "Booking": {
         "backToProfile": "Back to Profile",
@@ -587,7 +592,10 @@
                 "emailNotif": "Email Notifications",
                 "emailNotifDesc": "Receive updates about your bookings.",
                 "save": "Save Changes",
-                "saving": "Saving..."
+                "saving": "Saving...",
+                "upgradeToProCapacity": "Upgrade to Pro to change this limit.",
+                "allowedFormats": "JPG, PNG, GIF allowed.",
+                "selectLanguage": "Select a language"
             }
         },
         "subscription": {

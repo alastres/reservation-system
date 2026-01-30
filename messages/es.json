@@ -359,7 +359,11 @@
                 "text": "Texto Corto",
                 "textarea": "Texto Largo",
                 "checkbox": "Casilla (Sí/No)"
-            }
+            },
+            "freePlanAlwaysZero": "Plan Gratuito: Siempre 0€",
+            "upgradeToAcceptPayments": "Mejora tu plan para aceptar pagos",
+            "upgradeToProConcurrency": "Mejora a Pro para funciones de equipo/concurrencia.",
+            "selectLanguage": "Selecciona un idioma"
         },
         "status": {
             "created": "¡Servicio creado!",
@@ -497,7 +501,8 @@
         "bookNow": "Reservar",
         "available": "Disponible",
         "poweredBy": "Impulsado por",
-        "free": "Gratis"
+        "free": "Gratis",
+        "noDescription": "No hay descripción disponible."
     },
     "Booking": {
         "backToProfile": "Volver al Perfil",
@@ -587,7 +592,10 @@
                 "emailNotif": "Notificaciones por Correo",
                 "emailNotifDesc": "Recibe actualizaciones sobre tus reservas.",
                 "save": "Guardar Cambios",
-                "saving": "Guardando..."
+                "saving": "Guardando...",
+                "upgradeToProCapacity": "Mejora a Pro para cambiar este límite.",
+                "allowedFormats": "JPG, PNG, GIF permitidos.",
+                "selectLanguage": "Selecciona un idioma"
             }
         },
         "subscription": {

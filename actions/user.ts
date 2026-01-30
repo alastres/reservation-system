@@ -100,3 +100,19 @@ export const getUserPlan = async () => {
 
     return { plan: user?.subscriptionPlan, role: user?.role, username: user?.username };
 }
+
+export const updateTimezone = async (timeZone: string) => {
+    const session = await auth();
+    if (!session?.user?.id) return { error: "Unauthorized" };
+
+    try {
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { timeZone },
+        });
+        revalidatePath("/dashboard");
+        return { success: true };
+    } catch {
+        return { error: "Failed to update timezone" };
+    }
+};

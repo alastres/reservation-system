@@ -199,7 +199,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                         />
                         <div className="text-sm text-muted-foreground">
                             <p>{t('recProfile')}</p>
-                            <p>{t('recProfile').includes('br') ? 'JPG, PNG, GIF' : 'JPG, PNG, GIF allowed.'}</p> {/* Adjust if needed */}
+                            <p>{t('allowedFormats')}</p>
                         </div>
                         {isUploading && <p className="text-xs text-primary animate-pulse">{t('uploading')}</p>}
                     </div>
@@ -254,7 +254,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">
                     {(!user.role || user.role !== "ADMIN") && (!user.subscriptionPlan || user.subscriptionPlan === "FREE" as any)
-                        ? <span className="text-yellow-600 dark:text-yellow-500 font-medium">Upgrade to Pro to change this limit.</span>
+                        ? <span className="text-yellow-600 dark:text-yellow-500 font-medium">{t('upgradeToProCapacity')}</span>
                         : t('capacityDesc')
                     }
                 </p>
@@ -310,7 +310,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                         disabled={isPending}
                     >
                         <SelectTrigger>
-                            <SelectValue placeholder="Select a language" />
+                            <SelectValue placeholder={t('selectLanguage')} />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="es">Español</SelectItem>
