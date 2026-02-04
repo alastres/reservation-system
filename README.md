@@ -1,133 +1,141 @@
-# Reservation SaaS Platform (Next.js 14)
+# Plataforma SaaS de Reservas (Next.js 16)
 
-A professional, white-label appointment scheduling platform built with **Next.js 14**. It empowers professionals (Owners) to manage their services, availability, and payments, while providing Clients with a seamless booking experience. Similar to Calendly, but self-hosted and fully customizable.
+Una plataforma profesional de programación de citas de marca blanca construida con **Next.js 16**. Permite a los profesionales (Dueños) gestionar sus servicios, disponibilidad y pagos, mientras ofrece a los Clientes una experiencia de reserva fluida. Similar a Calendly, pero auto-hospedado y totalmente personalizable.
 
-![Dashboard Preview](public/dashboard-preview.png)
+![Vista Previa del Dashboard](public/dashboard-preview.png)
 
-## 🚀 Key Features
+## 🚀 Características Principales
 
-### 🔐 Authentication & Security
-- **Multi-Method Auth**: Supports Google OAuth, Email/Password, and Magic Links (via **Auth.js / NextAuth v5**).
-- **OTP Verification**: Secure 2-step verification for email registration.
-- **Role-Based Access Control (RBAC)**: Distinct portals for **Admins**, **Owners** (Providers), and **Clients**.
-- **Security Best Practices**:
-  - **Rate Limiting**: Middleware-based protection against abuse.
-  - **Spam Prevention**: Honeypot fields and CAPTCHA implementation.
-  - **Input Validation**: Strict schema validation using **Zod**.
+### 🔐 Autenticación y Seguridad
+- **Autenticación Multi-método**: Soporta Google OAuth, Email/Contraseña y Enlaces Mágicos (vía **Auth.js / NextAuth v5**).
+- **Verificación OTP**: Verificación segura en 2 pasos para el registro por correo electrónico.
+- **Control de Acceso Basado en Roles (RBAC)**: Portales distintos para **Administradores**, **Dueños** (Proveedores) y **Clientes**.
+- **Mejores Prácticas de Seguridad**:
+  - **Rate Limiting**: Protección basada en middleware contra abusos.
+  - **Prevención de Spam**: Campos Honeypot e implementación de CAPTCHA.
+  - **Validación de Entradas**: Validación estricta de esquemas usando **Zod**.
 
-### 📅 Booking Engine
-- **Flexible Services**: Configure duration, price, capacity (1-on-1 or Groups), and location (Google Meet, Phone number for calls, In-Person).
-- **Hybrid Availability**:
-  - **Weekly Rules**: Set recurring operating hours (e.g., Mon-Fri 9-5).
-  - **Date Exceptions**: Override specific dates for holidays or time off.
-  - **Google Calendar Sync**: 2-way sync to prevent double bookings.
-- **Smart Logic**:
-  - **Time Zone conversion**: Auto-detects client timezone.
-  - **Concurrency Management**: Global limits (e.g., "max 3 bookings at once") vs Service limits.
-  - **Buffer Times**: Automatic gaps between appointments.
+### 📅 Motor de Reservas
+- **Servicios Flexibles**: Configura duración, precio, capacidad (1 a 1 o Grupos) y ubicación (Google Meet, Número de teléfono, En persona).
+- **Disponibilidad Híbrida**:
+  - **Reglas Semanales**: Establece horarios de operación recurrentes (ej: Lun-Vie 9-5).
+  - **Excepciones por Fecha**: Anula fechas específicas para vacaciones o tiempo libre.
+  - **Sincronización con Google Calendar**: Sincronización bidireccional para evitar dobles reservas.
+- **Lógica Inteligente**:
+  - **Conversión de Zona Horaria**: Detecta automáticamente la zona horaria del cliente.
+  - **Gestión de Concurrencia**: Límites globales (ej: "máximo 3 reservas al mismo tiempo") vs límites por Servicio.
+  - **Tiempos de Buffer**: Espacios automáticos entre citas.
 
-### 💰 Payments & Monetization (Stripe)
-- **Direct Payments**: Clients pay upfront to confirm bookings.
+### 💰 Pagos y Monetización (Stripe)
+- **Pagos Directos**: Los clientes pagan por adelantado para confirmar reservas.
 - **Stripe Connect (Express)**:
-  - **Onboarding**: Owners connect their own Stripe accounts via a dedicated onboarding flow.
-  - **Automatic Payouts**: Funds are routed directly to the Owner's bank account.
-  - **Platform Fees**: (Optional) The platform can take a % cut of every transaction.
-- **SaaS Subscriptions**: Build a business model where Owners pay a monthly/annual fee to use the platform.
-- **Webhooks**: Real-time status updates (Payment Succeeded, Subscription Updated).
+  - **Onboarding**: Los dueños conectan sus propias cuentas de Stripe a través de un flujo de incorporación dedicado.
+  - **Pagos Automáticos**: Los fondos se envían directamente a la cuenta bancaria del Dueño.
+  - **Tarifas de Plataforma**: (Opcional) La plataforma puede cobrar un % de cada transacción.
+- **Suscripciones SaaS**: Modelo de negocio donde los Dueños pagan una tarifa mensual/anual por usar la plataforma.
+- **Webhooks**: Actualizaciones de estado en tiempo real (Pago Exitoso, Suscripción Actualizada).
 
-### 🌍 Internationalization (i18n)
-- **Multilingual Support**: Fully translated into **English (EN)** and **Spanish (ES)**.
-- **Locale Detection**: Middleware automatically redirects users based on browser preference.
-- **Localized Content**: All emails, error messages, and UI elements are adapted.
+### 🌍 Internacionalización (i18n)
+- **Soporte Multilingüe**: Totalmente traducido a **Inglés (EN)** y **Español (ES)**, incluyendo componentes de servidor y cliente.
+- **Detección de Configuración Regional**: El middleware redirige automáticamente a los usuarios según la preferencia del navegador.
+- **Contenido Localizado**: Todos los correos electrónicos, mensajes de error y elementos de la interfaz de usuario están adaptados.
 
-### ⚙️ Automation & Analytics
-- **Cron Jobs**: Background tasks for sending **24h and 1h Appointment Reminders** (via Vercel Cron).
-- **Email Notifications**: Transactional emails via **Resend** (Confirmations, Cancellations, Reminders).
-- **Dashboard Analytics**: Interactive charts (Recharts) for Revenue, Booking Volume, and Popular Services.
+### ⚙️ Automatización y Analíticas
+- **Cron Jobs**: Tareas en segundo plano para enviar **Recordatorios de Citas de 24h y 1h** (vía Vercel Cron).
+- **Notificaciones por Correo**: Correos transaccionales vía **Resend / Nodemailer** (Confirmaciones, Cancelaciones, Recordatorios).
+- **Analíticas del Dashboard**: Gráficos interactivos (Recharts) para Ingresos, Volumen de Reservas y Servicios Populares.
+
+### 🎨 UX/UI Moderno
+- **Interfaz Premium**: Construida con **Tailwind CSS 4** y componentes de **Shadcn/UI**.
+- **Animaciones Suaves**: Utilizando **Framer Motion** para una experiencia de usuario dinámica.
+- **Feedback Visual**: Notificaciones tipo toast elegantes con **Sonner**.
+- **Entrada de Teléfono**: Manejo robusto de números internacionales con `react-phone-number-input`.
 
 ---
 
-## 🛠 Tech Stack
+## 🛠 Tecnologías
 
-- **Framework**: [Next.js 14](https://nextjs.org/) (App Router, Server Actions)
-- **Language**: TypeScript
-- **Database**: PostgreSQL (via [Neon](https://neon.tech) or Supabase)
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Server Actions)
+- **Lenguaje**: TypeScript
+- **Base de Datos**: PostgreSQL (vía [Neon](https://neon.tech) o Supabase)
 - **ORM**: [Prisma](https://www.prisma.io/)
-- **Auth**: [Auth.js (NextAuth v5)](https://authjs.dev/)
-- **Payments**: [Stripe](https://stripe.com/) & Stripe Connect
-- **Email**: [Resend](https://resend.com/) & [Nodemailer](https://nodemailer.com/)
-- **UI/Styling**: [TailwindCSS](https://tailwindcss.com/) & [Shadcn/UI](https://ui.shadcn.com/)
-- **Validation**: [Zod](https://zod.dev/) & [React Hook Form](https://react-hook-form.com/)
-- **Internationalization**: [next-intl](https://next-intl-docs.vercel.app/)
+- **Auth**: [Auth.js (NextAuth v5 Beta)](https://authjs.dev/)
+- **Pagos**: [Stripe](https://stripe.com/) & Stripe Connect
+- **Correo**: [Resend](https://resend.com/) & [Nodemailer](https://nodemailer.com/)
+- **UI/Estilos**: [TailwindCSS 4](https://tailwindcss.com/) & [Shadcn/UI](https://ui.shadcn.com/)
+- **Validación**: [Zod](https://zod.dev/) & [React Hook Form](https://react-hook-form.com/)
+- **Internacionalización**: [next-intl](https://next-intl-docs.vercel.app/)
+- **Gestión de Estado**: [Zustand](https://zustand-demo.pmnd.rs/)
+- **Fechas**: [Date-fns](https://date-fns.org/) & [React Day Picker](https://react-day-picker.js.org/)
 
 ---
 
-## 📦 Getting Started
+## 📦 Comenzando
 
-### 1. Prerequisites
+### 1. Prerrequisitos
 - Node.js 18+
-- PostgreSQL Database URL
-- Stripe Account (with Connect enabled)
-- Google Cloud Project (for Calendar API & Auth)
-- Resend API Key
+- URL de Base de Datos PostgreSQL
+- Cuenta de Stripe (con Connect habilitado)
+- Proyecto de Google Cloud (para API de Calendar y Auth)
+- Clave API de Resend
 
-### 2. Installation
+### 2. Instalación
 
 ```bash
-# Clone repository
-git clone https://github.com/your-username/reservation-system.git
+# Clonar repositorio
+git clone https://github.com/tu-usuario/reservation-system.git
 cd reservation-system
 
-# Install dependencies
+# Instalar dependencias
 npm install
 
-# Initialize Database
+# Inicializar Base de Datos
 npx prisma generate
 npx prisma db push
 ```
 
-### 3. Environment Configuration
+### 3. Configuración del Entorno
 
-Rename `.env.example` to `.env` and configure the following:
+Renombra `.env.example` a `.env` y configura lo siguiente:
 
 #### Core
 ```env
-DATABASE_URL="postgresql://user:pass@host/db?sslmode=require"
-NEXT_PUBLIC_APP_URL="http://localhost:3000" # Use https://your-domain.com in production
+DATABASE_URL="postgresql://usuario:pass@host/db?sslmode=require"
+NEXT_PUBLIC_APP_URL="http://localhost:3000" # Usa https://tu-dominio.com en producción
 ```
 
-#### Authentication (NextAuth)
+#### Autenticación (NextAuth)
 ```env
-AUTH_SECRET="generate-with-openssl-rand-base64-32"
+AUTH_SECRET="generar-con-openssl-rand-base64-32"
 # Google OAuth
-AUTH_GOOGLE_ID="your-client-id"
-AUTH_GOOGLE_SECRET="your-client-secret"
+AUTH_GOOGLE_ID="tu-client-id"
+AUTH_GOOGLE_SECRET="tu-client-secret"
 ```
 
-#### Payments (Stripe)
-Go to Stripe Dashboard > Developers > API Keys.
+#### Pagos (Stripe)
+Ve al Dashboard de Stripe > Desarrolladores > Claves API.
 ```env
 STRIPE_SECRET_KEY="sk_test_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
 
-# Product IDs (Create these in Stripe Dashboard Products)
+# IDs de Productos (Créalos en Productos del Dashboard de Stripe)
 STRIPE_PRICE_MONTHLY="price_..."
 STRIPE_PRICE_QUARTERLY="price_..."
 STRIPE_PRICE_ANNUAL="price_..."
 ```
 
-#### Google Calendar Integration
-Required for 2-way sync. Enable **Google Calendar API** in Cloud Console.
+#### Integración con Google Calendar
+Requerido para sincronización de 2 vías. Habilita **Google Calendar API** en Cloud Console.
 ```env
-GOOGLE_CLIENT_ID="same-as-auth-id"
-GOOGLE_CLIENT_SECRET="same-as-auth-secret"
+GOOGLE_CLIENT_ID="mismo-que-auth-id"
+GOOGLE_CLIENT_SECRET="mismo-que-auth-secret"
 ```
 
-#### Email (Resend)
+#### Correo (Resend)
 ```env
 RESEND_API_KEY="re_..."
-EMAIL_FROM="onboarding@resend.dev" # Or your verified domain
+EMAIL_FROM="onboarding@resend.dev" # O tu dominio verificado
 EMAIL_SERVER_HOST="smtp.resend.com"
 EMAIL_SERVER_PORT="465"
 EMAIL_SERVER_USER="resend"
@@ -136,58 +144,58 @@ EMAIL_SERVER_PASSWORD="re_..."
 
 ---
 
-## 🚀 Configuration Guide
+## 🚀 Guía de Configuración
 
-### Google Cloud Setup
-1. Create a project in [Google Cloud Console](https://console.cloud.google.com/).
-2. Enable **Google Calendar API**.
-3. Go to **Credentials** > **Create Credentials** > **OAuth Client ID**.
-4. Set Authorized Redirect URIs:
+### Configuración de Google Cloud
+1. Crea un proyecto en [Google Cloud Console](https://console.cloud.google.com/).
+2. Habilita **Google Calendar API**.
+3. Ve a **Credenciales** > **Crear credenciales** > **ID de cliente de OAuth**.
+4. Configura URIs de redirección autorizados:
    - Local: `http://localhost:3000/api/auth/callback/google`
-   - Production: `https://your-domain.com/api/auth/callback/google`
-5. Copy Client ID and Secret to `.env`.
+   - Producción: `https://your-domain.com/api/auth/callback/google`
+5. Copia el ID de Cliente y el Secreto al `.env`.
 
-### Stripe Connect Setup
-1. Go to Stripe Dashboard > **Connect**.
-2. Enable **Express** accounts.
-3. In **Input Settings** > **Redirects**, add:
+### Configuración de Stripe Connect
+1. Ve al Dashboard de Stripe > **Connect**.
+2. Habilita cuentas **Express**.
+3. En **Configuración de la entrada** > **Redireccionamientos**, añade:
    - `http://localhost:3000/api/stripe/connect/refresh`
    - `http://localhost:3000/api/stripe/connect/return`
-   - (And the comprehensive production equivalents)
-4. Use the `STRIPE_SECRET_KEY` in your `.env`.
+   - (Y los equivalentes completos de producción)
+4. Usa la `STRIPE_SECRET_KEY` en tu `.env`.
 
-### Vercel Deployment & Cron Jobs
-1. **Push to GitHub**.
-2. **Import to Vercel**: Select the repository.
-3. **Environment Variables**: Copy all variables from `.env`.
+### Despliegue en Vercel y Cron Jobs
+1. **Push a GitHub**.
+2. **Importar a Vercel**: Selecciona el repositorio.
+3. **Variables de Entorno**: Copia todas las variables del `.env`.
 4. **Cron Jobs**:
-   - The project includes a `vercel.json` file defining the cron schedule (`/api/cron/reminders`).
-   - Vercel automatically detects this.
-   - You can secure the cron endpoint by adding a `CRON_SECRET` env var (optional implementation).
+   - El proyecto incluye un archivo `vercel.json` definiendo el horario del cron (`/api/cron/reminders`).
+   - Vercel detecta esto automáticamente.
+   - Puedes asegurar el endpoint del cron añadiendo una var de entorno `CRON_SECRET` (implementación opcional).
 
 ---
 
-## 🏃‍♂️ Running the Project
+## 🏃‍♂️ Ejecutando el Proyecto
 
-### Development
+### Desarrollo
 ```bash
 npm run dev
-# Visit http://localhost:3000
+# Visita http://localhost:3000
 ```
 
-### Production Build
+### Build de Producción
 ```bash
 npm run build
 npm start
 ```
 
-### Utility Scripts
-The `scripts/` folder contains helper scripts for verification (excluded from build):
-- `npm run check-tz`: Verifies timezone handling.
-- `npm run verify-all`: runs a full build verification.
+### Scripts de Utilidad
+La carpeta `scripts/` contiene scripts de ayuda para verificación (excluidos del build):
+- `npm run check-tz`: Verifica el manejo de zonas horarias.
+- `npm run verify-all`: corre una verificación completa del build.
 
 ---
 
-## 📄 License
+## 📄 Licencia
 
-MIT License.
+Licencia MIT.
