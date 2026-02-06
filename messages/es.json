@@ -633,7 +633,16 @@
                 "PRO": "€15/mes",
                 "BUSINESS": "€49/mes"
             },
-            "usePortalToDowngrade": "Por favor usa el portal de facturación para gestionar tu suscripción actual si deseas cambiar al plan gratuito."
+            "usePortalToDowngrade": "Por favor usa el portal de facturación para gestionar tu suscripción actual si deseas cambiar al plan gratuito.",
+            "success": {
+                "title": "¡Suscripción Activada!",
+                "description": "Tu cuenta ha sido activada con éxito.",
+                "welcome": "¡Bienvenido a Scheduler!",
+                "welcomeDesc": "Ya puedes empezar a crear servicios, gestionar tu disponibilidad y recibir reservas.",
+                "goToDashboard": "Ir al Panel de Control",
+                "viewSubscription": "Ver Mi Suscripción",
+                "emailConfirmation": "Recibirás un email de confirmación en breve."
+            }
         },
         "stripe": {
             "title": "Pagos y Stripe Connect",
