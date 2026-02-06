@@ -10,7 +10,13 @@ export async function POST(req: Request) {
     const signature = (await headers()).get("stripe-signature");
 
     if (!signature) {
+        console.error("Webhook Error: No signature found in headers");
         return NextResponse.json({ error: "No signature" }, { status: 400 });
+    }
+
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+        console.error("Webhook Error: STRIPE_WEBHOOK_SECRET is not set");
+        return NextResponse.json({ error: "Server Configuration Error" }, { status: 500 });
     }
 
     let event: Stripe.Event;
@@ -19,10 +25,10 @@ export async function POST(req: Request) {
         event = stripe.webhooks.constructEvent(
             body,
             signature,
-            process.env.STRIPE_WEBHOOK_SECRET!
+            process.env.STRIPE_WEBHOOK_SECRET
         );
     } catch (err: any) {
-        console.error("Webhook signature verification failed:", err.message);
+        console.error(`Webhook signature verification failed. Signature: ${signature.substring(0, 10)}... Error: ${err.message}`);
         return NextResponse.json(
             { error: `Webhook Error: ${err.message}` },
             { status: 400 }

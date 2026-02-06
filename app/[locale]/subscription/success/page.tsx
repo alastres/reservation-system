@@ -14,7 +14,7 @@ export default async function SubscriptionSuccessPage({
 }) {
     const session = await auth();
     const { locale } = await params;
-    const t = await getTranslations({ locale, namespace: 'Subscription.success' });
+    const t = await getTranslations({ locale, namespace: 'subscription.success' });
     const { session_id } = await searchParams;
 
     if (!session?.user) {
