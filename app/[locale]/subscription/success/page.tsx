@@ -14,7 +14,7 @@ export default async function SubscriptionSuccessPage({
 }) {
     const session = await auth();
     const { locale } = await params;
-    const t = await getTranslations({ locale, namespace: 'subscription.success' });
+    const t = await getTranslations({ locale, namespace: 'Subscription' });
     const { session_id } = await searchParams;
 
     if (!session?.user) {
@@ -39,33 +39,33 @@ export default async function SubscriptionSuccessPage({
                         </span>
                     </div>
 
-                    <CardTitle className="text-2xl">{t('title')}</CardTitle>
+                    <CardTitle className="text-2xl">{t('success.title')}</CardTitle>
                     <CardDescription>
-                        {t('description')}
+                        {t('success.description')}
                     </CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
                     <div className="bg-muted p-4 rounded-lg space-y-2">
                         <p className="text-sm">
-                            <strong>{t('welcome')}</strong>
+                            <strong>{t('success.welcome')}</strong>
                         </p>
                         <p className="text-sm text-muted-foreground">
-                            {t('welcomeDesc')}
+                            {t('success.welcomeDesc')}
                         </p>
                     </div>
 
                     <div className="space-y-2">
                         <Button asChild className="w-full">
-                            <a href="/dashboard">{t('goToDashboard')}</a>
+                            <a href="/dashboard">{t('success.goToDashboard')}</a>
                         </Button>
                         <Button asChild variant="outline" className="w-full">
-                            <a href="/subscription/manage">{t('viewSubscription')}</a>
+                            <a href="/subscription/manage">{t('success.viewSubscription')}</a>
                         </Button>
                     </div>
 
                     <p className="text-xs text-center text-muted-foreground">
-                        {t('emailConfirmation')}
+                        {t('success.emailConfirmation')}
                     </p>
                 </CardContent>
             </Card>

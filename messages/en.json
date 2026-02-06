@@ -477,8 +477,17 @@
         "statusFailed": "Failed to get subscription status",
         "cancelFailed": "Failed to cancel subscription",
         "noActiveSubscription": "No active subscription found",
-        "cancelSuccess": "Subscription will be cancelled at the end of the billing period",
-        "noSubscriptionFound": "No active subscription found. Please subscribe first."
+        "cancelSuccess": "Subscription will cancel at the end of the billing period",
+        "noSubscriptionFound": "No active subscription found. Please subscribe first.",
+        "success": {
+            "title": "Subscription Activated!",
+            "description": "Your account has been successfully activated.",
+            "welcome": "Welcome to Scheduler!",
+            "welcomeDesc": "You can now start creating services, managing your availability, and receiving bookings.",
+            "goToDashboard": "Go to Dashboard",
+            "viewSubscription": "View My Subscription",
+            "emailConfirmation": "You will receive a confirmation email shortly."
+        }
     },
     "Stripe": {
         "unauthorized": "Unauthorized",
@@ -633,16 +642,7 @@
                 "PRO": "€15/month",
                 "BUSINESS": "€49/month"
             },
-            "usePortalToDowngrade": "Please use the billing portal to manage your current subscription if you wish to switch to the free plan.",
-            "success": {
-                "title": "Subscription Activated!",
-                "description": "Your account has been successfully activated.",
-                "welcome": "Welcome to Scheduler!",
-                "welcomeDesc": "You can now start creating services, managing your availability, and receiving bookings.",
-                "goToDashboard": "Go to Dashboard",
-                "viewSubscription": "View My Subscription",
-                "emailConfirmation": "You will receive a confirmation email shortly."
-            }
+            "usePortalToDowngrade": "Please use the billing portal to manage your current subscription if you wish to switch to the free plan."
         },
         "stripe": {
             "title": "Payments & Stripe Connect",
